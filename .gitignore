@@ -1,0 +1,11 @@
+__pycache__/
+*.py[cod]
+*$py.class
+
+.vscode/
+
+.DS_Store
+Thumbs.db
+
+mysql_data/
+portainer_data/
