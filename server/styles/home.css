@@ -1,0 +1,207 @@
+/* Fonte do Google — importada no topo */
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&display=swap');
+
+/* Zera espaços padrão do navegador */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Sora', sans-serif;
+}
+
+/* Cor de fundo geral */
+body {
+  background: #0b1a1f;
+  color: #e6edf3;
+}
+
+/* Divide a tela em 2 colunas: sidebar + conteúdo */
+.pagina {
+  display: flex;
+  min-height: 100vh;
+}
+
+/* ── SIDEBAR ── */
+.sidebar {
+  width: 200px;
+  background: #112028;
+  border-right: 1px solid #1e3540;
+  padding: 28px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.logo {
+  color: #c9a84c;
+  font-size: 1.2rem;
+}
+
+/* Links do menu */
+nav {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.menu-item {
+  text-decoration: none;
+  color: #6b8a96;
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  transition: background 0.2s, color 0.2s;
+}
+
+.menu-item:hover {
+  background: #163038;
+  color: #e6edf3;
+}
+
+/* Item ativo (página atual) */
+.menu-item.ativo {
+  color: #2dd4bf;
+  background: rgba(45, 212, 191, 0.08);
+  border-left: 3px solid #2dd4bf;
+  padding-left: 9px;
+}
+
+/* Perfil no rodapé da sidebar */
+.perfil {
+  margin-top: auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.82rem;
+  color: #6b8a96;
+}
+
+.avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: #163038;
+  border: 1px solid #1e3540;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  color: #2dd4bf;
+}
+
+/* ── CONTEÚDO PRINCIPAL ── */
+.conteudo {
+  flex: 1;              /* ocupa o restante da tela */
+  padding: 40px 48px;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.saudacao {
+  font-size: 1.3rem;
+  font-weight: 600;
+}
+
+/* ── CARD DE SALDO ── */
+.card-saldo {
+  background: linear-gradient(135deg, #0f3040, #1a4a38);
+  border-radius: 14px;
+  padding: 28px 32px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.saldo-label {
+  font-size: 0.65rem;
+  letter-spacing: 0.1em;
+  color: #6b8a96;
+  margin-bottom: 8px;
+}
+
+.saldo-valor {
+  font-size: 2.2rem;
+  font-weight: 700;
+}
+
+.seta {
+  font-size: 1.8rem;
+  color: #6b8a96;
+  cursor: pointer;
+}
+
+/* ── GRID DE 3 CARDS ── */
+.grid-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+}
+
+.card {
+  border-radius: 14px;
+  padding: 22px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 170px;
+}
+
+.card h3 {
+  font-size: 0.92rem;
+}
+
+.card p {
+  font-size: 0.78rem;
+  color: #6b8a96;
+  line-height: 1.5;
+}
+
+/* Variação escura */
+.card--escuro {
+  background: #122a34;
+  border: 1px solid #1e3540;
+}
+
+/* Variação dourada */
+.card--dourado {
+  background: linear-gradient(135deg, #b8922a, #c9a84c);
+}
+
+.card--dourado h3,
+.card--dourado p {
+  color: #1a1000;
+}
+
+/* Fatura */
+.label-fatura {
+  font-size: 0.7rem !important;
+}
+
+.valor-fatura {
+  font-size: 1.2rem !important;
+  font-weight: 700;
+  color: #e6edf3 !important;
+}
+
+/* ── BOTÕES ── */
+.btn {
+  align-self: flex-start;
+  border: none;
+  border-radius: 20px;
+  padding: 7px 18px;
+  font-size: 0.76rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: auto;
+}
+
+.btn--dourado {
+  background: #c9a84c;
+  color: #1a1000;
+}
+
+.btn--verde {
+  background: #2dd4bf;
+  color: #0b1a1f;
+}
