@@ -9,7 +9,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #1a2e2b;
+  background: #111111;
   font-family: Arial, sans-serif;
 }
 
@@ -19,10 +19,10 @@ body {
   min-height: 420px;
   border-radius: 10px;
   overflow: hidden;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
 }
 
-/* Painel esquerdo */
+/* ── Painel esquerdo ── */
 .left-panel {
   flex: 1;
   background: #2e4a47;
@@ -61,7 +61,7 @@ body {
 
 .left-panel h2 {
   color: #ffffff;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 500;
   letter-spacing: 1.5px;
   margin-bottom: 0.8rem;
@@ -74,7 +74,7 @@ body {
   max-width: 200px;
 }
 
-/* Painel direito */
+/* ── Painel direito ── */
 .right-panel {
   flex: 1.2;
   background: #111111;
@@ -86,30 +86,35 @@ body {
 
 .right-panel h1 {
   color: #ffffff;
-  font-size: 15px;
+  font-size: 14px;
   letter-spacing: 2px;
   font-weight: 400;
   text-align: center;
   margin-bottom: 2rem;
 }
 
+/* ── Grupos de campo ── */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 1rem;
+}
+
 label {
-  color: #cccccc;
-  font-size: 12px;
-  display: block;
-  margin-bottom: 6px;
+  color: #aaaaaa;
+  font-size: 11px;
+  margin-bottom: 5px;
 }
 
 input[type="text"],
 input[type="password"] {
   width: 100%;
   background: #1e1e1e;
-  border: 1px solid #333333;
-  border-radius: 4px;
-  padding: 10px 12px;
+  border: 1px solid #2a2a2a;
+  border-radius: 5px;
+  padding: 11px 12px;
   color: #ffffff;
-  font-size: 14px;
-  margin-bottom: 1rem;
+  font-size: 13px;
   outline: none;
   transition: border-color 0.2s;
 }
@@ -119,15 +124,34 @@ input[type="password"]:focus {
   border-color: #4ecfb5;
 }
 
+/* ── Validação ── */
+.erro-campo {
+  display: block;
+  color: #e05555;
+  font-size: 9px;
+  margin-top: 3px;
+  min-height: 12px;
+}
+
+input.input-erro {
+  border-color: #cf4e4e !important;
+  background: #1e1414;
+}
+
+input.input-ok {
+  border-color: #4ecfb5 !important;
+}
+
+/* ── Esqueci a senha ── */
 .forgot-link {
   text-align: right;
   margin-bottom: 1.5rem;
-  margin-top: -0.5rem;
+  margin-top: 0.2rem;
 }
 
 .forgot-link a {
   color: #4ecfb5;
-  font-size: 12px;
+  font-size: 11px;
   text-decoration: none;
 }
 
@@ -135,23 +159,32 @@ input[type="password"]:focus {
   text-decoration: underline;
 }
 
+/* ── Botão login ── */
 .btn-login {
   background: #4ecfb5;
   color: #111111;
   border: none;
-  border-radius: 4px;
+  border-radius: 5px;
   padding: 11px 24px;
   font-size: 13px;
   font-weight: 700;
   letter-spacing: 1px;
   cursor: pointer;
   transition: background 0.2s;
+  width: auto;
+  align-self: flex-start;
 }
 
 .btn-login:hover {
   background: #3ab89f;
 }
 
+.btn-login:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ── Cadastre-se ── */
 .register-text {
   color: #aaaaaa;
   font-size: 12px;
@@ -165,4 +198,24 @@ input[type="password"]:focus {
 
 .register-text a:hover {
   text-decoration: underline;
+}
+
+/* ── Feedback global ── */
+.mensagem {
+  margin-top: 1rem;
+  padding: 8px 12px;
+  border-radius: 5px;
+  font-size: 12px;
+}
+
+.mensagem.sucesso {
+  background: #0f3d2e;
+  border: 1px solid #4ecfb5;
+  color: #4ecfb5;
+}
+
+.mensagem.erro {
+  background: #3d0f0f;
+  border: 1px solid #cf4e4e;
+  color: #cf4e4e;
 }

@@ -24,22 +24,30 @@
     <div class="right-panel">
       <h1>ACESSO DE LOGIN</h1>
 
-      <label for="cpf">CPF / Código da Conta</label>
-      <input type="text" id="cpf" name="cpf" autocomplete="off" />
+      <div class="form-group">
+        <label for="cpf">CPF / Código da Conta</label>
+        <input type="text" id="cpf" name="cpf" autocomplete="off" />
+      </div>
 
-      <label for="senha">Senha</label>
-      <input type="password" id="senha" name="senha" />
+      <div class="form-group">
+        <label for="senha">Senha</label>
+        <input type="password" id="senha" name="senha" />
+      </div>
 
       <div class="forgot-link">
         <a href="#">Esqueci a senha</a>
       </div>
 
-      <button class="btn-login">LOGIN</button>
+      <div id="mensagem" class="mensagem" style="display:none;"></div>
+
+      <button class="btn-login" id="btn-login">LOGIN</button>
 
       <p class="register-text">Nao tem conta? <a href="cadastro.html">Cadastre-se</a></p>
     </div>
 
   </div>
+
+  <script src="../requisições/login.js"></script>
 
 </body>
 </html>

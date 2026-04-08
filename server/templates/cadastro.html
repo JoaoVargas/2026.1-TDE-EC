@@ -9,11 +9,11 @@
 <body>
 
   <div class="logo">ß</div>
-
+ 
   <div class="page">
-
+ 
     <h1>CRIAR CONTA</h1>
-
+ 
     <div class="form-grid">
       <div class="form-group">
         <label for="nome">Nome completo</label>
@@ -40,11 +40,11 @@
         <input type="password" id="confirmar" name="confirmar" />
       </div>
     </div>
-
+ 
     <hr class="divider" />
-
+ 
     <h2>ENDEREÇO</h2>
-
+ 
     <div class="form-grid">
       <div class="form-group">
         <label for="cep">CEP</label>
@@ -71,13 +71,18 @@
         <input type="text" id="estado" name="estado" />
       </div>
     </div>
-
+ 
+    <!-- Mensagem de feedback -->
+    <div id="mensagem" class="mensagem" style="display:none;"></div>
+ 
     <div class="actions">
       <button class="btn-voltar" onclick="history.back()">Voltar</button>
-      <button class="btn-finalizar">Finalizar Cadastro</button>
+      <button class="btn-finalizar" id="btn-finalizar">Finalizar Cadastro</button>
     </div>
-
+ 
   </div>
-
+ 
+  <script src="../requisições/cadastro.js"></script>
+ 
 </body>
 </html>
