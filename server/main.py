@@ -6,6 +6,8 @@ from pydantic import BaseModel
 from pathlib import Path
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
+from server.models.example import fetch_all_from_table
+
 app = FastAPI()
 
 # Libera o frontend acessar a API
@@ -131,12 +133,14 @@ def get_transacao2(request: Request):
     )
 
 
-@app.get("/table", response_class=HTMLResponse)
-def get_table(request: Request):
+@app.get("/table/{name}", response_class=HTMLResponse)
+def get_table(request: Request, name: str):
+    table_data = fetch_all_from_table(name)
+
     return templates.TemplateResponse(
         request,
         name="table.html",
-        context={"request": request},
+        context={"request": request, "name": name, "table_data": table_data}
     )
 
 @app.exception_handler(StarletteHTTPException)
