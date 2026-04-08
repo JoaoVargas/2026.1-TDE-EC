@@ -1,9 +1,10 @@
 from fastapi import FastAPI, Request
 from fastapi.templating import Jinja2Templates
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from pathlib import Path
+from starlette.exceptions import HTTPException as StarletteHTTPException
 
 app = FastAPI()
 
@@ -67,13 +68,82 @@ def post_login(dados: LoginRequest):
     return {"message": "Login realizado com sucesso!"}
 
 
-@app.get("/cadastro")
+@app.get("/cadastro", response_class=HTMLResponse)
 def get_cadastro(request: Request):
     return templates.TemplateResponse(
         request,
         name="cadastro.html",
         context={"request": request},
     )
+
+
+@app.get("/home", response_class=HTMLResponse)
+def get_home(request: Request):
+    return templates.TemplateResponse(
+        request,
+        name="home.html",
+        context={"request": request},
+    )
+
+
+@app.get("/login", response_class=HTMLResponse)
+def get_login(request: Request):
+    return templates.TemplateResponse(
+        request,
+        name="login.html",
+        context={"request": request},
+    )
+
+
+@app.get("/investimentos", response_class=HTMLResponse)
+def get_investimentos(request: Request):
+    return templates.TemplateResponse(
+        request,
+        name="investimentos.html",
+        context={"request": request},
+    )
+
+
+@app.get("/investimentos2", response_class=HTMLResponse)
+def get_investimentos2(request: Request):
+    return templates.TemplateResponse(
+        request,
+        name="investimentos2.html",
+        context={"request": request},
+    )
+
+
+@app.get("/transacao", response_class=HTMLResponse)
+def get_transacao(request: Request):
+    return templates.TemplateResponse(
+        request,
+        name="transacao.html",
+        context={"request": request},
+    )
+
+
+@app.get("/transacao2", response_class=HTMLResponse)
+def get_transacao2(request: Request):
+    return templates.TemplateResponse(
+        request,
+        name="transacao2.html",
+        context={"request": request},
+    )
+
+
+@app.get("/table", response_class=HTMLResponse)
+def get_table(request: Request):
+    return templates.TemplateResponse(
+        request,
+        name="table.html",
+        context={"request": request},
+    )
+
+@app.exception_handler(StarletteHTTPException)
+async def custom_http_exception_handler(request: Request, exc: StarletteHTTPException):
+    if exc.status_code == 404:
+        return RedirectResponse(url="/home", status_code=307)
+    raise exc
 
 if __name__ == "__main__":
     import uvicorn
