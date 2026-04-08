@@ -12,7 +12,7 @@ def get_connection():
                 host="localhost",
                 user="user",
                 password="password",
-                database="mydb",
+                database="bancodigital",
             )
         except Error as e:
             print(f"Error connecting to MySQL: {e}")
