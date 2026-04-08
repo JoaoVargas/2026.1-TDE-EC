@@ -3,7 +3,7 @@ from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from models.example import fetch_all_from_table
+from pathlib import Path
 
 app = FastAPI()
 
@@ -15,7 +15,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-templates = Jinja2Templates(directory="./templates")
+BASE_DIR = Path(__file__).resolve().parents[1]
+templates = Jinja2Templates(directory=str(BASE_DIR / "server" / "templates"))
 
 
 # ─── Models ───────────────────────────────────────────────────────────────────
@@ -66,24 +67,21 @@ def post_login(dados: LoginRequest):
     return {"message": "Login realizado com sucesso!"}
 
 
-@app.get("/test/{name}")
-def get_test_param(request: Request, name: str):
-    data = fetch_all_from_table(name)
-    print(f"Fetched data from table '{name}': {data}")
+@app.get("/cadastro")
+def get_cadastro(request: Request):
     return templates.TemplateResponse(
         request,
-        name="table.html",
-        context={"request": request, "name": name, "data": data},
+        name="cadastro.html",
+        context={"request": request},
     )
 
 if __name__ == "__main__":
     import uvicorn
-    from pathlib import Path
 
     project_root = Path(__file__).resolve().parents[1]
     uvicorn.run(
         "server.main:app",
-        host="127.0.0.1",
+        host="localhost",
         port=8000,
         reload=True,
         app_dir=str(project_root),
