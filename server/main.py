@@ -1,9 +1,13 @@
 from fastapi import FastAPI, Request
 from fastapi.templating import Jinja2Templates
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from models.example import fetch_all_from_table
+from pathlib import Path
+from starlette.exceptions import HTTPException as StarletteHTTPException
+from fastapi.staticfiles import StaticFiles
+
+from server.models.example import fetch_all_from_table
 
 app = FastAPI()
 
@@ -15,7 +19,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-templates = Jinja2Templates(directory="./templates")
+BASE_DIR = Path(__file__).resolve().parents[1]
+templates = Jinja2Templates(directory=str(BASE_DIR / "server" / "templates"))
+
+app.mount("/styles", StaticFiles(directory=str(BASE_DIR / "server" / "styles")), name="styles")
+app.mount("/requisições", StaticFiles(directory=str(BASE_DIR / "server" / "requisições")), name="requisicoes")
 
 
 # ─── Models ───────────────────────────────────────────────────────────────────
@@ -66,24 +74,92 @@ def post_login(dados: LoginRequest):
     return {"message": "Login realizado com sucesso!"}
 
 
-@app.get("/test/{name}")
-def get_test_param(request: Request, name: str):
-    data = fetch_all_from_table(name)
-    print(f"Fetched data from table '{name}': {data}")
+@app.get("/cadastro", response_class=HTMLResponse)
+def get_cadastro(request: Request):
+    return templates.TemplateResponse(
+        request,
+        name="cadastro.html",
+        context={"request": request},
+    )
+
+
+@app.get("/home", response_class=HTMLResponse)
+def get_home(request: Request):
+    return templates.TemplateResponse(
+        request,
+        name="home.html",
+        context={"request": request},
+    )
+
+
+@app.get("/login", response_class=HTMLResponse)
+def get_login(request: Request):
+    return templates.TemplateResponse(
+        request,
+        name="login.html",
+        context={"request": request},
+    )
+
+
+@app.get("/investimentos", response_class=HTMLResponse)
+def get_investimentos(request: Request):
+    return templates.TemplateResponse(
+        request,
+        name="investimentos.html",
+        context={"request": request},
+    )
+
+
+@app.get("/investimentos2", response_class=HTMLResponse)
+def get_investimentos2(request: Request):
+    return templates.TemplateResponse(
+        request,
+        name="investimentos2.html",
+        context={"request": request},
+    )
+
+
+@app.get("/transacao", response_class=HTMLResponse)
+def get_transacao(request: Request):
+    return templates.TemplateResponse(
+        request,
+        name="transacao.html",
+        context={"request": request},
+    )
+
+
+@app.get("/transacao2", response_class=HTMLResponse)
+def get_transacao2(request: Request):
+    return templates.TemplateResponse(
+        request,
+        name="transacao2.html",
+        context={"request": request},
+    )
+
+
+@app.get("/table/{name}", response_class=HTMLResponse)
+def get_table(request: Request, name: str):
+    table_data = fetch_all_from_table(name)
+
     return templates.TemplateResponse(
         request,
         name="table.html",
-        context={"request": request, "name": name, "data": data},
+        context={"request": request, "name": name, "table_data": table_data}
     )
+
+@app.exception_handler(StarletteHTTPException)
+async def custom_http_exception_handler(request: Request, exc: StarletteHTTPException):
+    if exc.status_code == 404:
+        return RedirectResponse(url="/home", status_code=307)
+    raise exc
 
 if __name__ == "__main__":
     import uvicorn
-    from pathlib import Path
 
     project_root = Path(__file__).resolve().parents[1]
     uvicorn.run(
         "server.main:app",
-        host="127.0.0.1",
+        host="localhost",
         port=8000,
         reload=True,
         app_dir=str(project_root),
