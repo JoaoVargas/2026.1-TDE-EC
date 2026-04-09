@@ -155,9 +155,22 @@ document.getElementById('continue-btn').addEventListener('click', () => {
     return;
   }
   const c = contacts[selectedIndex];
-  const key = c.cnpj || c.cpf || c.phone;
-  alert(`Transferência para: ${c.name}\nBanco: ${c.bank}\nChave: ${key}`);
+  const params = new URLSearchParams(window.location.search);
+  const valor = params.get('valor') || '0,00';
+  window.location.href = 'transacao3.html?valor=' + encodeURIComponent(valor)
+    + '&nome=' + encodeURIComponent(c.name)
+    + '&banco=' + encodeURIComponent(c.bank);
 });
 
 // Init
 renderContacts();
+
+// ─── Lê o valor da URL e atualiza o título ────────────────────────────────────
+(function () {
+  const params = new URLSearchParams(window.location.search);
+  const valor = params.get('valor');
+  if (valor) {
+    const el = document.getElementById('valor-titulo');
+    if (el) el.textContent = 'R$ ' + valor;
+  }
+})();

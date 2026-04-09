@@ -17,14 +17,14 @@ function updateDisplay() {
 
 function bump() {
   display.classList.remove('bump');
-  void display.offsetWidth; // reflow
+  void display.offsetWidth;
   display.classList.add('bump');
   display.addEventListener('animationend', () => display.classList.remove('bump'), { once: true });
 }
 
 document.querySelectorAll('.key[data-val]').forEach(btn => {
   btn.addEventListener('click', () => {
-    if (digits.length >= 10) return; // max limit
+    if (digits.length >= 10) return;
     digits += btn.dataset.val;
     updateDisplay();
     bump();
@@ -38,6 +38,7 @@ delBtn.addEventListener('click', () => {
 });
 
 continueBtn.addEventListener('click', () => {
-  const value = display.textContent;
-  alert(`Valor confirmado: ${value}`);
+  if (digits === '') return;
+  const value = display.textContent.replace('R$: ', '');
+  window.location.href = 'transacao2.html?valor=' + encodeURIComponent(value);
 });
