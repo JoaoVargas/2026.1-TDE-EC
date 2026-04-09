@@ -1,7 +1,7 @@
 from datetime import datetime
 from mysql.connector import Error
 
-from server.config.db import get_connection
+from config.db import get_connection
 
 def criar_usuario(payload: dict) -> int:
     """

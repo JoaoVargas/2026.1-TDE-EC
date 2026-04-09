@@ -9,8 +9,8 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 from fastapi.staticfiles import StaticFiles
 import mysql.connector
 
-from server.models.usuarios import criar_usuario, autenticar_usuario
-from server.models.example import fetch_all_from_table
+from models.usuarios import criar_usuario, autenticar_usuario
+from models.example import fetch_all_from_table
 
 app = FastAPI()
 
