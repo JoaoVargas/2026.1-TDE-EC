@@ -2,7 +2,7 @@ from datetime import datetime
 from mysql.connector import Error
 
 from server.config.db import get_connection
-
+import bcrypt
 def criar_usuario(payload: dict) -> int:
     """
     payload esperado:
@@ -21,7 +21,7 @@ def criar_usuario(payload: dict) -> int:
     endereco = payload["endereco"]
 
     datetime.strptime(payload["nascimento"], "%Y-%m-%d")
-
+    senha_hash = bcrypt.hashpw(payload["senha"].encode('utf-8'), bcrypt.gensalt())
     sql = """
         INSERT INTO usuarios (
             nome, email, senha, data_nascimento, cpf, cep,
@@ -33,7 +33,7 @@ def criar_usuario(payload: dict) -> int:
     valores = (
         payload["nome"],
         payload["email"],
-        payload["senha"],
+        senha_hash,
         payload["nascimento"],
         payload["cpf"],
         endereco["cep"],
@@ -71,11 +71,10 @@ def criar_usuario(payload: dict) -> int:
 
 
 def autenticar_usuario(cpf: str, senha: str):
-    """Retorna dados mínimos do usuário quando CPF e senha conferem."""
     sql = """
-        SELECT id, nome, email, cpf
+        SELECT id, nome, email, cpf, senha_hash
         FROM usuarios
-        WHERE cpf = %s AND senha = %s
+        WHERE cpf = %s
         LIMIT 1
     """
 
@@ -87,8 +86,23 @@ def autenticar_usuario(cpf: str, senha: str):
             raise RuntimeError("Falha ao conectar ao banco de dados.")
 
         cur = conn.cursor(dictionary=True)
-        cur.execute(sql, (cpf, senha))
-        return cur.fetchone()
+        cur.execute(sql, (cpf,))
+        usuario = cur.fetchone()
+
+        if not usuario:
+            return None
+
+        senha_ok = bcrypt.checkpw(
+            senha.encode('utf-8'),
+            usuario['senha_hash'].encode('utf-8') if isinstance(usuario['senha_hash'], str) else usuario['senha_hash']
+        )
+
+        if not senha_ok:
+            return None 
+
+        usuario.pop('senha_hash')
+        return usuario
+
     finally:
         if cur:
             cur.close()
