@@ -1,4 +1,4 @@
-const API_URL = 'http://localhost:3000/login'; // add o localhost ainda
+const API_URL = 'http://localhost:8000/login';
 
 // ─── Regras de validação ──────────────────────────────────────────────────────
 
@@ -103,7 +103,7 @@ document.getElementById('btn-login').addEventListener('click', async () => {
       mostrarFeedback('Login realizado com sucesso!', 'sucesso');
       // setTimeout(() => window.location.href = '../pages/dashboard.html', 1500);
     } else {
-      mostrarFeedback(resultado.message || 'CPF ou senha incorretos.', 'erro');
+      mostrarFeedback(resultado.message || resultado.detail || 'CPF ou senha incorretos.', 'erro');
     }
   } catch (error) {
     console.error('Erro na requisição:', error);

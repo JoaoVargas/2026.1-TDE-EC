@@ -1,12 +1,15 @@
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, HTTPException
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from pathlib import Path
+from typing import Any, Mapping, cast
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from fastapi.staticfiles import StaticFiles
+import mysql.connector
 
+from server.models.usuarios import criar_usuario, autenticar_usuario
 from server.models.example import fetch_all_from_table
 
 app = FastAPI()
@@ -60,18 +63,44 @@ def get_root():
 def post_cadastro(dados: CadastroRequest):
     print(f"Novo cadastro: {dados.nome} | CPF: {dados.cpf}")
 
-    # TODO: salvar no banco de dados
-
-    return {"message": "Cadastro realizado com sucesso!"}
+    try:
+        usuario_id = criar_usuario(dados.model_dump())
+        return {"message": "Cadastro realizado com sucesso!", "usuario_id": usuario_id}
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Data de nascimento inválida. Use YYYY-MM-DD.")
+    except mysql.connector.Error as e:
+        if e.errno == 1062:
+            raise HTTPException(status_code=409, detail="CPF ou e-mail já cadastrado.")
+        raise HTTPException(status_code=500, detail="Erro ao salvar usuário no banco.")
 
 
 @app.post("/login")
 def post_login(dados: LoginRequest):
-    print(f"Tentativa de login: CPF {dados.cpf}")
+    cpf_limpo = "".join(filter(str.isdigit, dados.cpf))
+    print(f"Tentativa de login: CPF {cpf_limpo}")
 
-    # TODO: verificar no banco de dados
+    if len(cpf_limpo) != 11:
+        raise HTTPException(status_code=400, detail="CPF inválido.")
 
-    return {"message": "Login realizado com sucesso!"}
+    try:
+        usuario = autenticar_usuario(cpf_limpo, dados.senha)
+    except mysql.connector.Error:
+        raise HTTPException(status_code=500, detail="Erro ao consultar usuário no banco.")
+
+    if not usuario:
+        raise HTTPException(status_code=401, detail="CPF ou senha incorretos.")
+
+    usuario_dict = cast(Mapping[str, Any], usuario)
+
+    return {
+        "message": "Login realizado com sucesso!",
+        "usuario": {
+            "id": usuario_dict.get("id"),
+            "nome": usuario_dict.get("nome"),
+            "email": usuario_dict.get("email"),
+            "cpf": usuario_dict.get("cpf"),
+        },
+    }
 
 
 @app.get("/cadastro", response_class=HTMLResponse)
