@@ -1,4 +1,4 @@
-const API_URL = 'http://localhost:3000/cadastro';
+const API_URL = 'http://localhost:8000/cadastro';
  
 // ─── Regras de validação por campo ───────────────────────────────────────────
  

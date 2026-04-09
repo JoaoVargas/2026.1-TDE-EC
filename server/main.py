@@ -5,6 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from pathlib import Path
 from starlette.exceptions import HTTPException as StarletteHTTPException
+from fastapi.staticfiles import StaticFiles
 
 from server.models.example import fetch_all_from_table
 
@@ -20,6 +21,9 @@ app.add_middleware(
 
 BASE_DIR = Path(__file__).resolve().parents[1]
 templates = Jinja2Templates(directory=str(BASE_DIR / "server" / "templates"))
+
+app.mount("/styles", StaticFiles(directory=str(BASE_DIR / "server" / "styles")), name="styles")
+app.mount("/requisições", StaticFiles(directory=str(BASE_DIR / "server" / "requisições")), name="requisicoes")
 
 
 # ─── Models ───────────────────────────────────────────────────────────────────
