@@ -2,7 +2,7 @@ from datetime import datetime
 from mysql.connector import Error
 
 from server.config.db import get_connection
-import bcrypt
+
 def criar_usuario(payload: dict) -> int:
     """
     payload esperado:
