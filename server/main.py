@@ -112,6 +112,7 @@ def get_cadastro(request: Request):
     )
 
 
+
 @app.get("/home", response_class=HTMLResponse)
 def get_home(request: Request):
     return templates.TemplateResponse(
