@@ -21,7 +21,7 @@ def criar_usuario(payload: dict) -> int:
     endereco = payload["endereco"]
 
     datetime.strptime(payload["nascimento"], "%Y-%m-%d")
-    senha_hash = bcrypt.hashpw(payload["senha"].encode('utf-8'), bcrypt.gensalt())
+    senha_hash = bcrypt.hashpw(payload["senha"].encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
     sql = """
         INSERT INTO usuarios (
             nome, email, senha, data_nascimento, cpf, cep,

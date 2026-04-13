@@ -101,7 +101,9 @@ document.getElementById('btn-login').addEventListener('click', async () => {
 
     if (response.ok) {
       mostrarFeedback('Login realizado com sucesso!', 'sucesso');
-      // setTimeout(() => window.location.href = '../pages/dashboard.html', 1500);
+      localStorage.setItem('token', resultado.token);
+      localStorage.setItem('usuario', JSON.stringify(resultado.usuario));
+      window.location.href = '../templates/home.html';
     } else {
       mostrarFeedback(resultado.message || resultado.detail || 'CPF ou senha incorretos.', 'erro');
     }

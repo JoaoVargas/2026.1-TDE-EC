@@ -1,7 +1,24 @@
 const API_URL = 'http://localhost:8000/cadastro';
  
 // ─── Regras de validação por campo ───────────────────────────────────────────
- 
+ document.addEventListener('DOMContentLoaded', () => {
+  const rascunho = JSON.parse(localStorage.getItem('cadastro_rascunho'));
+  if (!rascunho) return;
+
+  document.getElementById('nome').value       = rascunho.nome || '';
+  document.getElementById('email').value      = rascunho.email || '';
+  document.getElementById('cpf').value        = rascunho.cpf || '';
+  document.getElementById('nascimento').value = rascunho.nascimento || '';
+  // senha não restaura por segurança
+
+  document.getElementById('cep').value        = rascunho.endereco?.cep || '';
+  document.getElementById('logradouro').value = rascunho.endereco?.logradouro || '';
+  document.getElementById('numero').value     = rascunho.endereco?.numero || '';
+  document.getElementById('bairro').value     = rascunho.endereco?.bairro || '';
+  document.getElementById('cidade').value     = rascunho.endereco?.cidade || '';
+  document.getElementById('estado').value     = rascunho.endereco?.estado || '';
+});
+
 const regras = {
   nome: (v) => {
     if (!v) return 'Nome completo é obrigatório.';
@@ -191,22 +208,21 @@ Object.keys(regras).forEach((id) => {
 // ─── Verificações em tempo real (FORA do click) ───────────────────────────
 document.getElementById("cpf").addEventListener("blur", async (e) => {
   const cpf = e.target.value.replace(/\D/g, "");
-  if (cpf.length !== 11) return;
+  if (cpf.length !== 11 || !validarCPF(cpf)) return;
 
   const res = await fetch(`/verificar?cpf=${cpf}`);
   const data = await res.json();
-  if (!data.disponivel) mostrarFeedback("CPF já cadastrado.", "erro");
+  if (!data.disponivel) mostrarErro("cpf", "CPF já cadastrado.");
 });
 
 document.getElementById("email").addEventListener("blur", async (e) => {
   const email = e.target.value.trim();
-  if (!email) return;
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return;
 
   const res = await fetch(`/verificar?email=${email}`);
   const data = await res.json();
-  if (!data.disponivel) mostrarFeedback("E-mail já cadastrado.", "erro");
+  if (!data.disponivel) mostrarErro("email", "E-mail já cadastrado.");
 });
-
 // ─── Envio do formulário ──────────────────────────────────────────────────
 document.getElementById('btn-finalizar').addEventListener('click', async () => {
   const campos = Object.keys(regras);
@@ -232,7 +248,7 @@ document.getElementById('btn-finalizar').addEventListener('click', async () => {
       estado:     document.getElementById('estado').value.trim(),
     }
   };
-
+  localStorage.setItem('cadastro_rascunho', JSON.stringify(dados));
   const btn = document.getElementById('btn-finalizar');
   btn.disabled = true;
   btn.textContent = 'Enviando...';
@@ -253,7 +269,7 @@ document.getElementById('btn-finalizar').addEventListener('click', async () => {
 
     if (response.ok) {
       mostrarFeedback('Cadastro realizado com sucesso!', 'sucesso');
-      window.location.href = '../pages/login.html';
+      window.location.href = '../templates/login.html';
       return;
     }
 
