@@ -1,3 +1,7 @@
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+
 from fastapi import FastAPI, Request, HTTPException
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse, RedirectResponse
@@ -57,7 +61,6 @@ class LoginRequest(BaseModel):
 @app.get("/")
 def get_root():
     return {"message": "API online"}
-
 
 @app.post("/cadastro")
 def post_cadastro(dados: CadastroRequest):

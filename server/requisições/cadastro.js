@@ -188,15 +188,35 @@ Object.keys(regras).forEach((id) => {
  
 // ─── Envio do formulário ──────────────────────────────────────────────────────
  
+// ─── Verificações em tempo real (FORA do click) ───────────────────────────
+document.getElementById("cpf").addEventListener("blur", async (e) => {
+  const cpf = e.target.value.replace(/\D/g, "");
+  if (cpf.length !== 11) return;
+
+  const res = await fetch(`/verificar?cpf=${cpf}`);
+  const data = await res.json();
+  if (!data.disponivel) mostrarFeedback("CPF já cadastrado.", "erro");
+});
+
+document.getElementById("email").addEventListener("blur", async (e) => {
+  const email = e.target.value.trim();
+  if (!email) return;
+
+  const res = await fetch(`/verificar?email=${email}`);
+  const data = await res.json();
+  if (!data.disponivel) mostrarFeedback("E-mail já cadastrado.", "erro");
+});
+
+// ─── Envio do formulário ──────────────────────────────────────────────────
 document.getElementById('btn-finalizar').addEventListener('click', async () => {
   const campos = Object.keys(regras);
   const validos = campos.map(validarCampo);
- 
+
   if (validos.includes(false)) {
     mostrarFeedback('Corrija os erros antes de continuar.', 'erro');
     return;
   }
- 
+
   const dados = {
     nome:       document.getElementById('nome').value.trim(),
     email:      document.getElementById('email').value.trim(),
@@ -212,26 +232,33 @@ document.getElementById('btn-finalizar').addEventListener('click', async () => {
       estado:     document.getElementById('estado').value.trim(),
     }
   };
- 
+
   const btn = document.getElementById('btn-finalizar');
   btn.disabled = true;
   btn.textContent = 'Enviando...';
- 
+
   try {
     const response = await fetch(API_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(dados),
     });
- 
+
     const resultado = await response.json();
- 
+
+    if (response.status === 409) {
+      mostrarFeedback("CPF ou e-mail já cadastrado.", 'erro');
+      return;
+    }
+
     if (response.ok) {
       mostrarFeedback('Cadastro realizado com sucesso!', 'sucesso');
-      // setTimeout(() => window.location.href = '../pages/login.html', 2000);
-    } else {
-      mostrarFeedback(resultado.message || resultado.error || 'Erro ao realizar cadastro.', 'erro');
+      window.location.href = '../pages/login.html';
+      return;
     }
+
+    mostrarFeedback(resultado.detail || 'Erro ao realizar cadastro.', 'erro');
+
   } catch (error) {
     console.error('Erro na requisição:', error);
     mostrarFeedback('Não foi possível conectar ao servidor.', 'erro');
@@ -240,7 +267,6 @@ document.getElementById('btn-finalizar').addEventListener('click', async () => {
     btn.textContent = 'Finalizar Cadastro';
   }
 });
- 
 // ─── Feedback global ─────────────────────────────────────────────────────────
  
 function mostrarFeedback(texto, tipo) {
