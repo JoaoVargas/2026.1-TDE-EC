@@ -31,7 +31,7 @@ templates = Jinja2Templates(directory=str(BASE_DIR / "server" / "templates"))
 
 app.mount("/styles", StaticFiles(directory=str(BASE_DIR / "server" / "styles")), name="styles")
 app.mount("/requisições", StaticFiles(directory=str(BASE_DIR / "server" / "requisições")), name="requisicoes")
-
+app.mount("/static", StaticFiles(directory=str(BASE_DIR / "server" / "static")), name="static")
 
 # ─── Models ───────────────────────────────────────────────────────────────────
 
@@ -54,6 +54,7 @@ class CadastroRequest(BaseModel):
 class LoginRequest(BaseModel):
     cpf: str
     senha: str
+
 
 
 # ─── Rotas ────────────────────────────────────────────────────────────────────
