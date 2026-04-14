@@ -15,9 +15,11 @@ body {
 
 .container {
   display: flex;
+  justify-content: center;
   height: 100vh;
-  width: 580px;
+  width: 100%;
   min-height: 420px;
+  flex-wrap: wrap;
   border-radius: 10px;
   overflow: hidden;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
@@ -25,6 +27,8 @@ body {
 
 /* ── Painel esquerdo ── */
 .left-panel {
+  min-width: 290px;
+  max-width: 520px;
   flex: 1;
   background: #2e4a47;
   display: flex;
@@ -58,16 +62,23 @@ body {
 }
 
 .left-panel p {
-  color: #aaccc7;
+  color: #ffffff;
   font-size: 12px;
   line-height: 1.6;
-  max-width: 200px;
+  max-width: 400px;
 }
 
 /* ── Painel direito ── */
+.slogan {
+  width: 100%;
+  justify-content: center;
+  display: none;
+}
 .right-panel {
-  flex: 1.2;
+  min-width: 290px;
+  flex: 1;
   background: #111111;
+  max-width: 520px;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -140,7 +151,7 @@ input.input-ok {
 }
 
 .forgot-link a {
-  color: #4ecfb5;
+  color: #C5A059;
   font-size: 11px;
   text-decoration: none;
 }
@@ -182,7 +193,7 @@ input.input-ok {
 }
 
 .register-text a {
-  color: #4ecfb5;
+  color: #C5A059;
   text-decoration: none;
 }
 
@@ -208,4 +219,13 @@ input.input-ok {
   background: #3d0f0f;
   border: 1px solid #cf4e4e;
   color: #cf4e4e;
+}
+
+@media (max-width: 600px) {
+  .left-panel {
+    display: none;
+  }
+  .slogan {
+    display: flex;
+  }
 }
