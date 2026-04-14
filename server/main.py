@@ -1,4 +1,8 @@
-from fastapi import FastAPI, Request, HTTPException
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from config.auth import criar_token, verificar_token
+from fastapi import FastAPI, Request, HTTPException, Header
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.middleware.cors import CORSMiddleware
@@ -9,7 +13,7 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 from fastapi.staticfiles import StaticFiles
 import mysql.connector
 
-from models.usuarios import criar_usuario, autenticar_usuario
+from models.usuarios import criar_usuario, autenticar_usuario, usuario_existe
 from models.example import fetch_all_from_table
 
 app = FastAPI()
@@ -57,6 +61,11 @@ class LoginRequest(BaseModel):
 @app.get("/")
 def get_root():
     return {"message": "API online"}
+    
+@app.get("/verificar")
+def get_verificar(cpf: str = None, email: str = None):
+    existe = usuario_existe(cpf=cpf, email=email)
+    return {"disponivel": not existe}
 
     @app.get("/extrato", response_class=HTMLResponse)
 def get_extrato(request: Request):
@@ -81,7 +90,6 @@ def post_cadastro(dados: CadastroRequest):
 @app.post("/login")
 def post_login(dados: LoginRequest):
     cpf_limpo = "".join(filter(str.isdigit, dados.cpf))
-    print(f"Tentativa de login: CPF {cpf_limpo}")
 
     if len(cpf_limpo) != 11:
         raise HTTPException(status_code=400, detail="CPF inválido.")
@@ -89,22 +97,35 @@ def post_login(dados: LoginRequest):
     try:
         usuario = autenticar_usuario(cpf_limpo, dados.senha)
     except mysql.connector.Error:
-        raise HTTPException(status_code=500, detail="Erro ao consultar usuário no banco.")
+        raise HTTPException(status_code=500, detail="Erro ao consultar usuário.")
 
     if not usuario:
         raise HTTPException(status_code=401, detail="CPF ou senha incorretos.")
 
-    usuario_dict = cast(Mapping[str, Any], usuario)
+    token = criar_token({
+        "id": usuario["id"],
+        "nome": usuario["nome"],
+        "cpf": usuario["cpf"],
+    })
 
     return {
         "message": "Login realizado com sucesso!",
-        "usuario": {
-            "id": usuario_dict.get("id"),
-            "nome": usuario_dict.get("nome"),
-            "email": usuario_dict.get("email"),
-            "cpf": usuario_dict.get("cpf"),
-        },
+        "token": token,
+        "usuario": usuario,
     }
+
+@app.get("/me")
+def get_me(authorization: str = Header(None)):
+    if not authorization or not authorization.startswith("Bearer "):
+        raise HTTPException(status_code=401, detail="Token não fornecido.")
+
+    token = authorization.split(" ")[1]
+    payload = verificar_token(token)
+
+    if not payload:
+        raise HTTPException(status_code=401, detail="Token inválido ou expirado.")
+
+    return payload
 
 
 @app.get("/cadastro", response_class=HTMLResponse)
@@ -185,8 +206,12 @@ def get_table(request: Request, name: str):
 async def custom_http_exception_handler(request: Request, exc: StarletteHTTPException):
     if exc.status_code == 404:
         return RedirectResponse(url="/home", status_code=307)
-    raise exc
-
+    
+    from fastapi.responses import JSONResponse
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={"detail": exc.detail}
+    )
 if __name__ == "__main__":
     import uvicorn
 

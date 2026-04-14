@@ -1,7 +1,41 @@
 const API_URL = 'http://localhost:8000/cadastro';
  
+document.addEventListener('DOMContentLoaded', async () => {
+  const token = localStorage.getItem('token');
+  if (!token) return; // não está logado, fica na página
+
+  // verifica se o token ainda é válido
+  const res = await fetch('http://localhost:8000/me', {
+    headers: { 'Authorization': `Bearer ${token}` }
+  });
+
+  if (res.ok) {
+    window.location.href = '/home'; 
+  } else {
+    // token expirado, limpa
+    localStorage.removeItem('token');
+    localStorage.removeItem('usuario');
+  }
+});
 // ─── Regras de validação por campo ───────────────────────────────────────────
- 
+ document.addEventListener('DOMContentLoaded', () => {
+  const rascunho = JSON.parse(localStorage.getItem('cadastro_rascunho'));
+  if (!rascunho) return;
+
+  document.getElementById('nome').value       = rascunho.nome || '';
+  document.getElementById('email').value      = rascunho.email || '';
+  document.getElementById('cpf').value        = rascunho.cpf || '';
+  document.getElementById('nascimento').value = rascunho.nascimento || '';
+  // senha não restaura por segurança
+
+  document.getElementById('cep').value        = rascunho.endereco?.cep || '';
+  document.getElementById('logradouro').value = rascunho.endereco?.logradouro || '';
+  document.getElementById('numero').value     = rascunho.endereco?.numero || '';
+  document.getElementById('bairro').value     = rascunho.endereco?.bairro || '';
+  document.getElementById('cidade').value     = rascunho.endereco?.cidade || '';
+  document.getElementById('estado').value     = rascunho.endereco?.estado || '';
+});
+
 const regras = {
   nome: (v) => {
     if (!v) return 'Nome completo é obrigatório.';
@@ -188,15 +222,34 @@ Object.keys(regras).forEach((id) => {
  
 // ─── Envio do formulário ──────────────────────────────────────────────────────
  
+// ─── Verificações em tempo real (FORA do click) ───────────────────────────
+document.getElementById("cpf").addEventListener("blur", async (e) => {
+  const cpf = e.target.value.replace(/\D/g, "");
+  if (cpf.length !== 11 || !validarCPF(cpf)) return;
+
+  const res = await fetch(`/verificar?cpf=${cpf}`);
+  const data = await res.json();
+  if (!data.disponivel) mostrarErro("cpf", "CPF já cadastrado.");
+});
+
+document.getElementById("email").addEventListener("blur", async (e) => {
+  const email = e.target.value.trim();
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return;
+
+  const res = await fetch(`/verificar?email=${email}`);
+  const data = await res.json();
+  if (!data.disponivel) mostrarErro("email", "E-mail já cadastrado.");
+});
+// ─── Envio do formulário ──────────────────────────────────────────────────
 document.getElementById('btn-finalizar').addEventListener('click', async () => {
   const campos = Object.keys(regras);
   const validos = campos.map(validarCampo);
- 
+
   if (validos.includes(false)) {
     mostrarFeedback('Corrija os erros antes de continuar.', 'erro');
     return;
   }
- 
+
   const dados = {
     nome:       document.getElementById('nome').value.trim(),
     email:      document.getElementById('email').value.trim(),
@@ -212,26 +265,33 @@ document.getElementById('btn-finalizar').addEventListener('click', async () => {
       estado:     document.getElementById('estado').value.trim(),
     }
   };
- 
+  localStorage.setItem('cadastro_rascunho', JSON.stringify(dados));
   const btn = document.getElementById('btn-finalizar');
   btn.disabled = true;
   btn.textContent = 'Enviando...';
- 
+
   try {
     const response = await fetch(API_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(dados),
     });
- 
+
     const resultado = await response.json();
- 
+
+    if (response.status === 409) {
+      mostrarFeedback("CPF ou e-mail já cadastrado.", 'erro');
+      return;
+    }
+
     if (response.ok) {
       mostrarFeedback('Cadastro realizado com sucesso!', 'sucesso');
-      // setTimeout(() => window.location.href = '../pages/login.html', 2000);
-    } else {
-      mostrarFeedback(resultado.message || resultado.error || 'Erro ao realizar cadastro.', 'erro');
+      window.location.href = '/login';
+      return;
     }
+
+    mostrarFeedback(resultado.detail || 'Erro ao realizar cadastro.', 'erro');
+
   } catch (error) {
     console.error('Erro na requisição:', error);
     mostrarFeedback('Não foi possível conectar ao servidor.', 'erro');
@@ -240,7 +300,6 @@ document.getElementById('btn-finalizar').addEventListener('click', async () => {
     btn.textContent = 'Finalizar Cadastro';
   }
 });
- 
 // ─── Feedback global ─────────────────────────────────────────────────────────
  
 function mostrarFeedback(texto, tipo) {

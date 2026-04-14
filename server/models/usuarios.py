@@ -1,7 +1,7 @@
 from datetime import datetime
 from mysql.connector import Error
 import bcrypt
-from server.config.db import get_connection
+from config.db import get_connection
 
 def criar_usuario(payload: dict) -> int:
     """
@@ -21,7 +21,7 @@ def criar_usuario(payload: dict) -> int:
     endereco = payload["endereco"]
 
     datetime.strptime(payload["nascimento"], "%Y-%m-%d")
-    senha_hash = bcrypt.hashpw(payload["senha"].encode('utf-8'), bcrypt.gensalt())
+    senha_hash = bcrypt.hashpw(payload["senha"].encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
     sql = """
         INSERT INTO usuarios (
             nome, email, senha, data_nascimento, cpf, cep,
@@ -72,7 +72,7 @@ def criar_usuario(payload: dict) -> int:
 
 def autenticar_usuario(cpf: str, senha: str):
     sql = """
-        SELECT id, nome, email, cpf, senha_hash
+        SELECT id, nome, email, cpf, senha
         FROM usuarios
         WHERE cpf = %s
         LIMIT 1
@@ -94,15 +94,44 @@ def autenticar_usuario(cpf: str, senha: str):
 
         senha_ok = bcrypt.checkpw(
             senha.encode('utf-8'),
-            usuario['senha_hash'].encode('utf-8') if isinstance(usuario['senha_hash'], str) else usuario['senha_hash']
+            usuario['senha'].encode('utf-8') if isinstance(usuario['senha'], str) else usuario['senha']
         )
 
         if not senha_ok:
             return None 
 
-        usuario.pop('senha_hash')
+        usuario.pop('senha')
         return usuario
 
+    finally:
+        if cur:
+            cur.close()
+        if conn:
+            conn.close()
+
+def usuario_existe(cpf: str = None, email: str = None) -> bool:
+    if not cpf and not email:
+        return False
+
+    condicoes = []
+    valores = []
+
+    if cpf:
+        condicoes.append("cpf = %s")
+        valores.append(cpf)
+    if email:
+        condicoes.append("email = %s")
+        valores.append(email)
+
+    sql = f"SELECT id FROM usuarios WHERE {' OR '.join(condicoes)} LIMIT 1"
+
+    conn = None
+    cur = None
+    try:
+        conn = get_connection()
+        cur = conn.cursor()
+        cur.execute(sql, valores)
+        return cur.fetchone() is not None
     finally:
         if cur:
             cur.close()
