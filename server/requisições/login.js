@@ -90,7 +90,9 @@ Object.keys(regras).forEach((id) => {
     }
   });
 });
-
+document.getElementById('btn-cadastro').addEventListener('click', async () => {
+  window.location.reload.href = '/cadastro'
+})
 // ─── Envio ────────────────────────────────────────────────────────────────────
 
 document.getElementById('btn-login').addEventListener('click', async () => {
