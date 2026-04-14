@@ -13,6 +13,7 @@ def get_connection():
                 user="user",
                 password="password",
                 database="bancodigital",
+                connection_timeout=5 
             )
         except Error as e:
             print(f"Error connecting to MySQL: {e}")
