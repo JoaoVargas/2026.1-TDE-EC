@@ -60,6 +60,12 @@ body {
   height: 100vh;
 }
 
+.img {
+    width: 140%;
+    padding-right: 10px;
+    padding-top: 5px;
+}
+
 .sidebar-logo {
   display: flex;
   align-items: center;
@@ -77,8 +83,6 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-family: var(--mono);
-  font-size: 14px;
   color: var(--teal-accent);
   overflow: hidden;
 }
