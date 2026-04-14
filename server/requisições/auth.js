@@ -2,7 +2,7 @@ async function verificarLogin() {
   const token = localStorage.getItem('token');
 
   if (!token) {
-    window.location.href = '../pages/login.html';
+    window.location.href = '/login';
     return null;
   }
 
@@ -13,7 +13,7 @@ async function verificarLogin() {
   if (!res.ok) {
     localStorage.removeItem('token');
     localStorage.removeItem('usuario');
-    window.location.href = '../pages/login.html';
+    window.location.href = '../template/login.html';
     return null;
   }
 
@@ -23,5 +23,5 @@ async function verificarLogin() {
 function logout() {
   localStorage.removeItem('token');
   localStorage.removeItem('usuario');
-  window.location.href = '../pages/login.html';
+  window.location.href = '../template/login.html';
 }

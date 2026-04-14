@@ -8,11 +8,13 @@
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
 </head>
 <body>
-<script src="/requisições/auth.js"></script>
+<script src="../requisições/auth.js"></script>
 <script>
   verificarLogin().then(usuario => {
     if (usuario) {
       console.log("Logado como:", usuario.nome);
+    } else {
+      window.location.href = '../templates/login.html';
     }
   });
 </script>

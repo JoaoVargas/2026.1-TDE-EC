@@ -1,5 +1,22 @@
 const API_URL = 'http://localhost:8000/cadastro';
  
+document.addEventListener('DOMContentLoaded', async () => {
+  const token = localStorage.getItem('token');
+  if (!token) return; // não está logado, fica na página
+
+  // verifica se o token ainda é válido
+  const res = await fetch('http://localhost:8000/me', {
+    headers: { 'Authorization': `Bearer ${token}` }
+  });
+
+  if (res.ok) {
+    window.location.href = '/home'; 
+  } else {
+    // token expirado, limpa
+    localStorage.removeItem('token');
+    localStorage.removeItem('usuario');
+  }
+});
 // ─── Regras de validação por campo ───────────────────────────────────────────
  document.addEventListener('DOMContentLoaded', () => {
   const rascunho = JSON.parse(localStorage.getItem('cadastro_rascunho'));
@@ -269,7 +286,7 @@ document.getElementById('btn-finalizar').addEventListener('click', async () => {
 
     if (response.ok) {
       mostrarFeedback('Cadastro realizado com sucesso!', 'sucesso');
-      window.location.href = '../templates/login.html';
+      window.location.href = '/login';
       return;
     }
 

@@ -1,5 +1,22 @@
 const API_URL = 'http://localhost:8000/login';
 
+document.addEventListener('DOMContentLoaded', async () => {
+  const token = localStorage.getItem('token');
+  if (!token) return; // não está logado, fica na página
+
+  // verifica se o token ainda é válido
+  const res = await fetch('http://localhost:8000/me', {
+    headers: { 'Authorization': `Bearer ${token}` }
+  });
+
+  if (res.ok) {
+    window.location.href = '/home'; 
+  } else {
+    // token expirado, limpa
+    localStorage.removeItem('token');
+    localStorage.removeItem('usuario');
+  }
+});
 // ─── Regras de validação ──────────────────────────────────────────────────────
 
 const regras = {
@@ -103,7 +120,7 @@ document.getElementById('btn-login').addEventListener('click', async () => {
       mostrarFeedback('Login realizado com sucesso!', 'sucesso');
       localStorage.setItem('token', resultado.token);
       localStorage.setItem('usuario', JSON.stringify(resultado.usuario));
-      window.location.href = '../templates/home.html';
+      window.location.href = '/home';
     } else {
       mostrarFeedback(resultado.message || resultado.detail || 'CPF ou senha incorretos.', 'erro');
     }
