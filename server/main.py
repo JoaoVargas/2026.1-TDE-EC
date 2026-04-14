@@ -58,6 +58,10 @@ class LoginRequest(BaseModel):
 def get_root():
     return {"message": "API online"}
 
+    @app.get("/extrato", response_class=HTMLResponse)
+def get_extrato(request: Request):
+    return templates.TemplateResponse(request, name="extrato.html", context={"request": request})
+
 
 @app.post("/cadastro")
 def post_cadastro(dados: CadastroRequest):

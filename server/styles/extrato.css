@@ -1,0 +1,318 @@
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap');
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --bg:          #0f1e20;
+  --card-bg:     #183a3c;
+  --teal:        #1a6b6e;
+  --teal-light:  #22888c;
+  --teal-accent: #2eb8b8;
+  --border:      #2a5558;
+  --text:        #e8f4f4;
+  --text-muted:  #8abcbc;
+  --entrada:     #2eb8b8;
+  --saida:       #e05c5c;
+  --gold:        #c8922a;
+  --font-main:   'Syne', sans-serif;
+  --font-mono:   'JetBrains Mono', monospace;
+}
+
+html, body {
+  background: var(--bg);
+  font-family: var(--font-main);
+  color: var(--text);
+  min-height: 100%;
+}
+
+/* ── APP WRAPPER ─────────────────────────────── */
+.app {
+  width: 100%;
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 28px 24px 48px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* ── HEADER ──────────────────────────────────── */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.btn-voltar {
+  text-decoration: none;
+  color: var(--text);
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  transition: background 0.2s, color 0.2s;
+}
+
+.btn-voltar:hover {
+  background: #1c3436;
+  color: var(--teal-accent);
+}
+
+.logo {
+  color: var(--teal-accent);
+}
+
+/* ── SALDO CARD ──────────────────────────────── */
+.saldo-card {
+  background: linear-gradient(135deg, var(--card-bg) 60%, #1e5052 100%);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 24px 28px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+}
+
+.saldo-label {
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+}
+
+.saldo-valor {
+  font-family: var(--font-mono);
+  font-size: 2rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.saldo-badges {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: flex-end;
+}
+
+.badge {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 20px;
+}
+
+.badge--entrada {
+  background: rgba(46, 184, 184, 0.12);
+  color: var(--entrada);
+  border: 1px solid rgba(46, 184, 184, 0.25);
+}
+
+.badge--saida {
+  background: rgba(224, 92, 92, 0.12);
+  color: var(--saida);
+  border: 1px solid rgba(224, 92, 92, 0.25);
+}
+
+/* ── FILTROS ─────────────────────────────────── */
+.filtros {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.filtro {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  color: var(--text-muted);
+  font-family: var(--font-main);
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 7px 16px;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s, border-color 0.2s;
+}
+
+.filtro:hover {
+  background: #1c3436;
+  color: var(--text);
+}
+
+.filtro.ativo {
+  background: rgba(46, 184, 184, 0.1);
+  border-color: var(--teal-accent);
+  color: var(--teal-accent);
+}
+
+/* ── GRÁFICO ─────────────────────────────────── */
+.grafico-card {
+  background: linear-gradient(135deg, var(--card-bg) 60%, #1e5052 100%);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 22px 24px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+}
+
+.grafico-titulo {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  letter-spacing: 0.05em;
+  margin-bottom: 16px;
+  text-transform: uppercase;
+}
+
+.grafico {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  height: 100px;
+}
+
+.barra-grupo {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  height: 100%;
+  justify-content: flex-end;
+}
+
+.barra {
+  width: 100%;
+  border-radius: 6px 6px 0 0;
+  background: rgba(46, 184, 184, 0.25);
+  border: 1px solid rgba(46, 184, 184, 0.3);
+  transition: background 0.2s;
+  min-height: 4px;
+}
+
+.barra--destaque {
+  background: rgba(46, 184, 184, 0.6);
+  border-color: var(--teal-accent);
+  box-shadow: 0 0 12px rgba(46, 184, 184, 0.3);
+}
+
+.barra:hover {
+  background: rgba(46, 184, 184, 0.5);
+}
+
+.barra-label {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+}
+
+/* ── LISTA ───────────────────────────────────── */
+.lista-titulo {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.lista {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.transacao {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 18px;
+  border-radius: 12px;
+  background: var(--card-bg);
+  border: 1px solid transparent;
+  transition: border-color 0.2s, background 0.2s;
+  cursor: default;
+}
+
+.transacao:hover {
+  background: #1c3436;
+  border-color: var(--border);
+}
+
+.transacao-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  flex-shrink: 0;
+}
+
+.transacao-icon--entrada {
+  background: rgba(46, 184, 184, 0.12);
+  color: var(--entrada);
+  border: 1px solid rgba(46, 184, 184, 0.25);
+}
+
+.transacao-icon--saida {
+  background: rgba(224, 92, 92, 0.12);
+  color: var(--saida);
+  border: 1px solid rgba(224, 92, 92, 0.25);
+}
+
+.transacao-info {
+  flex: 1;
+}
+
+.transacao-nome {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 3px;
+}
+
+.transacao-data {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+}
+
+.transacao-valor {
+  font-family: var(--font-mono);
+  font-size: 0.92rem;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.transacao-valor--entrada { color: var(--entrada); }
+.transacao-valor--saida   { color: var(--saida);   }
+
+/* ── RESPONSIVIDADE ──────────────────────────── */
+@media (max-width: 480px) {
+  .app {
+    padding: 20px 16px 40px;
+  }
+
+  .saldo-card {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .saldo-badges {
+    align-items: flex-start;
+    flex-direction: row;
+  }
+
+  .saldo-valor {
+    font-size: 1.6rem;
+  }
+}
