@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BetaBank — Análise de Distribuição</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../styles/investimentos2.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+</head>
+<body>
+
+<div class="shell">
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-mark">
+        <img src="/static/imagens/slogan.png" alt="" style="width:35%;">
+      </div>
+      <div>
+        <div class="logo-name">BetaBank</div>
+        <div class="logo-tag">Virtual Bank</div>
+      </div>
+    </div>
+
+    <nav class="nav">
+      <div class="nav-section">Geral</div>
+      <a class="nav-item" href="#">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3">
+          <rect x="2" y="2" width="5" height="5" rx="1.2"/>
+          <rect x="9" y="2" width="5" height="5" rx="1.2"/>
+          <rect x="2" y="9" width="5" height="5" rx="1.2"/>
+          <rect x="9" y="9" width="5" height="5" rx="1.2"/>
+        </svg>
+        Visão geral
+      </a>
+      <a class="nav-item active" href="investimentos.html">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3">
+          <polyline points="2,12 5,7 8,9 11,5 14,8"/>
+          <circle cx="14" cy="8" r="1" fill="currentColor" stroke="none"/>
+        </svg>
+        Investimentos
+      </a>
+      <a class="nav-item" href="#">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3">
+          <rect x="2" y="4" width="12" height="9" rx="1.5"/>
+          <path d="M5 4V3a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v1"/>
+        </svg>
+        Carteira
+      </a>
+      <a class="nav-item" href="#">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3">
+          <circle cx="8" cy="8" r="6"/>
+          <path d="M8 5v3l2 1.5"/>
+        </svg>
+        Histórico
+      </a>
+      <div class="nav-section">Conta</div>
+      <a class="nav-item" href="#">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3">
+          <circle cx="8" cy="5" r="2.5"/>
+          <path d="M3 14c0-2.76 2.24-5 5-5s5 2.24 5 5"/>
+        </svg>
+        Perfil
+      </a>
+      <a class="nav-item" href="#">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3">
+          <circle cx="8" cy="8" r="2"/>
+          <path d="M8 1v2M8 13v2M1 8h2M13 8h2M3.05 3.05l1.41 1.41M11.54 11.54l1.41 1.41M3.05 12.95l1.41-1.41M11.54 4.46l1.41-1.41"/>
+        </svg>
+        Configurações
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="user-row">
+        <div class="avatar">U</div>
+        <div>
+          <div class="user-name">Usuário</div>
+          <div class="user-plan">Conta básica</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main class="main">
+    <div class="topbar">
+      <div class="page-title">Painel · <span>Investimentos</span></div>
+      <div class="topbar-actions">
+        <button class="btn-secondary">
+          <svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M7 1v12M1 7h12" stroke-linecap="round"/>
+          </svg>
+          Extrato
+        </button>
+        <button class="btn-primary">
+          Investir
+          <svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8">
+            <path d="M2 7h10M7 2l5 5-5 5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <div class="page">
+
+      <!-- Hero stats -->
+      <div class="hero anim">
+        <div class="stat-card primary">
+          <div class="stat-label">Total em investimentos</div>
+          <div class="stat-value"><span class="currency">R$</span><span id="total-val">0,00</span></div>
+          <div class="stat-change zero" id="total-change">— Sem variação</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Renda fixa</div>
+          <div class="stat-value"><span class="currency">R$</span><span id="fixo-val">0,00</span></div>
+          <div class="stat-change zero" id="fixo-pct">— 0 ativos</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Renda variável</div>
+          <div class="stat-value"><span class="currency">R$</span><span id="var-val">0,00</span></div>
+          <div class="stat-change zero" id="var-pct">— 0 ativos</div>
+        </div>
+      </div>
+
+      <!-- Tabs -->
+      <div class="tabs">
+        <div class="tab" onclick="location.href='investimentos.html'">Minha carteira</div>
+        <div class="tab" onclick="location.href='investimentos2.html'">Análise de distribuição</div>
+      </div>
+
+      <!-- Distribuição por classe -->
+      <div class="anim anim-1">
+        <div class="section-header" style="margin-bottom:14px;">
+          <div class="section-title">Distribuição por classe de ativo</div>
+        </div>
+        <div class="dist-grid dist-grid-donut">
+
+          <div class="dist-card">
+            <div class="chart-wrap">
+              <canvas id="donutChart" width="220" height="220"></canvas>
+              <div class="chart-center">
+                <div class="chart-center-val" id="donut-center-val">R$ 0,00</div>
+                <div class="chart-center-label">total</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="dist-card">
+            <div class="legend" id="class-legend"></div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- Participação por ativo -->
+      <div class="anim anim-2">
+        <div class="section-header" style="margin-bottom:14px;">
+          <div class="section-title">Participação por ativo</div>
+        </div>
+        <div class="dist-card">
+          <div class="bar-list" id="bar-list"></div>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- Rentabilidade por classe -->
+      <div class="anim anim-3">
+        <div class="section-header" style="margin-bottom:14px;">
+          <div class="section-title">Rentabilidade acumulada por classe</div>
+        </div>
+        <div class="dist-card">
+          <canvas id="barChart" height="90"></canvas>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script>
+/* ─── DADOS — substitua pelo retorno da API do backend ─────────────────── */
+
+// { label, valor, cor }
+const classes = [
+  { label: 'Renda Fixa',     valor: 0, cor: '#2eb8b8' },
+  { label: 'Renda Variável', valor: 0, cor: '#22888c' },
+  { label: 'Criptomoedas',   valor: 0, cor: '#c8922a' },
+];
+
+// { nome, classe, valor }
+const ativos = [
+  { nome: 'Tesouro Prefixado', classe: 'Renda Fixa',     valor: 0 },
+  { nome: 'Carro Novo',        classe: 'Renda Fixa',     valor: 0 },
+  { nome: 'XMLT',              classe: 'Renda Variável', valor: 0 },
+  { nome: 'XCORTI',            classe: 'Renda Variável', valor: 0 },
+  { nome: 'Bitcoin',           classe: 'Criptomoedas',   valor: 0 },
+  { nome: 'Memecoin',          classe: 'Criptomoedas',   valor: 0 },
+];
+
+// { label, pct }
+const rentabilidade = [
+  { label: 'Renda Fixa',     pct: 0 },
+  { label: 'Renda Variável', pct: 0 },
+  { label: 'Criptomoedas',   pct: 0 },
+];
+
+/* ─── HELPERS ─────────────────────────────────────────────────────────── */
+const fmtBRL = v => v.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+const total  = classes.reduce((s, c) => s + c.valor, 0);
+const pct    = v => total > 0 ? ((v / total) * 100).toFixed(1) : '0.0';
+const corDaClasse = nome => (classes.find(c => c.label === nome) || {}).cor || '#2a5558';
+
+/* ─── STATS ───────────────────────────────────────────────────────────── */
+document.getElementById('total-val').textContent      = fmtBRL(total);
+document.getElementById('donut-center-val').textContent = 'R$ ' + fmtBRL(total);
+
+const fixo = classes.find(c => c.label === 'Renda Fixa');
+const vari = classes.find(c => c.label === 'Renda Variável');
+document.getElementById('fixo-val').textContent = fmtBRL(fixo?.valor ?? 0);
+document.getElementById('var-val').textContent  = fmtBRL(vari?.valor ?? 0);
+document.getElementById('fixo-pct').textContent = `— ${pct(fixo?.valor ?? 0)}% da carteira`;
+document.getElementById('var-pct').textContent  = `— ${pct(vari?.valor ?? 0)}% da carteira`;
+
+/* ─── LEGENDA ─────────────────────────────────────────────────────────── */
+const legendEl = document.getElementById('class-legend');
+classes.forEach(c => {
+  legendEl.innerHTML += `
+    <div class="legend-item">
+      <div class="legend-dot" style="background:${c.cor}"></div>
+      <div class="legend-name">${c.label}</div>
+      <div class="legend-pct">${pct(c.valor)}%</div>
+      <div class="legend-val">R$ ${fmtBRL(c.valor)}</div>
+    </div>`;
+});
+
+/* ─── BARRAS POR ATIVO ────────────────────────────────────────────────── */
+const barList  = document.getElementById('bar-list');
+const maxAtivo = Math.max(...ativos.map(a => a.valor), 1);
+ativos.forEach(a => {
+  const w = ((a.valor / maxAtivo) * 100).toFixed(1);
+  barList.innerHTML += `
+    <div class="bar-row">
+      <label>${a.nome} <span>${pct(a.valor)}%</span></label>
+      <div class="bar-track">
+        <div class="bar-fill" style="width:${w}%;background:${corDaClasse(a.classe)}"></div>
+      </div>
+    </div>`;
+});
+
+/* ─── DONUT ───────────────────────────────────────────────────────────── */
+const donutData = classes.map(c => c.valor);
+const allZero   = donutData.every(v => v === 0);
+
+new Chart(document.getElementById('donutChart'), {
+  type: 'doughnut',
+  data: {
+    labels: classes.map(c => c.label),
+    datasets: [{
+      data: allZero ? [1, 1, 1] : donutData,
+      backgroundColor: allZero
+        ? ['rgba(46,184,184,.1)', 'rgba(34,136,140,.1)', 'rgba(200,146,42,.1)']
+        : classes.map(c => c.cor),
+      borderColor: '#0f1e20',
+      borderWidth: 3,
+      hoverOffset: 6,
+    }]
+  },
+  options: {
+    cutout: '70%',
+    plugins: {
+      legend: { display: false },
+      tooltip: { enabled: !allZero, callbacks: { label: ctx => ` R$ ${fmtBRL(ctx.raw)} (${pct(ctx.raw)}%)` } }
+    },
+    animation: { animateRotate: true, duration: 700 }
+  }
+});
+
+/* ─── BAR CHART ───────────────────────────────────────────────────────── */
+new Chart(document.getElementById('barChart'), {
+  type: 'bar',
+  data: {
+    labels: rentabilidade.map(r => r.label),
+    datasets: [{
+      data: rentabilidade.map(r => r.pct),
+      backgroundColor: ['#2eb8b8', '#22888c', '#c8922a'],
+      borderRadius: 6,
+      borderSkipped: false,
+    }]
+  },
+  options: {
+    responsive: true,
+    plugins: {
+      legend: { display: false },
+      tooltip: { callbacks: { label: ctx => ` ${ctx.raw.toFixed(2)}%` } }
+    },
+    scales: {
+      x: { grid: { color: 'rgba(42,85,88,.4)' }, ticks: { color: '#8abcbc', font: { family: 'Syne', size: 11 } } },
+      y: { grid: { color: 'rgba(42,85,88,.4)' }, ticks: { color: '#8abcbc', font: { family: 'JetBrains Mono', size: 10 }, callback: v => v + '%' } }
+    }
+  }
+});
+</script>
+
+</body>
+</html>
