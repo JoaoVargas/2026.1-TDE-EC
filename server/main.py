@@ -68,6 +68,10 @@ def get_verificar(cpf: str = None, email: str = None):
     existe = usuario_existe(cpf=cpf, email=email)
     return {"disponivel": not existe}
 
+    @app.get("/extrato", response_class=HTMLResponse)
+def get_extrato(request: Request):
+    return templates.TemplateResponse(request, name="extrato.html", context={"request": request})
+
 
 @app.post("/cadastro")
 def post_cadastro(dados: CadastroRequest):
