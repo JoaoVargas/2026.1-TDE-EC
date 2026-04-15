@@ -192,6 +192,14 @@ def get_transacao2(request: Request):
         context={"request": request},
     )
 
+@app.get("/transacao3", response_class=HTMLResponse)
+def get_transacao3(request: Request):
+    return templates.TemplateResponse(
+        request,
+        name="transacao3.html",
+        context={"request": request},
+    )
+
 
 @app.get("/table/{name}", response_class=HTMLResponse)
 def get_table(request: Request, name: str):

@@ -1,5 +1,23 @@
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
+  const token = localStorage.getItem('token');
+  if (!token) {
+    window.location.href = '/login';
+    return;
+  }
 
+  const res = await fetch('http://localhost:8000/me', {
+    headers: { 'Authorization': `Bearer ${token}` }
+  });
+
+  if (!res.ok) {
+    localStorage.removeItem('token');
+    localStorage.removeItem('usuario');
+    window.location.href = '/login';
+    return;
+  }
+
+  const usuario = await res.json();
+  console.log("Logado como:", usuario.nome);
   const display = document.getElementById('display');
   const delBtn = document.getElementById('del-btn');
   const continueBtn = document.getElementById('continue-btn');
@@ -43,8 +61,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
   continueBtn.addEventListener('click', () => {
     console.log("clicou");
-
-    const value = display.textContent.replace('R$: ', '');
+    
+    const value = display.textContent.replace('R$: ', '').trim();
+    console.log("valor:"+value);
     window.location.href = '/transacao2?valor=' + encodeURIComponent(value);
   });
 

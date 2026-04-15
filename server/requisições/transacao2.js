@@ -10,44 +10,30 @@ const contacts = [
   { name: 'Diego Martins',     initials: 'DM', bank: 'Sicredi',   cpf: '963.258.741-05', phone: '(48) 98600-6644' },
 ];
 
-// ─── Regex para formato COMPLETO (usado só no feedback visual) ────────────────
 const REGEX_FULL = {
   cpf:   /^\d{3}\.?\d{3}\.?\d{3}-?\d{2}$/,
   cnpj:  /^\d{2}\.?\d{3}\.?\d{3}\/?\d{4}-?\d{2}$/,
   phone: /^(\(?\d{2}\)?[\s\-]?)?(9\d{4}|\d{4})-?\d{4}$/,
 };
 
-// ─── Detecta o tipo pelo padrão dos caracteres digitados (parcial ou completo) ─
 function detectInputType(value) {
   const clean = value.trim();
   if (!clean) return 'text';
-
-  // Presença de barra → CNPJ
   if (clean.includes('/')) return 'cnpj';
-
-  // Presença de parênteses → telefone
   if (clean.includes('(') || clean.includes(')')) return 'phone';
 
   const digits = clean.replace(/\D/g, '');
   const onlyDigits = /^\d+$/.test(clean);
-  const cpfChars   = /^[\d.\-]+$/.test(clean);  // só dígitos, ponto e traço
-  const cnpjChars  = /^[\d.\-\/]+$/.test(clean); // acima + barra
+  const cpfChars   = /^[\d.\-]+$/.test(clean);
+  const cnpjChars  = /^[\d.\-\/]+$/.test(clean);
 
-  // Só dígitos puros: decide pelo comprimento
   if (onlyDigits) {
     if (digits.length <= 11) return 'cpf';
     if (digits.length <= 14) return 'cnpj';
   }
-
-  // Formatação de CPF parcial: ex: "123.", "123.456", "123.456.789-"
   if (cpfChars && !clean.includes('/')) return 'cpf';
-
-  // Formatação de CNPJ parcial
   if (cnpjChars) return 'cnpj';
-
-  // Tem traço mas não se encaixou: tenta telefone
   if (/^[\d\s\-]+$/.test(clean) && digits.length >= 8) return 'phone';
-
   return 'text';
 }
 
@@ -59,7 +45,6 @@ function showInputFeedback(type, isComplete) {
     el.style.cssText = 'font-size:0.75rem; margin-top:-14px; padding-left:6px; min-height:18px; transition: color 0.2s;';
     document.querySelector('.search-wrapper').after(el);
   }
-
   const map = {
     cpf:   isComplete ? '✔ CPF válido'      : '· Buscando por CPF…',
     cnpj:  isComplete ? '✔ CNPJ válido'     : '· Buscando por CNPJ…',
@@ -70,30 +55,17 @@ function showInputFeedback(type, isComplete) {
   el.style.color = isComplete ? '#2eb8b8' : '#8abcbc';
 }
 
-// ─── Filtra contatos por tipo, aceitando busca parcial ────────────────────────
 function filterContacts(filter, type) {
   if (!filter) return contacts;
-
-  // Para CPF/CNPJ/telefone: extrai só dígitos e faz includes
   const cleanDigits = filter.replace(/\D/g, '');
   const cleanLower  = filter.toLowerCase();
-
   return contacts.filter(c => {
-    if (type === 'cpf')
-      return c.cpf  && c.cpf.replace(/\D/g, '').includes(cleanDigits);
-    if (type === 'cnpj')
-      return c.cnpj && c.cnpj.replace(/\D/g, '').includes(cleanDigits);
-    if (type === 'phone')
-      return c.phone && c.phone.replace(/\D/g, '').includes(cleanDigits);
-    // Texto livre: nome ou banco
-    return (
-      c.name.toLowerCase().includes(cleanLower) ||
-      c.bank.toLowerCase().includes(cleanLower)
-    );
+    if (type === 'cpf')   return c.cpf   && c.cpf.replace(/\D/g, '').includes(cleanDigits);
+    if (type === 'cnpj')  return c.cnpj  && c.cnpj.replace(/\D/g, '').includes(cleanDigits);
+    if (type === 'phone') return c.phone && c.phone.replace(/\D/g, '').includes(cleanDigits);
+    return c.name.toLowerCase().includes(cleanLower) || c.bank.toLowerCase().includes(cleanLower);
   });
 }
-
-let selectedIndex = null;
 
 function avatarSVG() {
   return `<svg class="contact-avatar-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
@@ -106,6 +78,8 @@ function checkSVG() {
     <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
   </svg>`;
 }
+
+let selectedIndex = null;
 
 function renderContacts(filter = '') {
   const grid = document.getElementById('contacts-grid');
@@ -145,32 +119,32 @@ function renderContacts(filter = '') {
   });
 }
 
-document.getElementById('search-input').addEventListener('input', e => {
-  renderContacts(e.target.value);
-});
-
-document.getElementById('continue-btn').addEventListener('click', () => {
-  if (selectedIndex === null) {
-    alert('Selecione um contato para continuar.');
-    return;
-  }
-  const c = contacts[selectedIndex];
-  const params = new URLSearchParams(window.location.search);
-  const valor = params.get('valor') || '0,00';
-  window.location.href = 'transacao3.html?valor=' + encodeURIComponent(valor)
-    + '&nome=' + encodeURIComponent(c.name)
-    + '&banco=' + encodeURIComponent(c.bank);
-});
-
-// Init
-renderContacts();
-
-// ─── Lê o valor da URL e atualiza o título ────────────────────────────────────
-(function () {
+document.addEventListener('DOMContentLoaded', () => {
+  // Lê o valor da URL e atualiza o título
   const params = new URLSearchParams(window.location.search);
   const valor = params.get('valor');
   if (valor) {
     const el = document.getElementById('valor-titulo');
     if (el) el.textContent = 'R$ ' + valor;
   }
-})();
+
+  // Init
+  renderContacts();
+
+  document.getElementById('search-input').addEventListener('input', e => {
+    renderContacts(e.target.value);
+  });
+
+  document.getElementById('continue-btn').addEventListener('click', () => {
+    if (selectedIndex === null) {
+      alert('Selecione um contato para continuar.');
+      return;
+    }
+    const c = contacts[selectedIndex];
+    const params = new URLSearchParams(window.location.search);
+    const valor = params.get('valor') || '0,00';
+    window.location.href = '/transacao3?valor=' + encodeURIComponent(valor)
+      + '&nome=' + encodeURIComponent(c.name)
+      + '&banco=' + encodeURIComponent(c.bank);
+  });
+});

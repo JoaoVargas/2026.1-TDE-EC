@@ -1,7 +1,5 @@
-// ─────────────────────────────────────
-// SIDEBAR DESLIZANTE (mobile)
-// ─────────────────────────────────────
 document.addEventListener('DOMContentLoaded', async () => {
+
   const token = localStorage.getItem('token');
   if (!token) {
     window.location.href = '/login';
@@ -21,21 +19,34 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   const usuario = await res.json();
   console.log("Logado como:", usuario.nome);
-  // use os dados do usuário aqui se precisar
-});
+  console.log("Token:", localStorage.getItem("token"));
+  console.log("Usuario:", localStorage.getItem("usuario"));
 
-const sidebar  = document.querySelector(".sidebar");
-const btnMenu  = document.getElementById("btn-menu");
-const overlay  = document.getElementById("overlay");
+  // 🔽 AGORA SIM, DEPOIS QUE O DOM EXISTE
 
-// Abre a sidebar
-btnMenu.addEventListener("click", function () {
-  sidebar.classList.add("aberta");
-  overlay.classList.add("ativo");
-});
+  const sidebar  = document.querySelector(".sidebar");
+  const btnMenu  = document.getElementById("btn-menu");
+  const overlay  = document.getElementById("overlay");
+  const transacao = document.getElementById('transacao');
+  const investimento = document.getElementById('investimento');
+  btnMenu.addEventListener("click", function () {
+    sidebar.classList.add("aberta");
+    overlay.classList.add("ativo");
+  });
 
-// Fecha ao clicar no overlay
-overlay.addEventListener("click", function () {
-  sidebar.classList.remove("aberta");
-  overlay.classList.remove("ativo");
+  overlay.addEventListener("click", function () {
+    sidebar.classList.remove("aberta");
+    overlay.classList.remove("ativo");
+  });
+
+  transacao.addEventListener("click", function (e) {
+    e.preventDefault();
+    console.log("indo para transacao");
+    window.location.href = '/transacao';
+  });
+  investimento.addEventListener("click", function (e) {
+      e.preventDefault();
+      console.log("indo para investimento");
+      window.location.href = '/investimentos';
+    });
 });

@@ -10,7 +10,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
 
   if (res.ok) {
-    window.location.href = '/home'; 
+    window.location.href = '/home';
   } else {
     // token expirado, limpa
     localStorage.removeItem('token');
