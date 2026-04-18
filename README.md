@@ -47,6 +47,10 @@ Arquitetura do servidor
 - server/main.py: entrypoint ASGI (apenas cria a aplicacao)
 - server/core/settings.py: leitura e cache de configuracoes
 - server/core/app.py: factory da aplicacao FastAPI, middlewares e routers
+- server/web/router.py: roteador para paginas HTML
+- server/web/routes/pages.py: rotas web renderizadas com Jinja2
+- server/templates/: templates Jinja2
+- server/static/: arquivos estaticos (CSS, imagens, etc.)
 - server/db/base.py: Base declarativa do SQLAlchemy
 - server/db/session.py: engine, SessionLocal e check de conectividade
 - server/db/init_db.py: inicializacao das tabelas
@@ -67,3 +71,8 @@ Na raiz do projeto:
 Health check:
 
   GET /api/health
+
+Paginas HTML:
+
+  GET /
+  GET /healthcheck
