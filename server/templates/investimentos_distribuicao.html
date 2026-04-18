@@ -1,0 +1,74 @@
+{% extends "dashboard_base.html" %}
+
+{% block title %}Investimentos | Distribuicao{% endblock %}
+
+{% block dashboard_styles %}
+<link rel="stylesheet" href="/static/css/investimentos.css" />
+{% endblock %}
+
+{% block dashboard_topbar_actions %}
+<button class="ui-btn ui-btn-secondary" type="button">Extrato</button>
+<button class="ui-btn ui-btn-primary" type="button">Investir</button>
+{% endblock %}
+
+{% block dashboard_content %}
+<section class="investment-page" data-view="distribuicao">
+    <div class="investment-hero">
+        <article class="investment-stat ui-card main-stat">
+            <p class="investment-stat-label">Total em investimentos</p>
+            <p class="investment-stat-value"><span class="currency">R$</span><span id="total-val">0,00</span></p>
+            <p class="investment-stat-sub" id="total-change">- Sem variacao</p>
+        </article>
+        <article class="investment-stat ui-card">
+            <p class="investment-stat-label">Renda fixa</p>
+            <p class="investment-stat-value"><span class="currency">R$</span><span id="fixo-val">0,00</span></p>
+            <p class="investment-stat-sub" id="fixo-pct">- 0 ativos</p>
+        </article>
+        <article class="investment-stat ui-card">
+            <p class="investment-stat-label">Renda variavel</p>
+            <p class="investment-stat-value"><span class="currency">R$</span><span id="variavel-val">0,00</span></p>
+            <p class="investment-stat-sub" id="variavel-pct">- 0 ativos</p>
+        </article>
+    </div>
+
+    <nav class="investment-tabs">
+        <a class="investment-tab" href="/investimentos">Minha carteira</a>
+        <a class="investment-tab is-active" href="/investimentos/distribuicao">Analise de distribuicao</a>
+    </nav>
+
+    <section class="dist-section ui-card">
+        <header class="investment-section-header compact">
+            <h2>Distribuicao por classe de ativo</h2>
+        </header>
+
+        <div class="dist-grid">
+            <div class="donut-shell">
+                <div class="donut" id="dist-donut"></div>
+                <div class="donut-center">
+                    <p id="donut-total">R$ 0,00</p>
+                    <span>total</span>
+                </div>
+            </div>
+            <div class="legend-list" id="legend-list"></div>
+        </div>
+    </section>
+
+    <section class="dist-section ui-card">
+        <header class="investment-section-header compact">
+            <h2>Participacao por ativo</h2>
+        </header>
+        <div class="bar-list" id="asset-bars"></div>
+    </section>
+
+    <section class="dist-section ui-card">
+        <header class="investment-section-header compact">
+            <h2>Rentabilidade acumulada por classe</h2>
+        </header>
+        <div class="bar-list" id="return-bars"></div>
+    </section>
++</section>
+{% endblock %}
+
+{% block dashboard_scripts %}
+<script type="module" src="/static/js/pages/investimentos.js"></script>
+{% endblock %}

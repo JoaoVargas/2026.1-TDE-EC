@@ -1,0 +1,215 @@
+.transfer-flow {
+    background: linear-gradient(160deg, #142946 0%, #1d3558 100%);
+    width: min(560px, 100%);
+    margin: 0 auto;
+    padding: var(--space-5);
+    display: grid;
+    gap: var(--space-4);
+}
+
+.transfer-header h1 {
+    margin: 0;
+    font-size: 1.55rem;
+}
+
+.transfer-header p {
+    margin: 0.35rem 0 0;
+    color: var(--color-muted);
+}
+
+.transfer-step {
+    display: none;
+    gap: var(--space-3);
+}
+
+.transfer-step.is-active {
+    display: grid;
+}
+
+.info-card {
+    background: linear-gradient(140deg, #173550 0%, #1e4666 100%);
+    padding: var(--space-4);
+    border: 1px solid rgba(130, 180, 222, 0.28);
+}
+
+.info-title {
+    margin: 0;
+    color: var(--color-muted);
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.09em;
+}
+
+.info-value {
+    margin: 0.35rem 0 0;
+    font-family: var(--font-mono);
+    font-size: 1.3rem;
+}
+
+.amount-display {
+    text-align: center;
+    border-radius: var(--radius-md);
+    padding: 1rem;
+    border: 1px solid rgba(130, 180, 222, 0.35);
+    background: #102640;
+    font-family: var(--font-mono);
+    font-size: 1.8rem;
+}
+
+.numpad {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.65rem;
+    background: #122338;
+    border-radius: var(--radius-md);
+    padding: var(--space-3);
+}
+
+.numpad-key {
+    border: 1px solid rgba(129, 168, 209, 0.35);
+    border-radius: var(--radius-sm);
+    background: #1a2f4f;
+    color: var(--color-text);
+    font-family: var(--font-sans);
+    font-size: 1.05rem;
+    font-weight: 600;
+    padding: 1rem 0.3rem;
+    cursor: pointer;
+}
+
+.numpad-key:hover {
+    filter: brightness(1.08);
+}
+
+.numpad-key.delete {
+    font-size: 0.74rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--color-primary);
+}
+
+.numpad-key.empty {
+    background: transparent;
+    border-color: transparent;
+}
+
+.step-action {
+    justify-self: stretch;
+}
+
+.recipient-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--space-2);
+    flex-wrap: wrap;
+}
+
+.recipient-top p {
+    margin: 0;
+    color: var(--color-muted);
+}
+
+.recipient-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.7rem;
+}
+
+.recipient-card {
+    border-radius: var(--radius-sm);
+    border: 1px solid rgba(129, 168, 209, 0.35);
+    background: #17304f;
+    color: var(--color-text);
+    padding: 0.7rem 0.65rem;
+    display: grid;
+    gap: 0.35rem;
+    text-align: center;
+    cursor: pointer;
+}
+
+.recipient-card:hover {
+    filter: brightness(1.08);
+}
+
+.recipient-card.is-selected {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-primary), transparent 78%);
+}
+
+.recipient-initial {
+    width: 34px;
+    height: 34px;
+    border-radius: 999px;
+    display: grid;
+    place-items: center;
+    background: rgba(212, 174, 98, 0.2);
+    color: var(--color-accent);
+    margin: 0 auto;
+    font-weight: 700;
+}
+
+.recipient-name {
+    font-size: 0.76rem;
+    font-weight: 700;
+}
+
+.recipient-bank {
+    font-size: 0.66rem;
+    color: var(--color-muted);
+}
+
+.success-mark {
+    width: 84px;
+    height: 84px;
+    border-radius: 999px;
+    display: grid;
+    place-items: center;
+    margin: 0 auto;
+    background: linear-gradient(135deg, #1ea366, #47d287);
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #083323;
+}
+
+.step-success h2,
+.step-success p {
+    margin: 0;
+    text-align: center;
+}
+
+.step-success p {
+    color: var(--color-muted);
+}
+
+.receipt {
+    background: #122841;
+    padding: var(--space-3);
+    display: grid;
+    gap: 0.5rem;
+}
+
+.receipt div {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--space-2);
+    align-items: center;
+}
+
+.receipt span {
+    color: var(--color-muted);
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.receipt strong {
+    font-family: var(--font-mono);
+    font-size: 0.84rem;
+}
+
+@media (max-width: 720px) {
+    .recipient-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}

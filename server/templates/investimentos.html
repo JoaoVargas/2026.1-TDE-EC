@@ -1,0 +1,70 @@
+{% extends "dashboard_base.html" %}
+{% from "components/investment_macros.html" import stat_card, asset_card %}
+
+{% block title %}Investimentos | Banco Digital{% endblock %}
+
+{% block dashboard_styles %}
+<link rel="stylesheet" href="/static/css/investimentos.css" />
+{% endblock %}
+
+{% block dashboard_topbar_actions %}
+<button class="ui-btn ui-btn-secondary" type="button">Extrato</button>
+<button class="ui-btn ui-btn-primary" type="button">Investir</button>
+{% endblock %}
+
+{% block dashboard_content %}
+<section class="investment-page" data-view="carteira">
+    <div class="investment-hero">
+        <article class="investment-stat ui-card main-stat">
+            <p class="investment-stat-label">Total em investimentos</p>
+            <p class="investment-stat-value"><span class="currency">R$</span><span id="total-val">0,00</span></p>
+            <p class="investment-stat-sub" id="total-change">- Sem variacao</p>
+        </article>
+        {{ stat_card('Renda fixa', '0,00', '- 0 ativos') }}
+        {{ stat_card('Renda variavel', '0,00', '- 0 ativos') }}
+    </div>
+
+    <nav class="investment-tabs">
+        <a class="investment-tab is-active" href="/investimentos">Minha carteira</a>
+        <a class="investment-tab" href="/investimentos/distribuicao">Analise de distribuicao</a>
+    </nav>
+
+    <section class="investment-section">
+        <header class="investment-section-header">
+            <h2>Renda fixa</h2>
+            <a href="#">Ver todos</a>
+        </header>
+        <div class="investment-card-grid">
+            {{ asset_card('Titulo publico', 'Tesouro Prefixado', 'Vencimento 2027', '100% CDI') }}
+            {{ asset_card('Meta pessoal', 'Carro Novo', 'Caixinha de objetivo', '100% CDI') }}
+            {{ asset_card('Novo', 'Nova caixinha disponivel', 'Descubra objetivos automatizados', 'Conhecer', 'accent') }}
+        </div>
+    </section>
+
+    <section class="investment-section">
+        <header class="investment-section-header">
+            <h2>Renda variavel</h2>
+            <a href="#">Ver todos</a>
+        </header>
+        <div class="investment-card-grid">
+            {{ asset_card('FII', 'XMLT', 'Fundo imobiliario', '1% proventos') }}
+            {{ asset_card('FII', 'XCORTI', 'Fundo imobiliario', '15% proventos') }}
+        </div>
+    </section>
+
+    <section class="investment-section">
+        <header class="investment-section-header">
+            <h2>Criptomoedas</h2>
+            <a href="#">Ver todos</a>
+        </header>
+        <div class="investment-card-grid">
+            {{ asset_card('Criptoativo', 'Bitcoin', 'BTC · Proof of Work', '+16% crescimento', 'gold') }}
+            {{ asset_card('Criptoativo', 'Memecoin', 'MEME · Token', '+16% crescimento', 'gold') }}
+        </div>
+    </section>
+</section>
+{% endblock %}
+
+{% block dashboard_scripts %}
+<script type="module" src="/static/js/pages/investimentos.js"></script>
+{% endblock %}

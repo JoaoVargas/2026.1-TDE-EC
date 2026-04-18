@@ -28,7 +28,34 @@ def home_alias_page(request: Request):
     return templates.TemplateResponse(
         request=request,
         name="home.html",
-        context={"request": request},
+        context={"request": request, "active_page": "home", "dashboard_label": "Painel financeiro"},
+    )
+
+
+@router.get("/transacao")
+def transacao_page(request: Request):
+    return templates.TemplateResponse(
+        request=request,
+        name="transacao.html",
+        context={"request": request, "active_page": "transacao", "dashboard_label": "Nova transferencia"},
+    )
+
+
+@router.get("/investimentos")
+def investimentos_page(request: Request):
+    return templates.TemplateResponse(
+        request=request,
+        name="investimentos.html",
+        context={"request": request, "active_page": "investimentos", "dashboard_label": "Minha carteira"},
+    )
+
+
+@router.get("/investimentos/distribuicao")
+def investimentos_distribuicao_page(request: Request):
+    return templates.TemplateResponse(
+        request=request,
+        name="investimentos_distribuicao.html",
+        context={"request": request, "active_page": "investimentos", "dashboard_label": "Analise de distribuicao"},
     )
 
 

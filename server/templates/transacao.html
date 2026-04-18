@@ -1,0 +1,79 @@
+{% extends "dashboard_base.html" %}
+
+{% block title %}Transferencias | Banco Digital{% endblock %}
+
+{% block dashboard_styles %}
+<link rel="stylesheet" href="/static/css/transacao.css" />
+{% endblock %}
+
+{% block dashboard_topbar_actions %}
+<button class="ui-btn ui-btn-secondary" type="button" id="btn-cancelar-transferencia">Cancelar</button>
+{% endblock %}
+
+{% block dashboard_content %}
+<section class="transfer-flow ui-card" data-step="amount">
+    <header class="transfer-header">
+        <h1>Transferencia</h1>
+        <p id="transfer-subtitle">Qual e o valor da transferencia?</p>
+    </header>
+
+    <section class="transfer-step step-amount is-active" data-step-panel="amount">
+        <div class="info-card ui-card">
+            <p class="info-title">Saldo disponivel na conta</p>
+            <p class="info-value">R$ 12.500,00</p>
+        </div>
+
+        <div class="amount-display" id="amount-display">R$ 0,00</div>
+
+        <div class="numpad" id="numpad">
+            <button type="button" class="numpad-key" data-number="1">1</button>
+            <button type="button" class="numpad-key" data-number="2">2</button>
+            <button type="button" class="numpad-key" data-number="3">3</button>
+            <button type="button" class="numpad-key" data-number="4">4</button>
+            <button type="button" class="numpad-key" data-number="5">5</button>
+            <button type="button" class="numpad-key" data-number="6">6</button>
+            <button type="button" class="numpad-key" data-number="7">7</button>
+            <button type="button" class="numpad-key" data-number="8">8</button>
+            <button type="button" class="numpad-key" data-number="9">9</button>
+            <button type="button" class="numpad-key empty" disabled></button>
+            <button type="button" class="numpad-key" data-number="0">0</button>
+            <button type="button" class="numpad-key delete" id="btn-delete">Apagar</button>
+        </div>
+
+        <button type="button" class="ui-btn ui-btn-primary step-action" id="btn-to-recipient">Continuar</button>
+    </section>
+
+    <section class="transfer-step step-recipient" data-step-panel="recipient">
+        <div class="recipient-top">
+            <button type="button" class="ui-btn ui-btn-secondary" id="btn-back-amount">Voltar</button>
+            <p>Valor selecionado: <strong id="selected-amount">R$ 0,00</strong></p>
+        </div>
+
+        <label class="ui-label" for="recipient-search">Buscar contato</label>
+        <input class="ui-input" type="text" id="recipient-search" placeholder="Nome, banco ou chave" />
+
+        <div class="recipient-grid" id="recipient-grid"></div>
+
+        <button type="button" class="ui-btn ui-btn-primary step-action" id="btn-to-success" disabled>Transferir</button>
+    </section>
+
+    <section class="transfer-step step-success" data-step-panel="success">
+        <div class="success-mark">OK</div>
+        <h2>Transferencia concluida!</h2>
+        <p>Seu dinheiro foi enviado com sucesso.</p>
+
+        <div class="receipt ui-card">
+            <div><span>Valor</span><strong id="receipt-amount">R$ 0,00</strong></div>
+            <div><span>Para</span><strong id="receipt-name">-</strong></div>
+            <div><span>Banco</span><strong id="receipt-bank">-</strong></div>
+            <div><span>Data</span><strong id="receipt-date">-</strong></div>
+        </div>
+
+        <button type="button" class="ui-btn ui-btn-primary step-action" id="btn-finish-transfer">Voltar ao menu</button>
+    </section>
+</section>
+{% endblock %}
+
+{% block dashboard_scripts %}
+<script type="module" src="/static/js/pages/transacao.js"></script>
+{% endblock %}
