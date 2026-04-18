@@ -1,0 +1,36 @@
+{% extends "auth_base.html" %}
+{% from "components/forms.html" import input_field %}
+
+{% block title %}Login | Banco Digital{% endblock %}
+
+{% block content %}
+<div class="auth-container auth-login">
+    {% with heading="Bem-vindo de volta", description="Sua seguranca e nossa prioridade. Acesse sua conta para gerenciar seu dinheiro com praticidade." %}
+        {% include "components/auth_brand_panel.html" %}
+    {% endwith %}
+
+    <section class="auth-form-panel">
+        <h1>Acesso de Login</h1>
+
+        {{ input_field('cpf', 'CPF ou E-mail') }}
+        {{ input_field('senha', 'Senha', 'password', 'current-password') }}
+
+        <div class="forgot-link">
+            <a href="#" aria-disabled="true">Esqueci a senha</a>
+        </div>
+
+        <div id="mensagem" class="mensagem" style="display: none;"></div>
+
+        <button class="btn-primary" id="btn-login" type="button">Entrar</button>
+
+        <p class="register-text">
+            Nao tem conta?
+            <a href="/cadastro">Cadastre-se</a>
+        </p>
+    </section>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script type="module" src="/static/js/pages/login.js"></script>
+{% endblock %}

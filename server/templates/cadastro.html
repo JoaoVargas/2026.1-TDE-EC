@@ -1,0 +1,48 @@
+{% extends "auth_base.html" %}
+{% from "components/forms.html" import input_field %}
+
+{% block title %}Criar Conta | Banco Digital{% endblock %}
+
+{% block content %}
+<div class="auth-container auth-register">
+    {% with heading="Abra sua conta", description="Complete seus dados para criar sua conta digital e iniciar sua jornada financeira." %}
+        {% include "components/auth_brand_panel.html" %}
+    {% endwith %}
+
+    <section class="auth-form-panel">
+        <h1>Criar Conta</h1>
+
+        <div class="form-grid">
+            {{ input_field('nome', 'Nome completo') }}
+            {{ input_field('email', 'E-mail', 'email', 'email') }}
+            {{ input_field('cpf', 'CPF') }}
+            {{ input_field('nascimento', 'Data de nascimento', 'date') }}
+            {{ input_field('senha', 'Senha', 'password', 'new-password') }}
+            {{ input_field('confirmar', 'Confirmar senha', 'password', 'new-password') }}
+        </div>
+
+        <hr class="divider" />
+        <h2>Endereco</h2>
+
+        <div class="form-grid">
+            {{ input_field('cep', 'CEP', 'text', 'off', 'highlight') }}
+            {{ input_field('logradouro', 'Logradouro', 'text', 'street-address', 'highlight') }}
+            {{ input_field('numero', 'Numero') }}
+            {{ input_field('bairro', 'Bairro') }}
+            {{ input_field('cidade', 'Cidade') }}
+            {{ input_field('estado', 'Estado') }}
+        </div>
+
+        <div id="mensagem" class="mensagem" style="display: none;"></div>
+
+        <div class="actions">
+            <button class="btn-secondary" type="button" onclick="history.back()">Voltar</button>
+            <button class="btn-primary" id="btn-finalizar" type="button">Finalizar cadastro</button>
+        </div>
+    </section>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script type="module" src="/static/js/pages/cadastro.js"></script>
+{% endblock %}

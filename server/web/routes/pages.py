@@ -23,6 +23,29 @@ def home_page(request: Request):
     )
 
 
+@router.get("/home")
+def home_alias_page(request: Request):
+    return home_page(request)
+
+
+@router.get("/login")
+def login_page(request: Request):
+    return templates.TemplateResponse(
+        request=request,
+        name="login.html",
+        context={"request": request},
+    )
+
+
+@router.get("/cadastro")
+def cadastro_page(request: Request):
+    return templates.TemplateResponse(
+        request=request,
+        name="cadastro.html",
+        context={"request": request},
+    )
+
+
 @router.get("/healthcheck")
 def healthcheck_page(request: Request):
     db_status = "ok"
