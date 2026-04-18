@@ -1,54 +1,95 @@
 services:
-  portainer:
+  betabank-workbench:
+    image: lscr.io/linuxserver/mysql-workbench:latest
+    container_name: betabank-workbench
+    cap_add:
+      - IPC_LOCK
+    environment:
+      PUID: "1000"
+      PGID: "1000"
+      TZ: Etc/UTC
+    ports:
+      - "${MYSQL_WORKBENCH_PORT:-3003}:3000"
+      - "${MYSQL_WORKBENCH_HTTPS_PORT:-3004}:3001"
+    volumes:
+      - betabank_workbench_data:/config
+    shm_size: "1gb"
+    networks:
+      - betabank_network
+  betabank-portainer:
     image: portainer/portainer-ce
-    container_name: portainer
+    container_name: betabank-portainer
     restart: always
     ports:
-      - "9000:9000"
+      - "${PORTAINER_PORT:-3002}:9000"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - portainer_local_data:/data
+      - betabank_portainer_data:/data
     networks:
-      - mynetwork
-  mysql:
+      - betabank_network
+  betabank-db:
     image: mysql:8.4
-    container_name: mysql
+    container_name: betabank-db
+    env_file:
+      - ./.env
     environment:
-      MYSQL_ROOT_PASSWORD: example
-      MYSQL_DATABASE: bancodigital
-      MYSQL_USER: user
-      MYSQL_PASSWORD: password
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
     ports:
-      - "3306:3306"
+      - "${MYSQL_PORT:-3000}:3306"
     volumes:
-      - mysql_local_data:/var/lib/mysql
+      - betabank_db_data:/var/lib/mysql
       - ../db/INIT.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
     networks:
-      - mynetwork
+      - betabank_network
 
-  adminer:
-    image: adminer
-    container_name: adminer
-    restart: always
+  betabank-server:
+    container_name: betabank-server
+    env_file:
+      - ./.env
+    build:
+      context: ..
+      dockerfile: docker/dockerfile.server
     ports:
-      - "8080:8080"
+      - "${API_PORT:-3001}:8000"
+    volumes:
+      - ../server:/app/server
+    working_dir: /app
+    environment:
+      DB_HOST: ${DB_HOST:-betabank-db}
+      DB_PORT: ${DB_PORT:-3306}
+      DB_USER: ${MYSQL_USER}
+      DB_PASSWORD: ${MYSQL_PASSWORD}
+      DB_NAME: ${MYSQL_DATABASE}
+      PYTHONUNBUFFERED: 1
+    command: sh -c "pip install -r /app/server/requirements.txt && uvicorn server.main:app --host 0.0.0.0 --port 8000 --reload"
+    depends_on:
+      - betabank-db
     networks:
-      - mynetwork
+      - betabank_network
 
 volumes:
-  mysql_local_data:
+  betabank_db_data:
     driver: local
     driver_opts:
       type: none
-      device: ../db/mysql_data
+      device: ./mysql_data
       o: bind
-  portainer_local_data:
+  betabank_portainer_data:
     driver: local
     driver_opts:
       type: none
-      device: ../db/portainer_data/
+      device: ./portainer_data/
+      o: bind
+  betabank_workbench_data:
+    driver: local
+    driver_opts:
+      type: none
+      device: ./workbench_data/
       o: bind
 
 networks:
-  mynetwork:
+  betabank_network:
     driver: bridge
