@@ -1,10 +1,11 @@
 from sqlalchemy import select
 
-from config.db import Base, SessionLocal
-from models import orm_models  # noqa: F401
+from server.db.base import Base
+from server.db.session import SessionLocal
+from server.models import orm_models  # noqa: F401
 
 
-def fetch_all_from_table(table_name):
+def fetch_all_from_table(table_name: str) -> list[tuple[object, ...]]:
     if table_name not in Base.metadata.tables:
         return []
 
@@ -14,7 +15,5 @@ def fetch_all_from_table(table_name):
         if not rows:
             return []
 
-        # Template-friendly output shape that preserves old tuple-like semantics.
         columns = list(rows[0].keys())
-        records = [tuple(row[col] for col in columns) for row in rows]
-        return records
+        return [tuple(row[col] for col in columns) for row in rows]

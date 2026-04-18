@@ -41,7 +41,6 @@ services:
       - "${MYSQL_PORT:-3000}:3306"
     volumes:
       - betabank_db_data:/var/lib/mysql
-      - ../db/INIT.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
     networks:
       - betabank_network
 

@@ -1,4 +1,6 @@
-Inicialize o venv
+Setup do ambiente
+
+1. Crie e ative um ambiente virtual:
 
   python -m venv .venv
 
@@ -6,30 +8,62 @@ Inicialize o venv
   source .venv/bin/activate.fish
   source .venv/Scripts/activate
 
-Se tem o docker instalado então só rodar docker compose up na pasta docker. Se não então instalar e configurar o MySQL na máquina
-
-ORM (SQLAlchemy)
-
-1. Instale as dependências do servidor:
+2. Instale as dependencias do servidor:
 
   cd server
   pip install -r requirements.txt
 
-2. A conexão usa as variáveis de ambiente abaixo (ou DB_URL):
+3. Suba a infraestrutura com Docker (opcional, recomendado):
 
-  DB_HOST
-  DB_PORT
-  DB_USER
-  DB_PASSWORD
-  DB_NAME
+  cd ../docker
+  docker compose up
 
-3. O setup ORM fica em server/config/db.py:
+Configuracao
 
-  engine: conexão com MySQL
-  SessionLocal: sessão do banco
-  Base: base declarativa dos modelos
-  get_db(): dependência para rotas FastAPI
+A conexao com banco usa DB_URL ou os campos abaixo:
 
-4. Os modelos das tabelas do INIT.sql estão em:
+- DB_HOST
+- DB_PORT
+- DB_USER
+- DB_PASSWORD
+- DB_NAME
 
-  server/models/orm_models.py
+Opcoes de tuning do SQLAlchemy (opcionais):
+
+- DB_ECHO (true/false)
+- DB_POOL_SIZE
+- DB_MAX_OVERFLOW
+- DB_POOL_TIMEOUT
+- DB_POOL_RECYCLE
+
+Configuracoes adicionais da API:
+
+- APP_NAME
+- DEBUG
+- CORS_ALLOW_ORIGINS (lista separada por virgula)
+
+Arquitetura do servidor
+
+- server/main.py: entrypoint ASGI (apenas cria a aplicacao)
+- server/core/settings.py: leitura e cache de configuracoes
+- server/core/app.py: factory da aplicacao FastAPI, middlewares e routers
+- server/db/base.py: Base declarativa do SQLAlchemy
+- server/db/session.py: engine, SessionLocal e check de conectividade
+- server/db/init_db.py: inicializacao das tabelas
+- server/models/orm_models.py: entidades ORM
+- server/repositories/table_repository.py: acesso a dados
+- server/api/routes/: endpoints HTTP
+
+Compatibilidade
+
+O modulo server/models/example.py continua funcionando como camada de compatibilidade para imports legados.
+
+Executando a API
+
+Na raiz do projeto:
+
+  uvicorn server.main:app --reload --host 0.0.0.0 --port 8000
+
+Health check:
+
+  GET /api/health
