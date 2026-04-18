@@ -1,5 +1,19 @@
 import { requireAuthenticatedUser, logout } from "/static/js/components/auth-token-guard.js";
 
+function getCachedUser() {
+    const raw = localStorage.getItem("usuario");
+    if (!raw) {
+        return null;
+    }
+
+    try {
+        return JSON.parse(raw);
+    } catch {
+        localStorage.removeItem("usuario");
+        return null;
+    }
+}
+
 function getInitials(name) {
     if (!name) {
         return "U";
@@ -64,14 +78,20 @@ function hydrateUser(user) {
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
+    setupMobileSidebar();
+
+    const logoutBtn = document.getElementById("btn-logout");
+    logoutBtn?.addEventListener("click", logout);
+
+    const cachedUser = getCachedUser();
+    if (cachedUser) {
+        hydrateUser(cachedUser);
+    }
+
     const user = await requireAuthenticatedUser();
     if (!user) {
         return;
     }
 
     hydrateUser(user);
-    setupMobileSidebar();
-
-    const logoutBtn = document.getElementById("btn-logout");
-    logoutBtn?.addEventListener("click", logout);
 });
