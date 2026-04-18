@@ -112,3 +112,10 @@ a:hover {
     border: 1px solid var(--color-danger);
     color: var(--color-danger);
 }
+
+bb-insight-card,
+bb-investment-stat,
+bb-asset-card,
+bb-statement-item {
+    display: block;
+}

@@ -1,4 +1,5 @@
-from datetime import datetime, timedelta, timezone
+from datetime import date, datetime, timedelta, timezone
+import re
 
 import bcrypt
 from fastapi import APIRouter, Depends, HTTPException, Query, status
@@ -6,6 +7,7 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from jose import JWTError, jwt
 from pydantic import BaseModel, Field
 from sqlalchemy import or_, select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from server.core.settings import get_settings
@@ -14,6 +16,8 @@ from server.models.orm_models import Usuario
 
 router = APIRouter(tags=["auth"])
 security = HTTPBearer(auto_error=False)
+
+EMAIL_RE = re.compile(r"^[^\s@]+@[^\s@]+\.[^\s@]+$")
 
 
 class EnderecoCadastro(BaseModel):
@@ -29,7 +33,7 @@ class CadastroPayload(BaseModel):
     nome: str
     email: str
     cpf: str
-    nascimento: str
+    nascimento: date
     senha: str = Field(min_length=8)
     endereco: EnderecoCadastro
 
@@ -40,6 +44,14 @@ class LoginPayload(BaseModel):
 
 
 def _normalize_cpf(value: str) -> str:
+    return "".join(char for char in value if char.isdigit())
+
+
+def _normalize_email(value: str) -> str:
+    return value.strip().lower()
+
+
+def _normalize_cep(value: str) -> str:
     return "".join(char for char in value if char.isdigit())
 
 
@@ -58,7 +70,7 @@ def _create_access_token(subject: str) -> str:
     return jwt.encode(payload, settings.jwt_secret, algorithm=settings.jwt_algorithm)
 
 
-def _decode_access_token(token: str) -> dict[str, str]:
+def _decode_access_token(token: str) -> dict[str, object]:
     settings = get_settings()
     return jwt.decode(token, settings.jwt_secret, algorithms=[settings.jwt_algorithm])
 
@@ -70,10 +82,14 @@ def get_current_user(
     if not credentials:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Nao autenticado.")
 
+    if credentials.scheme.lower() != "bearer":
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token invalido.")
+
     token = credentials.credentials
     try:
         payload = _decode_access_token(token)
-        user_id = int(payload.get("sub", "0"))
+        subject = payload.get("sub")
+        user_id = int(str(subject))
     except (JWTError, ValueError):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token invalido.")
 
@@ -100,7 +116,7 @@ def verificar_disponibilidade(
     if cpf:
         filtros.append(Usuario.cpf == _normalize_cpf(cpf))
     if email:
-        filtros.append(Usuario.email == email.strip().lower())
+        filtros.append(Usuario.email == _normalize_email(email))
 
     query = select(Usuario.id).where(or_(*filtros))
     existe = db.execute(query).first() is not None
@@ -110,10 +126,31 @@ def verificar_disponibilidade(
 @router.post("/cadastro", status_code=status.HTTP_201_CREATED)
 def cadastrar_usuario(payload: CadastroPayload, db: Session = Depends(get_db)) -> dict[str, str]:
     cpf = _normalize_cpf(payload.cpf)
-    email = payload.email.strip().lower()
+    email = _normalize_email(payload.email)
+    nome = payload.nome.strip()
+    cep = _normalize_cep(payload.endereco.cep)
+    estado = payload.endereco.estado.strip().upper()
 
     if len(cpf) != 11:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="CPF invalido.")
+
+    if not nome:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Nome invalido.")
+
+    if not EMAIL_RE.match(email):
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="E-mail invalido.")
+
+    if payload.nascimento > date.today():
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="Data de nascimento invalida.",
+        )
+
+    if len(cep) != 8:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="CEP invalido.")
+
+    if len(estado) != 2 or not estado.isalpha():
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Estado invalido.")
 
     duplicate = db.execute(
         select(Usuario.id).where(or_(Usuario.cpf == cpf, Usuario.email == email))
@@ -121,30 +158,29 @@ def cadastrar_usuario(payload: CadastroPayload, db: Session = Depends(get_db)) -
     if duplicate:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="CPF ou e-mail ja cadastrado.")
 
-    try:
-        data_nascimento = datetime.strptime(payload.nascimento, "%Y-%m-%d").date()
-    except ValueError:
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail="Data de nascimento invalida.",
-        )
-
     novo_usuario = Usuario(
-        nome=payload.nome.strip(),
+        nome=nome,
         email=email,
         senha=_hash_password(payload.senha),
-        data_nascimento=data_nascimento,
+        data_nascimento=payload.nascimento,
         cpf=cpf,
-        cep="".join(char for char in payload.endereco.cep if char.isdigit()),
+        cep=cep,
         logradouro=payload.endereco.logradouro.strip(),
         numero=payload.endereco.numero.strip(),
         bairro=payload.endereco.bairro.strip(),
         cidade=payload.endereco.cidade.strip(),
-        estado=payload.endereco.estado.strip().upper(),
+        estado=estado,
     )
 
-    db.add(novo_usuario)
-    db.commit()
+    try:
+        db.add(novo_usuario)
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="CPF ou e-mail ja cadastrado.",
+        )
 
     return {"message": "Cadastro realizado com sucesso."}
 
@@ -152,7 +188,24 @@ def cadastrar_usuario(payload: CadastroPayload, db: Session = Depends(get_db)) -
 @router.post("/login")
 def login(payload: LoginPayload, db: Session = Depends(get_db)) -> dict[str, object]:
     login_value = payload.cpf.strip()
-    lookup = Usuario.email == login_value.lower() if "@" in login_value else Usuario.cpf == _normalize_cpf(login_value)
+    if not login_value:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="CPF/e-mail e obrigatorio.",
+        )
+
+    if "@" in login_value:
+        normalized_login = _normalize_email(login_value)
+        lookup = Usuario.email == normalized_login
+    else:
+        normalized_login = _normalize_cpf(login_value)
+        if len(normalized_login) != 11:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail="CPF invalido.",
+            )
+        lookup = Usuario.cpf == normalized_login
+
     user = db.execute(select(Usuario).where(lookup)).scalar_one_or_none()
 
     if not user or not _verify_password(payload.senha, user.senha):

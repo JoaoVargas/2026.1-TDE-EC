@@ -1,19 +1,17 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>{% block title %}Banco Digital{% endblock %}</title>
-    <link rel="stylesheet" href="/static/css/tokens.css" />
-    <link rel="stylesheet" href="/static/css/components.css" />
-    <link rel="stylesheet" href="/static/css/site.css" />
-    <link rel="stylesheet" href="/static/css/auth.css" />
-    {% block styles %}{% endblock %}
-</head>
-<body class="auth-layout">
-    <main class="auth-shell">
-        {% block content %}{% endblock %}
-    </main>
-    {% block scripts %}{% endblock %}
-</body>
-</html>
+{% extends "base.html" %}
+
+{% block body_class %}auth-layout{% endblock %}
+{% block main_class %}auth-shell{% endblock %}
+
+{% block styles %}
+<link rel="stylesheet" href="/static/css/auth.css" />
+{% block auth_styles %}{% endblock %}
+{% endblock %}
+
+{% block content %}
+{% block auth_content %}{% endblock %}
+{% endblock %}
+
+{% block scripts %}
+{% block auth_scripts %}{% endblock %}
+{% endblock %}

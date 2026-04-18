@@ -15,7 +15,8 @@ function applyFilter(filter) {
             visible = month === nowMonth;
         }
 
-        item.style.display = visible ? "" : "none";
+        const host = item.closest("bb-statement-item") || item;
+        host.style.display = visible ? "" : "none";
     });
 }
 

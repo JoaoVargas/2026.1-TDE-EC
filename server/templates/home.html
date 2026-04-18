@@ -1,5 +1,4 @@
 {% extends "dashboard_base.html" %}
-{% from "components/dashboard_macros.html" import insight_card %}
 
 {% block title %}Home | Banco Digital{% endblock %}
 
@@ -22,9 +21,22 @@
 </section>
 
 <section class="cards-grid">
-    {{ insight_card('Seguros BetaBank', 'Protecao inteligente para voce e sua familia.', 'Conhecer', 'ui-btn-accent') }}
-    {{ insight_card('Cartao de credito', 'Fatura atual: R$ 0,00') }}
-    {{ insight_card('Termos de uso', 'Leia os principais pontos e regras da conta.', 'Ver termos', 'ui-btn-secondary') }}
+    <bb-insight-card
+        title="Seguros BetaBank"
+        text="Protecao inteligente para voce e sua familia."
+        button-label="Conhecer"
+        button-variant="ui-btn-accent"
+    ></bb-insight-card>
+    <bb-insight-card
+        title="Cartao de credito"
+        text="Fatura atual: R$ 0,00"
+    ></bb-insight-card>
+    <bb-insight-card
+        title="Termos de uso"
+        text="Leia os principais pontos e regras da conta."
+        button-label="Ver termos"
+        button-variant="ui-btn-secondary"
+    ></bb-insight-card>
 </section>
 {% endblock %}
 

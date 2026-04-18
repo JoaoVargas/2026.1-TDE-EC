@@ -41,50 +41,45 @@
     <p class="statement-list-title">Transacoes recentes</p>
 
     <section class="statement-list" id="statement-list">
-        <article class="statement-item ui-card" data-type="in" data-month="4">
-            <div class="statement-icon in">+</div>
-            <div class="statement-meta">
-                <p class="statement-name">Salario</p>
-                <p class="statement-date">11/04/2026 · 09:00</p>
-            </div>
-            <p class="statement-amount in">+ R$ 3.200,00</p>
-        </article>
+        <bb-statement-item
+            kind="in"
+            month="4"
+            title="Salario"
+            date="11/04/2026 · 09:00"
+            amount="+ R$ 3.200,00"
+        ></bb-statement-item>
 
-        <article class="statement-item ui-card" data-type="out" data-month="4">
-            <div class="statement-icon out">-</div>
-            <div class="statement-meta">
-                <p class="statement-name">Transferencia - Gersio Caminhoes</p>
-                <p class="statement-date">11/04/2026 · 14:27</p>
-            </div>
-            <p class="statement-amount out">- R$ 88.854,11</p>
-        </article>
+        <bb-statement-item
+            kind="out"
+            month="4"
+            title="Transferencia - Gersio Caminhoes"
+            date="11/04/2026 · 14:27"
+            amount="- R$ 88.854,11"
+        ></bb-statement-item>
 
-        <article class="statement-item ui-card" data-type="out" data-month="4">
-            <div class="statement-icon out">-</div>
-            <div class="statement-meta">
-                <p class="statement-name">Fatura Cartao de Credito</p>
-                <p class="statement-date">05/04/2026 · 10:00</p>
-            </div>
-            <p class="statement-amount out">- R$ 450,00</p>
-        </article>
+        <bb-statement-item
+            kind="out"
+            month="4"
+            title="Fatura Cartao de Credito"
+            date="05/04/2026 · 10:00"
+            amount="- R$ 450,00"
+        ></bb-statement-item>
 
-        <article class="statement-item ui-card" data-type="in" data-month="4">
-            <div class="statement-icon in">+</div>
-            <div class="statement-meta">
-                <p class="statement-name">Pix recebido - Amanda Ferreira</p>
-                <p class="statement-date">02/04/2026 · 18:45</p>
-            </div>
-            <p class="statement-amount in">+ R$ 250,00</p>
-        </article>
+        <bb-statement-item
+            kind="in"
+            month="4"
+            title="Pix recebido - Amanda Ferreira"
+            date="02/04/2026 · 18:45"
+            amount="+ R$ 250,00"
+        ></bb-statement-item>
 
-        <article class="statement-item ui-card" data-type="out" data-month="4">
-            <div class="statement-icon out">-</div>
-            <div class="statement-meta">
-                <p class="statement-name">Mercado Extra</p>
-                <p class="statement-date">01/04/2026 · 12:30</p>
-            </div>
-            <p class="statement-amount out">- R$ 312,40</p>
-        </article>
+        <bb-statement-item
+            kind="out"
+            month="4"
+            title="Mercado Extra"
+            date="01/04/2026 · 12:30"
+            amount="- R$ 312,40"
+        ></bb-statement-item>
     </section>
 </section>
 {% endblock %}

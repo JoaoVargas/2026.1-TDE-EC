@@ -1,5 +1,4 @@
 {% extends "dashboard_base.html" %}
-{% from "components/investment_macros.html" import stat_card, asset_card %}
 
 {% block title %}Investimentos | Banco Digital{% endblock %}
 
@@ -20,8 +19,8 @@
             <p class="investment-stat-value"><span class="currency">R$</span><span id="total-val">0,00</span></p>
             <p class="investment-stat-sub" id="total-change">- Sem variacao</p>
         </article>
-        {{ stat_card('Renda fixa', '0,00', '- 0 ativos') }}
-        {{ stat_card('Renda variavel', '0,00', '- 0 ativos') }}
+        <bb-investment-stat label="Renda fixa" value="0,00" subtitle="- 0 ativos"></bb-investment-stat>
+        <bb-investment-stat label="Renda variavel" value="0,00" subtitle="- 0 ativos"></bb-investment-stat>
     </div>
 
     <nav class="investment-tabs">
@@ -35,9 +34,25 @@
             <a href="#">Ver todos</a>
         </header>
         <div class="investment-card-grid">
-            {{ asset_card('Titulo publico', 'Tesouro Prefixado', 'Vencimento 2027', '100% CDI') }}
-            {{ asset_card('Meta pessoal', 'Carro Novo', 'Caixinha de objetivo', '100% CDI') }}
-            {{ asset_card('Novo', 'Nova caixinha disponivel', 'Descubra objetivos automatizados', 'Conhecer', 'accent') }}
+            <bb-asset-card
+                kind="Titulo publico"
+                title="Tesouro Prefixado"
+                subtitle="Vencimento 2027"
+                tag="100% CDI"
+            ></bb-asset-card>
+            <bb-asset-card
+                kind="Meta pessoal"
+                title="Carro Novo"
+                subtitle="Caixinha de objetivo"
+                tag="100% CDI"
+            ></bb-asset-card>
+            <bb-asset-card
+                kind="Novo"
+                title="Nova caixinha disponivel"
+                subtitle="Descubra objetivos automatizados"
+                tag="Conhecer"
+                tone="accent"
+            ></bb-asset-card>
         </div>
     </section>
 
@@ -47,8 +62,18 @@
             <a href="#">Ver todos</a>
         </header>
         <div class="investment-card-grid">
-            {{ asset_card('FII', 'XMLT', 'Fundo imobiliario', '1% proventos') }}
-            {{ asset_card('FII', 'XCORTI', 'Fundo imobiliario', '15% proventos') }}
+            <bb-asset-card
+                kind="FII"
+                title="XMLT"
+                subtitle="Fundo imobiliario"
+                tag="1% proventos"
+            ></bb-asset-card>
+            <bb-asset-card
+                kind="FII"
+                title="XCORTI"
+                subtitle="Fundo imobiliario"
+                tag="15% proventos"
+            ></bb-asset-card>
         </div>
     </section>
 
@@ -58,8 +83,20 @@
             <a href="#">Ver todos</a>
         </header>
         <div class="investment-card-grid">
-            {{ asset_card('Criptoativo', 'Bitcoin', 'BTC · Proof of Work', '+16% crescimento', 'gold') }}
-            {{ asset_card('Criptoativo', 'Memecoin', 'MEME · Token', '+16% crescimento', 'gold') }}
+            <bb-asset-card
+                kind="Criptoativo"
+                title="Bitcoin"
+                subtitle="BTC · Proof of Work"
+                tag="+16% crescimento"
+                tone="gold"
+            ></bb-asset-card>
+            <bb-asset-card
+                kind="Criptoativo"
+                title="Memecoin"
+                subtitle="MEME · Token"
+                tag="+16% crescimento"
+                tone="gold"
+            ></bb-asset-card>
         </div>
     </section>
 </section>
