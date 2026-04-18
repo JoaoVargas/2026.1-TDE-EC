@@ -1,23 +1,7 @@
-:root {
-    --bg: #0b132b;
-    --panel: #1c2541;
-    --text: #f5f7ff;
-    --muted: #c9d0e5;
-    --ok: #4ade80;
-    --error: #f97373;
-    --link: #5bc0be;
-}
-
-* {
-    box-sizing: border-box;
-}
-
 body {
-    margin: 0;
     min-height: 100vh;
-    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-    color: var(--text);
-    background: radial-gradient(circle at top left, #3a506b 0%, var(--bg) 55%);
+    color: var(--color-text);
+    background: radial-gradient(circle at top left, #2e4868 0%, var(--color-bg-900) 58%);
 }
 
 .page {
@@ -30,9 +14,10 @@ body {
 .card {
     width: min(680px, 100%);
     padding: 2rem;
-    border-radius: 14px;
-    background: color-mix(in srgb, var(--panel), black 15%);
+    border-radius: var(--radius-lg);
+    background: color-mix(in srgb, var(--color-surface-700), black 12%);
     box-shadow: 0 18px 40px rgba(0, 0, 0, 0.35);
+    border: 1px solid color-mix(in srgb, var(--color-border), transparent 24%);
 }
 
 h1 {
@@ -40,7 +25,7 @@ h1 {
 }
 
 p {
-    color: var(--muted);
+    color: var(--color-muted);
 }
 
 .links {
@@ -48,15 +33,6 @@ p {
     gap: 1rem;
     margin-top: 1.5rem;
     flex-wrap: wrap;
-}
-
-a {
-    color: var(--link);
-    text-decoration: none;
-}
-
-a:hover {
-    text-decoration: underline;
 }
 
 .status-list {
@@ -82,16 +58,16 @@ a:hover {
 }
 
 .status-ok {
-    color: var(--ok);
+    color: var(--color-success);
 }
 
 .status-error {
-    color: var(--error);
+    color: var(--color-danger);
 }
 
 .error-detail {
     margin-top: 1rem;
-    color: var(--error);
+    color: var(--color-danger);
 }
 
 .wc-demo {
@@ -101,5 +77,5 @@ a:hover {
 .wc-demo h2 {
     margin: 0 0 0.65rem;
     font-size: 1.05rem;
-    color: var(--muted);
+    color: var(--color-muted);
 }

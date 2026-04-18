@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% from "components/dashboard_macros.html" import nav_link, insight_card %}
+
+{% block title %}Home | Banco Digital{% endblock %}
+{% block body_class %}dashboard-layout{% endblock %}
+{% block main_class %}dashboard-main{% endblock %}
+
+{% block styles %}
+<link rel="stylesheet" href="/static/css/home.css" />
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-shell">
+    <aside class="dashboard-sidebar ui-card" id="sidebar">
+        <div class="sidebar-top">
+            <h2 class="sidebar-logo">BetaBank</h2>
+            <button type="button" class="ui-btn ui-btn-secondary sidebar-close" id="btn-close-menu">Fechar</button>
+        </div>
+
+        <nav class="sidebar-nav">
+            {{ nav_link('/home', 'Inicio', True) }}
+            {{ nav_link('/transacao', 'Transferencias', False, 'transacao') }}
+            {{ nav_link('/investimentos', 'Investimentos', False, 'investimento') }}
+        </nav>
+
+        <div class="sidebar-profile">
+            <div class="avatar" id="user-avatar">U</div>
+            <div>
+                <strong id="profile-name">Usuario</strong>
+                <p id="profile-email">conta@betabank.local</p>
+            </div>
+        </div>
+
+        <button id="btn-logout" type="button" class="ui-btn ui-btn-secondary logout-btn">Sair</button>
+    </aside>
+
+    <section class="dashboard-content">
+        <div class="dashboard-topbar">
+            <button type="button" id="btn-menu" class="ui-btn ui-btn-secondary menu-toggle">Menu</button>
+            <div class="topbar-pill">Painel financeiro</div>
+        </div>
+
+        <header class="greeting-block">
+            <h1 id="welcome-title">Ola, Usuario</h1>
+            <p>Resumo rapido da sua conta e atalhos do BetaBank.</p>
+        </header>
+
+        <section class="balance-card ui-card">
+            <div>
+                <p class="balance-label">Saldo total</p>
+                <p class="balance-value" id="saldo-valor">R$ 1.250,00</p>
+            </div>
+            <a href="#" class="balance-arrow" aria-label="Abrir extrato">></a>
+        </section>
+
+        <section class="cards-grid">
+            {{ insight_card('Seguros BetaBank', 'Protecao inteligente para voce e sua familia.', 'Conhecer', 'ui-btn-accent') }}
+            {{ insight_card('Cartao de credito', 'Fatura atual: R$ 0,00') }}
+            {{ insight_card('Termos de uso', 'Leia os principais pontos e regras da conta.', 'Ver termos', 'ui-btn-secondary') }}
+        </section>
+    </section>
+</div>
+
+<div id="overlay" class="dashboard-overlay"></div>
+{% endblock %}
+
+{% block scripts %}
+<script type="module" src="/static/js/pages/home.js"></script>
+{% endblock %}

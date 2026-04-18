@@ -1,12 +1,12 @@
 {% macro input_field(id, label, type='text', autocomplete='off', extra_class='') -%}
 <div class="form-group">
-    <label for="{{ id }}">{{ label }}</label>
+    <label class="ui-label" for="{{ id }}">{{ label }}</label>
     <input
         type="{{ type }}"
         id="{{ id }}"
         name="{{ id }}"
         autocomplete="{{ autocomplete }}"
-        class="{{ extra_class }}"
+        class="ui-input {{ extra_class }}"
     />
 </div>
 {%- endmacro %}

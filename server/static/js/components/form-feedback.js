@@ -25,7 +25,8 @@ export function showFieldError(input, message) {
 
 export function showGlobalMessage(target, text, type) {
     target.textContent = text;
-    target.className = `mensagem ${type}`;
+    const variantClass = type === "sucesso" ? "feedback-success" : "feedback-error";
+    target.className = `feedback-message mensagem ${type} ${variantClass}`;
     target.style.display = "block";
     window.setTimeout(() => {
         target.style.display = "none";

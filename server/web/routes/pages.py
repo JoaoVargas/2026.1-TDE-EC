@@ -25,7 +25,11 @@ def home_page(request: Request):
 
 @router.get("/home")
 def home_alias_page(request: Request):
-    return home_page(request)
+    return templates.TemplateResponse(
+        request=request,
+        name="home.html",
+        context={"request": request},
+    )
 
 
 @router.get("/login")
