@@ -59,6 +59,15 @@ def investimentos_distribuicao_page(request: Request):
     )
 
 
+@router.get("/extrato")
+def extrato_page(request: Request):
+    return templates.TemplateResponse(
+        request=request,
+        name="extrato.html",
+        context={"request": request, "active_page": "home", "dashboard_label": "Extrato"},
+    )
+
+
 @router.get("/login")
 def login_page(request: Request):
     return templates.TemplateResponse(

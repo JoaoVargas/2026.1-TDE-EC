@@ -1,0 +1,94 @@
+{% extends "dashboard_base.html" %}
+
+{% block title %}Extrato | Banco Digital{% endblock %}
+
+{% block dashboard_styles %}
+<link rel="stylesheet" href="/static/css/extrato.css" />
+{% endblock %}
+
+{% block dashboard_content %}
+<section class="statement-page">
+    <section class="statement-balance ui-card">
+        <div>
+            <p class="statement-label">Saldo atual</p>
+            <p class="statement-value">R$ 1.250,00</p>
+        </div>
+        <div class="statement-badges">
+            <span class="statement-badge badge-in">+ R$ 3.200,00</span>
+            <span class="statement-badge badge-out">- R$ 1.950,00</span>
+        </div>
+    </section>
+
+    <nav class="statement-filters" id="statement-filters">
+        <button type="button" class="statement-filter is-active" data-filter="all">Tudo</button>
+        <button type="button" class="statement-filter" data-filter="in">Entradas</button>
+        <button type="button" class="statement-filter" data-filter="out">Saidas</button>
+        <button type="button" class="statement-filter" data-filter="month">Este mes</button>
+    </nav>
+
+    <section class="statement-chart ui-card">
+        <p class="chart-title">Gastos por periodo</p>
+        <div class="chart-columns">
+            <div class="chart-col"><span class="col-bar" style="height:60%"></span><span>Jan</span></div>
+            <div class="chart-col"><span class="col-bar" style="height:80%"></span><span>Fev</span></div>
+            <div class="chart-col"><span class="col-bar" style="height:45%"></span><span>Mar</span></div>
+            <div class="chart-col"><span class="col-bar emphasis" style="height:70%"></span><span>Abr</span></div>
+            <div class="chart-col"><span class="col-bar" style="height:55%"></span><span>Mai</span></div>
+            <div class="chart-col"><span class="col-bar" style="height:90%"></span><span>Jun</span></div>
+        </div>
+    </section>
+
+    <p class="statement-list-title">Transacoes recentes</p>
+
+    <section class="statement-list" id="statement-list">
+        <article class="statement-item ui-card" data-type="in" data-month="4">
+            <div class="statement-icon in">+</div>
+            <div class="statement-meta">
+                <p class="statement-name">Salario</p>
+                <p class="statement-date">11/04/2026 · 09:00</p>
+            </div>
+            <p class="statement-amount in">+ R$ 3.200,00</p>
+        </article>
+
+        <article class="statement-item ui-card" data-type="out" data-month="4">
+            <div class="statement-icon out">-</div>
+            <div class="statement-meta">
+                <p class="statement-name">Transferencia - Gersio Caminhoes</p>
+                <p class="statement-date">11/04/2026 · 14:27</p>
+            </div>
+            <p class="statement-amount out">- R$ 88.854,11</p>
+        </article>
+
+        <article class="statement-item ui-card" data-type="out" data-month="4">
+            <div class="statement-icon out">-</div>
+            <div class="statement-meta">
+                <p class="statement-name">Fatura Cartao de Credito</p>
+                <p class="statement-date">05/04/2026 · 10:00</p>
+            </div>
+            <p class="statement-amount out">- R$ 450,00</p>
+        </article>
+
+        <article class="statement-item ui-card" data-type="in" data-month="4">
+            <div class="statement-icon in">+</div>
+            <div class="statement-meta">
+                <p class="statement-name">Pix recebido - Amanda Ferreira</p>
+                <p class="statement-date">02/04/2026 · 18:45</p>
+            </div>
+            <p class="statement-amount in">+ R$ 250,00</p>
+        </article>
+
+        <article class="statement-item ui-card" data-type="out" data-month="4">
+            <div class="statement-icon out">-</div>
+            <div class="statement-meta">
+                <p class="statement-name">Mercado Extra</p>
+                <p class="statement-date">01/04/2026 · 12:30</p>
+            </div>
+            <p class="statement-amount out">- R$ 312,40</p>
+        </article>
+    </section>
+</section>
+{% endblock %}
+
+{% block dashboard_scripts %}
+<script type="module" src="/static/js/pages/extrato.js"></script>
+{% endblock %}
