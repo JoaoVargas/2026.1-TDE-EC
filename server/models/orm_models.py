@@ -1,10 +1,16 @@
 from datetime import date, datetime
 from decimal import Decimal
+from enum import Enum
 
-from sqlalchemy import Date, DateTime, ForeignKey, Numeric, String, func
+from sqlalchemy import Date, DateTime, Enum as SqlEnum, ForeignKey, Numeric, String, func
 from sqlalchemy.orm import Mapped, mapped_column
 
 from server.db.base import Base
+
+
+class TipoUsuario(str, Enum):
+    CLIENT = "client"
+    MANAGER = "manager"
 
 
 class Usuario(Base):
@@ -22,8 +28,26 @@ class Usuario(Base):
     bairro: Mapped[str | None] = mapped_column(String(100))
     cidade: Mapped[str | None] = mapped_column(String(100))
     estado: Mapped[str | None] = mapped_column(String(2))
+    tipo_usuario: Mapped[TipoUsuario] = mapped_column(
+        SqlEnum(
+            TipoUsuario,
+            name="tipo_usuario_enum",
+            native_enum=False,
+            validate_strings=True,
+        ),
+        nullable=False,
+        default=TipoUsuario.CLIENT,
+        server_default=TipoUsuario.CLIENT.value,
+    )
     created_at: Mapped[datetime] = mapped_column(
         DateTime, server_default=func.now(), nullable=False
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime,
+        server_default=func.now(),
+        server_onupdate=func.now(),
+        onupdate=func.now(),
+        nullable=False,
     )
 
 
@@ -40,6 +64,16 @@ class Conta(Base):
     tipo_conta: Mapped[str] = mapped_column(
         String(30), nullable=False, default="CORRENTE"
     )
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime, server_default=func.now(), nullable=False
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime,
+        server_default=func.now(),
+        server_onupdate=func.now(),
+        onupdate=func.now(),
+        nullable=False,
+    )
 
 
 class Transacao(Base):
@@ -53,18 +87,15 @@ class Transacao(Base):
     data_transacao: Mapped[datetime] = mapped_column(
         DateTime, server_default=func.now(), nullable=False
     )
-
-
-class Gasto(Base):
-    __tablename__ = "gastos"
-
-    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-    usuario_id: Mapped[int] = mapped_column(ForeignKey("usuarios.id"), nullable=False)
-    categoria: Mapped[str] = mapped_column(String(50), nullable=False)
-    descricao: Mapped[str | None] = mapped_column(String(255))
-    valor: Mapped[Decimal] = mapped_column(Numeric(15, 2), nullable=False)
-    data_gasto: Mapped[datetime] = mapped_column(
+    created_at: Mapped[datetime] = mapped_column(
         DateTime, server_default=func.now(), nullable=False
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime,
+        server_default=func.now(),
+        server_onupdate=func.now(),
+        onupdate=func.now(),
+        nullable=False,
     )
 
 
@@ -79,4 +110,14 @@ class Investimento(Base):
     rentabilidade: Mapped[Decimal | None] = mapped_column(Numeric(8, 4))
     data_aplicacao: Mapped[datetime] = mapped_column(
         DateTime, server_default=func.now(), nullable=False
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime, server_default=func.now(), nullable=False
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime,
+        server_default=func.now(),
+        server_onupdate=func.now(),
+        onupdate=func.now(),
+        nullable=False,
     )

@@ -1,3 +1,3 @@
-from server.models.orm_models import Conta, Gasto, Investimento, Transacao, Usuario
+from server.models.orm_models import Conta, Investimento, TipoUsuario, Transacao, Usuario
 
-__all__ = ["Usuario", "Conta", "Transacao", "Gasto", "Investimento"]
+__all__ = ["Usuario", "Conta", "Transacao", "Investimento", "TipoUsuario"]

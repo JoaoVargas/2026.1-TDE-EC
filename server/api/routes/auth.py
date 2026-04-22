@@ -1,18 +1,18 @@
 from datetime import date, datetime, timedelta, timezone
 import re
 
-import bcrypt
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from jose import JWTError, jwt
 from pydantic import BaseModel, Field
-from sqlalchemy import or_, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
+from server.core.security import hash_password, verify_password
 from server.core.settings import get_settings
 from server.db.session import get_db
 from server.models.orm_models import Usuario
+from server.repositories.usuario_repository import UsuarioRepository
 
 router = APIRouter(tags=["auth"])
 security = HTTPBearer(auto_error=False)
@@ -55,12 +55,9 @@ def _normalize_cep(value: str) -> str:
     return "".join(char for char in value if char.isdigit())
 
 
-def _hash_password(password: str) -> str:
-    return bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
-
-
-def _verify_password(password: str, password_hash: str) -> bool:
-    return bcrypt.checkpw(password.encode("utf-8"), password_hash.encode("utf-8"))
+def _tipo_usuario_value(user: Usuario) -> str:
+    tipo = user.tipo_usuario
+    return tipo.value if hasattr(tipo, "value") else str(tipo)
 
 
 def _create_access_token(subject: str) -> str:
@@ -93,7 +90,7 @@ def get_current_user(
     except (JWTError, ValueError):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token invalido.")
 
-    user = db.get(Usuario, user_id)
+    user = UsuarioRepository.get_by_id(db, user_id)
     if not user:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Usuario nao encontrado.")
 
@@ -112,14 +109,7 @@ def verificar_disponibilidade(
             detail="Informe cpf ou email para verificacao.",
         )
 
-    filtros = []
-    if cpf:
-        filtros.append(Usuario.cpf == _normalize_cpf(cpf))
-    if email:
-        filtros.append(Usuario.email == _normalize_email(email))
-
-    query = select(Usuario.id).where(or_(*filtros))
-    existe = db.execute(query).first() is not None
+    existe = UsuarioRepository.exists_by_cpf_or_email(db, cpf=cpf, email=email)
     return {"disponivel": not existe}
 
 
@@ -152,16 +142,14 @@ def cadastrar_usuario(payload: CadastroPayload, db: Session = Depends(get_db)) -
     if len(estado) != 2 or not estado.isalpha():
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Estado invalido.")
 
-    duplicate = db.execute(
-        select(Usuario.id).where(or_(Usuario.cpf == cpf, Usuario.email == email))
-    ).first()
-    if duplicate:
+    if UsuarioRepository.exists_by_cpf_or_email(db, cpf=cpf, email=email):
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="CPF ou e-mail ja cadastrado.")
 
-    novo_usuario = Usuario(
+    UsuarioRepository.create(
+        db,
         nome=nome,
         email=email,
-        senha=_hash_password(payload.senha),
+        senha_hash=hash_password(payload.senha),
         data_nascimento=payload.nascimento,
         cpf=cpf,
         cep=cep,
@@ -173,7 +161,6 @@ def cadastrar_usuario(payload: CadastroPayload, db: Session = Depends(get_db)) -
     )
 
     try:
-        db.add(novo_usuario)
         db.commit()
     except IntegrityError:
         db.rollback()
@@ -194,21 +181,15 @@ def login(payload: LoginPayload, db: Session = Depends(get_db)) -> dict[str, obj
             detail="CPF/e-mail e obrigatorio.",
         )
 
-    if "@" in login_value:
-        normalized_login = _normalize_email(login_value)
-        lookup = Usuario.email == normalized_login
-    else:
-        normalized_login = _normalize_cpf(login_value)
-        if len(normalized_login) != 11:
-            raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                detail="CPF invalido.",
-            )
-        lookup = Usuario.cpf == normalized_login
+    if "@" not in login_value and len(_normalize_cpf(login_value)) != 11:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="CPF invalido.",
+        )
 
-    user = db.execute(select(Usuario).where(lookup)).scalar_one_or_none()
+    user = UsuarioRepository.get_by_login(db, login_value)
 
-    if not user or not _verify_password(payload.senha, user.senha):
+    if not user or not verify_password(payload.senha, user.senha):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="CPF/e-mail ou senha incorretos.",
@@ -222,6 +203,7 @@ def login(payload: LoginPayload, db: Session = Depends(get_db)) -> dict[str, obj
             "nome": user.nome,
             "email": user.email,
             "cpf": user.cpf,
+            "tipo_usuario": _tipo_usuario_value(user),
         },
     }
 
@@ -233,4 +215,5 @@ def me(current_user: Usuario = Depends(get_current_user)) -> dict[str, object]:
         "nome": current_user.nome,
         "email": current_user.email,
         "cpf": current_user.cpf,
+        "tipo_usuario": _tipo_usuario_value(current_user),
     }
