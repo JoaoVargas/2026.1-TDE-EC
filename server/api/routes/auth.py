@@ -11,7 +11,7 @@ from sqlalchemy.orm import Session
 from server.core.security import hash_password, verify_password
 from server.core.settings import get_settings
 from server.db.session import get_db
-from server.models.orm_models import Usuario
+from server.models.orm_models import TipoUsuario, Usuario
 from server.repositories.usuario_repository import UsuarioRepository
 
 router = APIRouter(tags=["auth"])
@@ -60,6 +60,10 @@ def _tipo_usuario_value(user: Usuario) -> str:
     return tipo.value if hasattr(tipo, "value") else str(tipo)
 
 
+def _is_manager(user: Usuario) -> bool:
+    return _tipo_usuario_value(user) == TipoUsuario.MANAGER.value
+
+
 def _create_access_token(subject: str) -> str:
     settings = get_settings()
     expires_at = datetime.now(timezone.utc) + timedelta(minutes=settings.jwt_exp_minutes)
@@ -95,6 +99,15 @@ def get_current_user(
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Usuario nao encontrado.")
 
     return user
+
+
+def get_current_manager_user(current_user: Usuario = Depends(get_current_user)) -> Usuario:
+    if not _is_manager(current_user):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Acesso permitido apenas para gerentes.",
+        )
+    return current_user
 
 
 @router.get("/verificar")

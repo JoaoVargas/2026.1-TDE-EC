@@ -8,6 +8,10 @@ from sqlalchemy.orm import Mapped, mapped_column
 from server.db.base import Base
 
 
+def enum_value_list(enum_cls) -> list[str]:
+    return [member.value for member in enum_cls]
+
+
 class TipoUsuario(str, Enum):
     CLIENT = "client"
     MANAGER = "manager"
@@ -39,6 +43,7 @@ class Usuario(Base):
             name="tipo_usuario_enum",
             native_enum=False,
             validate_strings=True,
+            values_callable=enum_value_list,
         ),
         nullable=False,
         default=TipoUsuario.CLIENT,
@@ -74,6 +79,7 @@ class Conta(Base):
             name="tipo_conta_enum",
             native_enum=False,
             validate_strings=True,
+            values_callable=enum_value_list,
         ),
         nullable=False,
         default=TipoConta.CHECKING,

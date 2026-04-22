@@ -1,0 +1,71 @@
+{% extends "dashboard_base.html" %}
+
+{% block title %}Gestao de Contas | Banco Digital{% endblock %}
+
+{% block dashboard_styles %}
+<link rel="stylesheet" href="/static/css/manager.css" />
+{% endblock %}
+
+{% block dashboard_topbar_actions %}
+<a class="ui-btn ui-btn-secondary" href="/manager">Voltar para a central</a>
+{% endblock %}
+
+{% block dashboard_content %}
+<section class="page-panel ui-card manager-management-panel">
+    <header class="panel-header">
+        <h1>Usuarios e contas</h1>
+        <p>Consulta completa de usuarios cadastrados e suas contas associadas.</p>
+    </header>
+
+    <p class="manager-feedback" id="manager-feedback" role="status" aria-live="polite"></p>
+
+    <section class="management-loader ui-card" id="management-loader" aria-live="polite" hidden>
+        <div class="management-spinner" aria-hidden="true"></div>
+        <p>Carregando usuarios e contas...</p>
+    </section>
+
+    <article class="management-empty-card ui-card" id="management-empty" hidden>
+        <h2>Nenhum usuario encontrado</h2>
+        <p>Ainda nao existem usuarios cadastrados para exibir nesta area.</p>
+    </article>
+
+    <section class="management-users-grid" id="management-users-grid"></section>
+
+    <div class="management-modal-backdrop" id="rename-modal-backdrop" hidden>
+        <div
+            class="management-modal ui-card"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="rename-modal-title"
+        >
+            <header class="management-modal-header">
+                <h2 id="rename-modal-title">Alterar nome do usuario</h2>
+                <button type="button" class="ui-btn ui-btn-secondary management-modal-close" id="rename-modal-close">
+                    Fechar
+                </button>
+            </header>
+
+            <label class="ui-label" for="rename-modal-input">Novo nome</label>
+            <input
+                class="ui-input"
+                id="rename-modal-input"
+                type="text"
+                maxlength="100"
+                autocomplete="off"
+                placeholder="Digite o novo nome"
+            />
+
+            <p class="management-modal-feedback" id="rename-modal-feedback" role="status" aria-live="polite"></p>
+
+            <div class="management-modal-actions">
+                <button type="button" class="ui-btn ui-btn-secondary" id="rename-modal-cancel">Cancelar</button>
+                <button type="button" class="ui-btn ui-btn-primary" id="rename-modal-save">Salvar</button>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block dashboard_scripts %}
+<script type="module" src="/static/js/pages/manager_accounts.js"></script>
+{% endblock %}

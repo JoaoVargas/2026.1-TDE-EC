@@ -52,3 +52,32 @@ class ContaRepository:
             return None
         normalized = normalized.zfill(10)
         return db.execute(select(Conta).where(Conta.numero_conta == normalized)).scalar_one_or_none()
+
+    @classmethod
+    def count_all(cls, db: Session) -> int:
+        return db.execute(select(func.count()).select_from(Conta)).scalar_one()
+
+    @classmethod
+    def get_grouped_by_usuario_ids(
+        cls,
+        db: Session,
+        usuario_ids: list[int],
+    ) -> dict[int, list[Conta]]:
+        if not usuario_ids:
+            return {}
+
+        contas = list(
+            db.execute(
+                select(Conta)
+                .where(Conta.usuario_id.in_(usuario_ids))
+                .order_by(Conta.usuario_id.asc(), Conta.id.asc())
+            )
+            .scalars()
+            .all()
+        )
+
+        grouped: dict[int, list[Conta]] = {usuario_id: [] for usuario_id in usuario_ids}
+        for conta in contas:
+            grouped.setdefault(conta.usuario_id, []).append(conta)
+
+        return grouped

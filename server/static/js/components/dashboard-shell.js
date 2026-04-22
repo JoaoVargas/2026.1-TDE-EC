@@ -1,5 +1,9 @@
 import { requireAuthenticatedUser, logout } from "/static/js/components/auth-token-guard.js";
 
+function isManagerUser(user) {
+    return user?.tipo_usuario === "manager";
+}
+
 function getCachedUser() {
     const raw = localStorage.getItem("usuario");
     if (!raw) {
@@ -77,6 +81,20 @@ function hydrateUser(user) {
     }
 }
 
+function applyRoleAwareNavigation(user) {
+    const managerLink = document.getElementById("manager-nav-link");
+    if (!managerLink) {
+        return;
+    }
+
+    if (isManagerUser(user)) {
+        managerLink.classList.add("is-visible");
+        return;
+    }
+
+    managerLink.classList.remove("is-visible");
+}
+
 document.addEventListener("DOMContentLoaded", async () => {
     setupMobileSidebar();
 
@@ -86,6 +104,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const cachedUser = getCachedUser();
     if (cachedUser) {
         hydrateUser(cachedUser);
+        applyRoleAwareNavigation(cachedUser);
     }
 
     const user = await requireAuthenticatedUser();
@@ -94,4 +113,5 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     hydrateUser(user);
+    applyRoleAwareNavigation(user);
 });

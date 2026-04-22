@@ -27,6 +27,32 @@ def _ensure_usuario_tipo_column() -> None:
         )
 
 
+def _normalize_usuario_tipo_values() -> None:
+    inspector = inspect(engine)
+    if "usuarios" not in inspector.get_table_names():
+        return
+
+    with engine.begin() as connection:
+        connection.execute(
+            text(
+                "UPDATE usuarios SET tipo_usuario = 'manager' "
+                "WHERE UPPER(tipo_usuario) = 'MANAGER'"
+            )
+        )
+        connection.execute(
+            text(
+                "UPDATE usuarios SET tipo_usuario = 'client' "
+                "WHERE tipo_usuario IS NULL OR UPPER(tipo_usuario) = 'CLIENT'"
+            )
+        )
+        connection.execute(
+            text(
+                "UPDATE usuarios SET tipo_usuario = 'client' "
+                "WHERE LOWER(tipo_usuario) NOT IN ('client', 'manager')"
+            )
+        )
+
+
 def _seed_default_users_if_empty() -> None:
     with SessionLocal() as db:
         if not UsuarioRepository.is_empty(db):
@@ -165,6 +191,7 @@ def init_orm() -> None:
 
     Base.metadata.create_all(bind=engine)
     _ensure_usuario_tipo_column()
+    _normalize_usuario_tipo_values()
     _ensure_audit_columns()
     _ensure_conta_schema_and_data()
     _drop_gastos_table_if_exists()

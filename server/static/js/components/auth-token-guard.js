@@ -2,6 +2,15 @@ const TOKEN_STORAGE_KEY = "token";
 const USER_STORAGE_KEY = "usuario";
 const AUTH_ME_ENDPOINT = "/api/me";
 
+function isManagerUser(user) {
+    const role = String(user?.tipo_usuario || "").trim().toLowerCase();
+    return role === "manager" || role === "tipousuario.manager";
+}
+
+function getPostLoginRoute(user) {
+    return isManagerUser(user) ? "/manager" : "/home";
+}
+
 function clearAuthStorage() {
     localStorage.removeItem(TOKEN_STORAGE_KEY);
     localStorage.removeItem(USER_STORAGE_KEY);
@@ -63,7 +72,7 @@ export async function redirectIfAuthenticated() {
     const result = await requestCurrentUser(token);
 
     if (result.status === "ok") {
-        window.location.href = "/home";
+        window.location.href = getPostLoginRoute(result.user);
         return;
     }
 
@@ -93,6 +102,24 @@ export async function requireAuthenticatedUser() {
     }
 
     return cachedUser;
+}
+
+export async function requireManagerUser() {
+    const user = await requireAuthenticatedUser();
+    if (!user) {
+        return null;
+    }
+
+    if (!isManagerUser(user)) {
+        window.location.href = "/home";
+        return null;
+    }
+
+    return user;
+}
+
+export function getDefaultRouteForUser(user) {
+    return getPostLoginRoute(user);
 }
 
 export function logout() {

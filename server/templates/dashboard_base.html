@@ -1,5 +1,4 @@
 {% extends "base.html" %}
-{% from "components/dashboard_macros.html" import nav_link %}
 
 {% block body_class %}dashboard-layout{% endblock %}
 {% block main_class %}dashboard-main{% endblock %}
@@ -10,33 +9,16 @@
 {% endblock %}
 
 {% block content %}
-<div class="dashboard-shell">
-    <aside class="dashboard-sidebar ui-card" id="sidebar">
-        <div class="sidebar-top">
-            <h2 class="sidebar-logo">BetaBank</h2>
-            <button type="button" class="ui-btn ui-btn-secondary sidebar-close" id="btn-close-menu">Fechar</button>
-        </div>
-
-        <nav class="sidebar-nav">
-            {{ nav_link('/home', 'Inicio', active_page == 'home') }}
-            {{ nav_link('/transacao', 'Transferencias', active_page == 'transacao', 'transacao') }}
-            {{ nav_link('/investimentos', 'Investimentos', active_page == 'investimentos', 'investimento') }}
-        </nav>
-
-        <div class="sidebar-profile">
-            <div class="avatar" id="user-avatar">U</div>
-            <div>
-                <strong id="profile-name">Usuario</strong>
-                <p id="profile-email">conta@betabank.local</p>
-            </div>
-        </div>
-
-        <button id="btn-logout" type="button" class="ui-btn ui-btn-secondary logout-btn">Sair</button>
-    </aside>
+<div class="dashboard-shell{% if not show_sidebar | default(true) %} dashboard-shell-no-sidebar{% endif %}">
+    {% if show_sidebar | default(true) %}
+    {% include "components/dashboard_sidebar.html" %}
+    {% endif %}
 
     <section class="dashboard-content">
         <div class="dashboard-topbar">
+            {% if show_sidebar | default(true) %}
             <button type="button" id="btn-menu" class="ui-btn ui-btn-secondary menu-toggle">Menu</button>
+            {% endif %}
             <div class="dashboard-topbar-right">
                 <div class="topbar-pill">{{ dashboard_label | default('Painel financeiro') }}</div>
                 {% block dashboard_topbar_actions %}{% endblock %}
@@ -47,7 +29,9 @@
     </section>
 </div>
 
+{% if show_sidebar | default(true) %}
 <div id="overlay" class="dashboard-overlay"></div>
+{% endif %}
 {% endblock %}
 
 {% block scripts %}

@@ -59,6 +59,32 @@ class UsuarioRepository:
         return count == 0
 
     @classmethod
+    def count_all(cls, db: Session) -> int:
+        return db.execute(select(func.count()).select_from(Usuario)).scalar_one()
+
+    @classmethod
+    def count_by_tipo(cls, db: Session, tipo_usuario: TipoUsuario) -> int:
+        return db.execute(
+            select(func.count()).select_from(Usuario).where(Usuario.tipo_usuario == tipo_usuario)
+        ).scalar_one()
+
+    @classmethod
+    def list_all(cls, db: Session) -> list[Usuario]:
+        return list(
+            db.execute(select(Usuario).order_by(Usuario.nome.asc(), Usuario.id.asc())).scalars().all()
+        )
+
+    @classmethod
+    def update_nome(cls, db: Session, *, usuario_id: int, nome: str) -> Usuario | None:
+        usuario = cls.get_by_id(db, usuario_id)
+        if not usuario:
+            return None
+
+        usuario.nome = nome.strip()
+        db.flush()
+        return usuario
+
+    @classmethod
     def create(
         cls,
         db: Session,

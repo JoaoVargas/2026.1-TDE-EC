@@ -1,4 +1,7 @@
-import { redirectIfAuthenticated } from "/static/js/components/auth-token-guard.js";
+import {
+    getDefaultRouteForUser,
+    redirectIfAuthenticated,
+} from "/static/js/components/auth-token-guard.js";
 import { showFieldError, showGlobalMessage } from "/static/js/components/form-feedback.js";
 import { formatCpf, onlyDigits } from "/static/js/components/formatters.js";
 
@@ -90,7 +93,7 @@ async function submitLogin() {
         localStorage.setItem("token", result.token);
         localStorage.setItem("usuario", JSON.stringify(result.usuario));
         showGlobalMessage(messageEl, "Login realizado com sucesso!", "sucesso");
-        window.location.href = "/home";
+        window.location.href = getDefaultRouteForUser(result.usuario);
     } catch {
         showGlobalMessage(messageEl, "Nao foi possivel conectar ao servidor.", "erro");
     } finally {

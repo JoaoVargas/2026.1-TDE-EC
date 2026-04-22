@@ -1,0 +1,25 @@
+{% from "components/dashboard_macros.html" import nav_link %}
+
+<aside class="dashboard-sidebar ui-card" id="sidebar">
+    <div class="sidebar-top">
+        <h2 class="sidebar-logo">BetaBank</h2>
+        <button type="button" class="ui-btn ui-btn-secondary sidebar-close" id="btn-close-menu">Fechar</button>
+    </div>
+
+    <nav class="sidebar-nav">
+        {{ nav_link('/home', 'Inicio', active_page == 'home') }}
+        {{ nav_link('/transacao', 'Transferencias', active_page == 'transacao', 'transacao') }}
+        {{ nav_link('/investimentos', 'Investimentos', active_page == 'investimentos', 'investimento') }}
+        {{ nav_link('/manager', 'Gerencia', active_page == 'manager', 'manager-nav-link') }}
+    </nav>
+
+    <div class="sidebar-profile">
+        <div class="avatar" id="user-avatar">U</div>
+        <div>
+            <strong id="profile-name">Usuario</strong>
+            <p id="profile-email">conta@betabank.local</p>
+        </div>
+    </div>
+
+    <button id="btn-logout" type="button" class="ui-btn ui-btn-secondary logout-btn">Sair</button>
+</aside>

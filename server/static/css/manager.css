@@ -1,0 +1,328 @@
+.manager-hub-panel,
+.manager-management-panel {
+    background: linear-gradient(145deg, #162845 0%, #1c3255 100%);
+    padding: var(--space-5);
+    display: grid;
+    gap: var(--space-4);
+}
+
+.manager-overview-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--space-3);
+}
+
+.manager-kpi {
+    background: linear-gradient(160deg, #172b49 0%, #1c3557 100%);
+    padding: var(--space-3);
+    display: grid;
+    gap: 0.35rem;
+}
+
+.manager-kpi-label {
+    margin: 0;
+    color: var(--color-muted);
+    font-size: 0.8rem;
+}
+
+.manager-kpi-value {
+    font-size: clamp(1.2rem, 2.8vw, 1.9rem);
+}
+
+.manager-choice-card {
+    display: grid;
+    gap: 0.7rem;
+    align-content: start;
+}
+
+.manager-choice-card h2,
+.manager-choice-card p {
+    margin: 0;
+}
+
+.manager-choice-card p {
+    color: var(--color-muted);
+    line-height: 1.45;
+}
+
+.manager-choice-card .ui-btn {
+    justify-self: start;
+}
+
+.manager-feedback {
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--color-muted);
+}
+
+.manager-feedback.is-error {
+    color: #ff918b;
+}
+
+.manager-feedback.is-success {
+    color: #8de8c4;
+}
+
+.management-loader,
+.management-empty-card {
+    padding: var(--space-4);
+    background: linear-gradient(160deg, #172b49 0%, #1b3354 100%);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.management-loader[hidden],
+.management-empty-card[hidden],
+.management-users-grid[hidden],
+.management-modal-backdrop[hidden] {
+    display: none !important;
+}
+
+.management-loader {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+}
+
+.management-loader p,
+.management-empty-card p,
+.management-empty-card h2 {
+    margin: 0;
+}
+
+.management-empty-card {
+    display: grid;
+    gap: 0.5rem;
+}
+
+.management-empty-card p {
+    color: var(--color-muted);
+}
+
+.management-spinner {
+    width: 1.1rem;
+    height: 1.1rem;
+    border-radius: 999px;
+    border: 2px solid rgba(255, 255, 255, 0.18);
+    border-top-color: #8cf6ec;
+    animation: manager-spin 0.8s linear infinite;
+}
+
+@keyframes manager-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.management-users-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-3);
+}
+
+.management-user-card {
+    background: linear-gradient(160deg, #172b49 0%, #1b3354 100%);
+    padding: var(--space-4);
+    display: grid;
+    gap: var(--space-3);
+}
+
+.management-user-header {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--space-2);
+    align-items: flex-start;
+}
+
+.management-user-header h2,
+.management-user-header p {
+    margin: 0;
+}
+
+.management-user-header p {
+    color: var(--color-muted);
+    font-size: 0.85rem;
+}
+
+.management-user-identity {
+    display: grid;
+    gap: 0.35rem;
+}
+
+.management-user-name-row {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.management-name-edit-trigger {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: var(--radius-sm);
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--color-text);
+    padding: 0.35rem 0.5rem;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.76rem;
+}
+
+.management-name-edit-trigger:hover {
+    background: rgba(115, 219, 211, 0.12);
+}
+
+.management-name-edit-trigger svg {
+    width: 0.85rem;
+    height: 0.85rem;
+    fill: currentColor;
+}
+
+.management-name-edit-trigger span {
+    line-height: 1;
+}
+
+.management-user-inline-feedback {
+    margin: 0;
+    font-size: 0.78rem;
+    color: var(--color-muted);
+}
+
+.management-user-inline-feedback.is-error {
+    color: #ff918b;
+}
+
+.management-user-inline-feedback.is-success {
+    color: #8de8c4;
+}
+
+.management-badge {
+    padding: 0.35rem 0.55rem;
+    border-radius: 999px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    background: rgba(115, 219, 211, 0.18);
+    border: 1px solid rgba(115, 219, 211, 0.3);
+    color: #89f6ec;
+}
+
+.management-user-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.55rem 1rem;
+    font-size: 0.84rem;
+    color: var(--color-muted);
+}
+
+.management-account-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 0.55rem;
+}
+
+.management-account-item {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--space-2);
+    align-items: center;
+    padding: 0.65rem 0.72rem;
+    border-radius: var(--radius-sm);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(9, 16, 29, 0.32);
+}
+
+.management-account-item p {
+    margin: 0.2rem 0 0;
+    font-size: 0.8rem;
+    color: var(--color-muted);
+}
+
+.management-account-item span {
+    font-weight: 700;
+}
+
+.management-account-empty {
+    padding: 0.65rem 0.72rem;
+    border-radius: var(--radius-sm);
+    border: 1px dashed rgba(255, 255, 255, 0.2);
+    color: var(--color-muted);
+    font-size: 0.85rem;
+}
+
+.management-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(6, 10, 18, 0.68);
+    z-index: 40;
+    display: grid;
+    place-items: center;
+    padding: var(--space-4);
+}
+
+.management-modal {
+    width: min(100%, 460px);
+    background: linear-gradient(165deg, #172b49 0%, #1b3354 100%);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    padding: var(--space-4);
+    display: grid;
+    gap: var(--space-3);
+}
+
+.management-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+.management-modal-header h2 {
+    margin: 0;
+    font-size: 1rem;
+}
+
+.management-modal-close {
+    padding: 0.45rem 0.65rem;
+    font-size: 0.72rem;
+}
+
+.management-modal-feedback {
+    margin: 0;
+    min-height: 1.1rem;
+    color: var(--color-muted);
+    font-size: 0.84rem;
+}
+
+.management-modal-feedback.is-error {
+    color: #ff918b;
+}
+
+.management-modal-feedback.is-success {
+    color: #8de8c4;
+}
+
+.management-modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.55rem;
+}
+
+@media (max-width: 920px) {
+    .manager-overview-grid,
+    .management-users-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .manager-hub-panel,
+    .manager-management-panel {
+        padding: var(--space-4);
+    }
+
+    .management-name-edit-trigger span {
+        display: none;
+    }
+}
