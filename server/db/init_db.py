@@ -97,11 +97,75 @@ def _drop_gastos_table_if_exists() -> None:
         connection.execute(text("DROP TABLE IF EXISTS gastos"))
 
 
+def _ensure_conta_schema_and_data() -> None:
+    inspector = inspect(engine)
+    if "contas" not in inspector.get_table_names():
+        return
+
+    with engine.begin() as connection:
+        connection.execute(
+            text(
+                "UPDATE contas SET tipo_conta = 'checking' "
+                "WHERE tipo_conta IS NULL OR LOWER(tipo_conta) IN ('corrente', 'checkings')"
+            )
+        )
+        connection.execute(
+            text(
+                "UPDATE contas SET tipo_conta = 'savings' "
+                "WHERE LOWER(tipo_conta) IN ('poupanca')"
+            )
+        )
+        connection.execute(
+            text(
+                "UPDATE contas SET tipo_conta = 'checking' "
+                "WHERE LOWER(tipo_conta) NOT IN ('checking', 'savings')"
+            )
+        )
+
+        connection.execute(
+            text(
+                "UPDATE contas SET numero_conta = LPAD(CAST(id AS CHAR), 10, '0') "
+                "WHERE numero_conta IS NULL OR numero_conta = '' OR numero_conta REGEXP '[^0-9]'"
+            )
+        )
+        connection.execute(
+            text(
+                "UPDATE contas SET numero_conta = LPAD(numero_conta, 10, '0') "
+                "WHERE numero_conta REGEXP '^[0-9]+$' AND CHAR_LENGTH(numero_conta) < 10"
+            )
+        )
+        connection.execute(
+            text(
+                "UPDATE contas SET agencia = '0001' "
+                "WHERE agencia IS NULL OR agencia = '' OR agencia REGEXP '[^0-9]' "
+                "OR CHAR_LENGTH(agencia) <> 4"
+            )
+        )
+
+        connection.execute(
+            text(
+                "ALTER TABLE contas MODIFY COLUMN numero_conta VARCHAR(10) NOT NULL"
+            )
+        )
+        connection.execute(
+            text(
+                "ALTER TABLE contas MODIFY COLUMN agencia VARCHAR(4) NOT NULL DEFAULT '0001'"
+            )
+        )
+        connection.execute(
+            text(
+                "ALTER TABLE contas MODIFY COLUMN tipo_conta "
+                "ENUM('checking', 'savings') NOT NULL DEFAULT 'checking'"
+            )
+        )
+
+
 def init_orm() -> None:
     from server.models import orm_models  # noqa: F401
 
     Base.metadata.create_all(bind=engine)
     _ensure_usuario_tipo_column()
     _ensure_audit_columns()
+    _ensure_conta_schema_and_data()
     _drop_gastos_table_if_exists()
     _seed_default_users_if_empty()

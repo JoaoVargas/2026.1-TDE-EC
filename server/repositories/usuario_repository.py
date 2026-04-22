@@ -2,6 +2,7 @@ from sqlalchemy import func, or_, select
 from sqlalchemy.orm import Session
 
 from server.models.orm_models import TipoUsuario, Usuario
+from server.repositories.conta_repository import ContaRepository
 
 
 class UsuarioRepository:
@@ -74,6 +75,7 @@ class UsuarioRepository:
         cidade: str | None,
         estado: str | None,
         tipo_usuario: TipoUsuario = TipoUsuario.CLIENT,
+        criar_conta_padrao: bool = True,
     ) -> Usuario:
         usuario = Usuario(
             nome=nome.strip(),
@@ -91,4 +93,8 @@ class UsuarioRepository:
         )
         db.add(usuario)
         db.flush()
+
+        if criar_conta_padrao:
+            ContaRepository.create(db, usuario_id=usuario.id)
+
         return usuario

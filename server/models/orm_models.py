@@ -13,6 +13,11 @@ class TipoUsuario(str, Enum):
     MANAGER = "manager"
 
 
+class TipoConta(str, Enum):
+    CHECKING = "checking"
+    SAVINGS = "savings"
+
+
 class Usuario(Base):
     __tablename__ = "usuarios"
 
@@ -56,13 +61,23 @@ class Conta(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     usuario_id: Mapped[int] = mapped_column(ForeignKey("usuarios.id"), nullable=False)
-    numero_conta: Mapped[str] = mapped_column(String(20), nullable=False, unique=True)
-    agencia: Mapped[str] = mapped_column(String(10), nullable=False, default="0001")
+    numero_conta: Mapped[str] = mapped_column(String(10), nullable=False, unique=True)
+    agencia: Mapped[str] = mapped_column(
+        String(4), nullable=False, default="0001", server_default="0001"
+    )
     saldo: Mapped[Decimal] = mapped_column(
         Numeric(15, 2), nullable=False, default=Decimal("0.00")
     )
-    tipo_conta: Mapped[str] = mapped_column(
-        String(30), nullable=False, default="CORRENTE"
+    tipo_conta: Mapped[TipoConta] = mapped_column(
+        SqlEnum(
+            TipoConta,
+            name="tipo_conta_enum",
+            native_enum=False,
+            validate_strings=True,
+        ),
+        nullable=False,
+        default=TipoConta.CHECKING,
+        server_default=TipoConta.CHECKING.value,
     )
     created_at: Mapped[datetime] = mapped_column(
         DateTime, server_default=func.now(), nullable=False
