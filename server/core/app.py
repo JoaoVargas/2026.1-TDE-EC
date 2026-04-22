@@ -34,7 +34,9 @@ def create_app() -> FastAPI:
         allow_methods=["*"],
         allow_headers=["*"],
     )
+
     app.mount("/static", StaticFiles(directory=str(base_dir / "static")), name="static")
+    
     app.include_router(web_router)
     app.include_router(api_router, prefix="/api")
     return app
