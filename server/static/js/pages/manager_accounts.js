@@ -121,6 +121,14 @@ function setGridVisibility(show) {
     grid.hidden = !show;
 }
 
+function waitForNextFrame() {
+    return new Promise((resolve) => {
+        requestAnimationFrame(() => {
+            resolve();
+        });
+    });
+}
+
 function createAccountRow(account) {
     const item = document.createElement("li");
     item.className = "management-account-item";
@@ -470,6 +478,9 @@ async function loadUsersAndAccounts() {
     setGridVisibility(false);
     showFeedback("Carregando usuarios e contas...");
 
+    // Allow the browser to paint the loader before request/processing work starts.
+    await waitForNextFrame();
+
     try {
         const response = await fetch(USERS_ACCOUNTS_ENDPOINT, {
             headers: { Authorization: `Bearer ${token}` },
@@ -505,6 +516,11 @@ async function loadUsersAndAccounts() {
 
 document.addEventListener("DOMContentLoaded", async () => {
     bindRenameModalEvents();
+
+    setLoadingState(true);
+    setEmptyState(false);
+    setGridVisibility(false);
+    showFeedback("Carregando usuarios e contas...");
 
     const manager = await requireManagerUser();
     if (!manager) {
