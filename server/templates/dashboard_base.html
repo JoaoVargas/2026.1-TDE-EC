@@ -11,7 +11,7 @@
 {% block content %}
 <div class="dashboard-shell{% if not show_sidebar | default(true) %} dashboard-shell-no-sidebar{% endif %}">
     {% if show_sidebar | default(true) %}
-    {% include "components/dashboard_sidebar.html" %}
+    {% include sidebar_template | default("components/dashboard_sidebar.html") %}
     {% endif %}
 
     <section class="dashboard-content">

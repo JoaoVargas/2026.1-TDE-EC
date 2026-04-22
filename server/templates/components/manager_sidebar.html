@@ -1,16 +1,14 @@
 {% from "components/dashboard_macros.html" import nav_link %}
 
-<aside class="dashboard-sidebar ui-card" id="sidebar">
+<aside class="dashboard-sidebar manager-sidebar ui-card" id="sidebar">
     <div class="sidebar-top">
         <h2 class="sidebar-logo">BetaBank</h2>
         <button type="button" class="ui-btn ui-btn-secondary sidebar-close" id="btn-close-menu">Fechar</button>
     </div>
 
     <nav class="sidebar-nav">
-        {{ nav_link('/home', 'Inicio', active_page == 'home') }}
-        {{ nav_link('/transacao', 'Transferencias', active_page == 'transacao', 'transacao') }}
-        {{ nav_link('/extrato', 'Extrato', active_page == 'extrato', 'extrato') }}
-        {{ nav_link('/investimentos', 'Investimentos', active_page == 'investimentos', 'investimento') }}
+        {{ nav_link('/manager', 'Painel', active_page == 'manager_dashboard') }}
+        {{ nav_link('/manager/accounts', 'Contas e usuarios', active_page == 'manager_accounts') }}
     </nav>
 
     <div class="sidebar-profile">
@@ -21,7 +19,7 @@
         </div>
     </div>
 
-    <a href="/manager" id="manager-nav-link" class="ui-btn ui-btn-primary manager-entry-btn">Acessar gerencia</a>
+    <a href="/home" class="ui-btn ui-btn-primary manager-entry-btn">Acessar conta</a>
 
     <button id="btn-logout" type="button" class="ui-btn ui-btn-secondary logout-btn">Sair</button>
 </aside>

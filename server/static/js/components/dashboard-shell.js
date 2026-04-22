@@ -1,7 +1,8 @@
 import { requireAuthenticatedUser, logout } from "/static/js/components/auth-token-guard.js";
 
 function isManagerUser(user) {
-    return user?.tipo_usuario === "manager";
+    const role = String(user?.tipo_usuario || "").trim().toLowerCase();
+    return role === "manager" || role === "tipousuario.manager";
 }
 
 function getCachedUser() {

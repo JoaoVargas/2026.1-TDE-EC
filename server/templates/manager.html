@@ -9,23 +9,21 @@
 {% block dashboard_content %}
 <section class="page-panel ui-card manager-hub-panel">
     <header class="panel-header">
-        <h1>Central de gerencia</h1>
-        <p>Escolha entre acessar sua conta pessoal ou entrar no modulo de gestao.</p>
+        <h1>Painel de gerencia</h1>
+        <p>Acompanhe atalhos rapidos e acesse os modulos administrativos.</p>
     </header>
 
-    <section class="panel-grid">
-        <article class="panel-box ui-card manager-choice-card">
-            <h2>Minha conta</h2>
-            <p>Acesse sua experiencia bancaria padrao para transacoes, extrato e investimentos.</p>
-            <a href="/home" class="ui-btn ui-btn-primary">Acessar minha conta</a>
+    <section class="manager-overview-grid">
+        <article class="manager-kpi ui-card">
+            <p class="manager-kpi-label">Modulo principal</p>
+            <strong class="manager-kpi-value">Contas e usuarios</strong>
         </article>
-
-        <article class="panel-box ui-card manager-choice-card">
-            <h2>Gestao de usuarios</h2>
-            <p>Visualize todos os usuarios, tipos de perfil e contas vinculadas.</p>
-            <a href="/manager/accounts" class="ui-btn ui-btn-secondary">Gerenciar contas</a>
+        <article class="manager-kpi ui-card">
+            <p class="manager-kpi-label">Perfil</p>
+            <strong class="manager-kpi-value">Gerente</strong>
         </article>
     </section>
+
 </section>
 {% endblock %}
 

@@ -12,8 +12,8 @@ def manager_accounts_page(request: Request):
         name="manager_accounts.html",
         context={
             "request": request,
-            "active_page": "manager",
+            "active_page": "manager_accounts",
             "dashboard_label": "Gestao de usuarios e contas",
-            "show_sidebar": False,
+            "sidebar_template": "components/manager_sidebar.html",
         },
     )

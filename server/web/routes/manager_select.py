@@ -5,15 +5,15 @@ from server.web.routes._shared import templates
 router = APIRouter(tags=["pages"])
 
 
-@router.get("/manager")
-def manager_page(request: Request):
+@router.get("/manager/select")
+def manager_select_page(request: Request):
     return templates.TemplateResponse(
         request=request,
-        name="manager.html",
+        name="manager_select.html",
         context={
             "request": request,
-            "active_page": "manager_dashboard",
-            "dashboard_label": "Painel de gerencia",
-            "sidebar_template": "components/manager_sidebar.html",
+            "active_page": "manager_select",
+            "dashboard_label": "Selecione seu acesso",
+            "show_sidebar": False,
         },
     )

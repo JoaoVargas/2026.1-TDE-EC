@@ -9,6 +9,7 @@ from server.web.routes.investimentos import router as investimentos_router
 from server.web.routes.login import router as login_router
 from server.web.routes.manager import router as manager_router
 from server.web.routes.manager_accounts import router as manager_accounts_router
+from server.web.routes.manager_select import router as manager_select_router
 from server.web.routes.transacao import router as transacao_router
 
 web_router = APIRouter()
@@ -21,4 +22,5 @@ web_router.include_router(login_router)
 web_router.include_router(cadastro_router)
 web_router.include_router(manager_router)
 web_router.include_router(manager_accounts_router)
+web_router.include_router(manager_select_router)
 web_router.include_router(healthcheck_router)

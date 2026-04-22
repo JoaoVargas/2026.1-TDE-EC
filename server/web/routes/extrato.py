@@ -10,5 +10,5 @@ def extrato_page(request: Request):
     return templates.TemplateResponse(
         request=request,
         name="extrato.html",
-        context={"request": request, "active_page": "home", "dashboard_label": "Extrato"},
+        context={"request": request, "active_page": "extrato", "dashboard_label": "Extrato"},
     )

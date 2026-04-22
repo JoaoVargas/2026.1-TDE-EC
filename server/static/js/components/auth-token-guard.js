@@ -8,7 +8,7 @@ function isManagerUser(user) {
 }
 
 function getPostLoginRoute(user) {
-    return isManagerUser(user) ? "/manager" : "/home";
+    return isManagerUser(user) ? "/manager/select" : "/home";
 }
 
 function clearAuthStorage() {
