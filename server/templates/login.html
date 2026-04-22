@@ -1,55 +1,36 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>BetaBank</title>
-  <link rel="stylesheet" href="../styles/login.css" />
-</head>
-<body>
+{% extends "auth_base.html" %}
+{% from "components/forms.html" import input_field %}
 
-  <div class="container">
+{% block title %}Login | Banco Digital{% endblock %}
 
-    <!-- Painel Esquerdo -->
-    <div class="left-panel">
-      <div class="logo-circle">
-        <span><img src="http://localhost:8000/static/imagens/slogan.png" alt="" style="min-height: 100px; width: 35%;"></span>
-      </div>
-      <div class="divider"></div>
-      <h2>BEM VINDO DE VOLTA</h2>
-      <p>Sua segurança é nossa prioridade. Acesse sua conta para gerenciar seu dinheiro com praticidade.</p>
-    </div>
+{% block content %}
+<div class="auth-container auth-login">
+    {% with heading="Bem-vindo de volta", description="Sua seguranca e nossa prioridade. Acesse sua conta para gerenciar seu dinheiro com praticidade." %}
+        {% include "components/auth_brand_panel.html" %}
+    {% endwith %}
 
-    <!-- Painel Direito -->
-    <div class="right-panel">
-      <div class="slogan"><img  src="http://localhost:8000/static/imagens/slogan.png" alt="" style=" width: 35%;"></div>
-      
-      <h1>ACESSO DE LOGIN</h1>
+    <section class="auth-form-panel">
+        <h1>Acesso de Login</h1>
 
-      <div class="form-group">
-        <label for="cpf">CPF / Código da Conta</label>
-        <input type="text" id="cpf" name="cpf" autocomplete="off" />
-      </div>
+        {{ input_field('cpf', 'CPF ou E-mail') }}
+        {{ input_field('senha', 'Senha', 'password', 'current-password') }}
 
-      <div class="form-group">
-        <label for="senha">Senha</label>
-        <input type="password" id="senha" name="senha" />
-      </div>
+        <div class="forgot-link">
+            <a href="#" aria-disabled="true">Esqueci a senha</a>
+        </div>
 
-      <div class="forgot-link">
-        <a href="#">Esqueci a senha</a>
-      </div>
+        <div id="mensagem" class="feedback-message" style="display: none;"></div>
 
-      <div id="mensagem" class="mensagem" style="display:none;"></div>
+        <button class="ui-btn ui-btn-primary" id="btn-login" type="button">Entrar</button>
 
-      <button class="btn-login" id="btn-login">LOGIN</button>
+        <p class="register-text">
+            Nao tem conta?
+            <a href="/cadastro">Cadastre-se</a>
+        </p>
+    </section>
+</div>
+{% endblock %}
 
-      <p class="register-text" id="btn-cadastro">Nao tem conta? <a href="/cadastro">Cadastre-se</a></p>
-    </div>
-
-  </div>
-
-  <script src="../requisições/login.js"></script>
-
-</body>
-</html>
+{% block scripts %}
+<script type="module" src="/static/js/pages/login.js"></script>
+{% endblock %}

@@ -1,0 +1,32 @@
+{% extends "dashboard_base.html" %}
+
+{% block title %}Gerencia | Banco Digital{% endblock %}
+
+{% block dashboard_styles %}
+<link rel="stylesheet" href="/static/css/manager.css" />
+{% endblock %}
+
+{% block dashboard_content %}
+<section class="page-panel ui-card manager-hub-panel">
+    <header class="panel-header">
+        <h1>Painel de gerencia</h1>
+        <p>Acompanhe atalhos rapidos e acesse os modulos administrativos.</p>
+    </header>
+
+    <section class="manager-overview-grid">
+        <article class="manager-kpi ui-card">
+            <p class="manager-kpi-label">Modulo principal</p>
+            <strong class="manager-kpi-value">Contas e usuarios</strong>
+        </article>
+        <article class="manager-kpi ui-card">
+            <p class="manager-kpi-label">Perfil</p>
+            <strong class="manager-kpi-value">Gerente</strong>
+        </article>
+    </section>
+
+</section>
+{% endblock %}
+
+{% block dashboard_scripts %}
+<script type="module" src="/static/js/pages/manager.js"></script>
+{% endblock %}

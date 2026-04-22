@@ -1,0 +1,13 @@
+{% macro nav_link(href, label, active=False, id='') -%}
+<a href="{{ href }}" class="sidebar-link{% if active %} is-active{% endif %}"{% if id %} id="{{ id }}"{% endif %}>{{ label }}</a>
+{%- endmacro %}
+
+{% macro insight_card(title, text, button_label='', button_variant='ui-btn-primary') -%}
+<article class="dashboard-card ui-card">
+    <h3>{{ title }}</h3>
+    <p>{{ text }}</p>
+    {% if button_label %}
+    <button type="button" class="ui-btn {{ button_variant }}">{{ button_label }}</button>
+    {% endif %}
+</article>
+{%- endmacro %}

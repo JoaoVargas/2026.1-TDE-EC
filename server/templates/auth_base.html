@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block body_class %}auth-layout{% endblock %}
+{% block main_class %}auth-shell{% endblock %}
+
+{% block styles %}
+<link rel="stylesheet" href="/static/css/auth.css" />
+{% block auth_styles %}{% endblock %}
+{% endblock %}
+
+{% block content %}
+{% block auth_content %}{% endblock %}
+{% endblock %}
+
+{% block scripts %}
+{% block auth_scripts %}{% endblock %}
+{% endblock %}

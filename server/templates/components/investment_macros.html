@@ -1,0 +1,16 @@
+{% macro stat_card(label, value='0,00', subtitle='-') -%}
+<article class="investment-stat ui-card">
+    <p class="investment-stat-label">{{ label }}</p>
+    <p class="investment-stat-value"><span class="currency">R$</span>{{ value }}</p>
+    <p class="investment-stat-sub">{{ subtitle }}</p>
+</article>
+{%- endmacro %}
+
+{% macro asset_card(kind, title, subtitle, tag, tone='teal') -%}
+<article class="asset-card ui-card tone-{{ tone }}">
+    <p class="asset-kind">{{ kind }}</p>
+    <h3 class="asset-title">{{ title }}</h3>
+    <p class="asset-subtitle">{{ subtitle }}</p>
+    <p class="asset-tag">{{ tag }}</p>
+</article>
+{%- endmacro %}

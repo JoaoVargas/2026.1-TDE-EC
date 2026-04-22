@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block title %}Inicio | Banco Digital{% endblock %}
+
+{% block content %}
+<section class="card">
+    <h1>Banco Digital API</h1>
+    <p>Servidor online com suporte a paginas HTML via Jinja2.</p>
+    <div class="links">
+        <a href="/healthcheck">Ver healthcheck HTML</a>
+        <a href="/api/health">Ver healthcheck JSON</a>
+    </div>
+</section>
+{% endblock %}

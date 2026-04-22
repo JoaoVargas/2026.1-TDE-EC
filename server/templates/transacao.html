@@ -1,79 +1,79 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Transferência</title>
-  <link rel="stylesheet" href="/styles/transacao.css" />
-  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
-</head>
-<body>
+{% extends "dashboard_base.html" %}
 
-<script>
-  verificarLogin().then(usuario => {
-    if (usuario) {
-      console.log("Logado como:", usuario.nome);
-    } 
-  });
-</script>
-  <div class="app">
+{% block title %}Transferencias | Banco Digital{% endblock %}
 
-    <!-- Header -->
-    <header class="header">
-      <div class="avatar">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="22" height="22">
-          <path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/>
-        </svg>
-      </div>
-      <div class="logo">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="26" height="26">
-          <path d="M11.5 2C9 2 7 4 7 6.5v1H5v2h2v1H5v2h2v7h2v-7h4v-2H9v-1h4c1.4 0 2.5-1.1 2.5-2.5S14.4 4.5 13 4.5h-.5V2h-1zm0 2h1c.8 0 1.5.7 1.5 1.5S13.3 7 12.5 7H9V6.5C9 5.1 10.1 4 11.5 4z"/>
-        </svg>
-      </div>
+{% block dashboard_styles %}
+<link rel="stylesheet" href="/static/css/transacao.css" />
+{% endblock %}
+
+{% block dashboard_topbar_actions %}
+<button class="ui-btn ui-btn-secondary" type="button" id="btn-cancelar-transferencia">Cancelar</button>
+{% endblock %}
+
+{% block dashboard_content %}
+<section class="transfer-flow ui-card" data-step="amount">
+    <header class="transfer-header">
+        <h1>Transferencia</h1>
+        <p id="transfer-subtitle">Qual e o valor da transferencia?</p>
     </header>
 
-    <!-- Info Card -->
-    <div class="info-card">
-      <p class="info-title">Qual é o valor da transferência?</p>
-      <p class="info-balance">Saldo disponível na conta: <span>R$ ....</span></p>
-    </div>
+    <section class="transfer-step step-amount is-active" data-step-panel="amount">
+        <div class="info-card ui-card">
+            <p class="info-title">Saldo disponivel na conta</p>
+            <p class="info-value">R$ 12.500,00</p>
+        </div>
 
-    <!-- Display -->
-    <div class="display-wrapper">
-      <div class="display" id="display">R$: 0,00</div>
-    </div>
+        <div class="amount-display" id="amount-display">R$ 0,00</div>
 
-    <!-- Numpad -->
-    <div class="numpad">
-      <button class="key" data-val="1">1</button>
-      <button class="key" data-val="2">2</button>
-      <button class="key" data-val="3">3</button>
-      <button class="key" data-val="4">4</button>
-      <button class="key" data-val="5">5</button>
-      <button class="key" data-val="6">6</button>
-      <button class="key" data-val="7">7</button>
-      <button class="key" data-val="8">8</button>
-      <button class="key" data-val="9">9</button>
-      <button class="key key-empty"></button>
-      <button class="key" data-val="0">0</button>
-      <button class="key key-del" id="del-btn">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
-          <path d="M22 3H7c-.69 0-1.23.35-1.59.88L0 12l5.41 8.11c.36.53.9.89 1.59.89h15c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-3.41 13L17 17.59 14.41 15 12 17.41 9.59 15 7 17.59 5.41 16l2.59-2.59L5.41 11 7 9.41 9.59 12 12 9.59 14.41 12 17 9.41 18.59 11l-2.58 2.41L18.59 16z"/>
-        </svg>
-      </button>
-    </div>
+        <div class="numpad" id="numpad">
+            <button type="button" class="numpad-key" data-number="1">1</button>
+            <button type="button" class="numpad-key" data-number="2">2</button>
+            <button type="button" class="numpad-key" data-number="3">3</button>
+            <button type="button" class="numpad-key" data-number="4">4</button>
+            <button type="button" class="numpad-key" data-number="5">5</button>
+            <button type="button" class="numpad-key" data-number="6">6</button>
+            <button type="button" class="numpad-key" data-number="7">7</button>
+            <button type="button" class="numpad-key" data-number="8">8</button>
+            <button type="button" class="numpad-key" data-number="9">9</button>
+            <button type="button" class="numpad-key empty" disabled></button>
+            <button type="button" class="numpad-key" data-number="0">0</button>
+            <button type="button" class="numpad-key delete" id="btn-delete">Apagar</button>
+        </div>
 
-    <!-- Button -->
-    <button type="button" class="continue-btn" id="continue-btn">
-      CONTINUAR
-      
-      <!-- Logozinha daora -->
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="18" height="18">
-        <path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z"/>
-      </svg>
-    </button>
+        <button type="button" class="ui-btn ui-btn-primary step-action" id="btn-to-recipient">Continuar</button>
+    </section>
 
-  </div>
-  <script src="/requisições/transacao.js"></script>
-</body>
-</html>
+    <section class="transfer-step step-recipient" data-step-panel="recipient">
+        <div class="recipient-top">
+            <button type="button" class="ui-btn ui-btn-secondary" id="btn-back-amount">Voltar</button>
+            <p>Valor selecionado: <strong id="selected-amount">R$ 0,00</strong></p>
+        </div>
+
+        <label class="ui-label" for="recipient-search">Buscar contato</label>
+        <input class="ui-input" type="text" id="recipient-search" placeholder="Nome, banco ou chave" />
+
+        <div class="recipient-grid" id="recipient-grid"></div>
+
+        <button type="button" class="ui-btn ui-btn-primary step-action" id="btn-to-success" disabled>Transferir</button>
+    </section>
+
+    <section class="transfer-step step-success" data-step-panel="success">
+        <div class="success-mark">OK</div>
+        <h2>Transferencia concluida!</h2>
+        <p>Seu dinheiro foi enviado com sucesso.</p>
+
+        <div class="receipt ui-card">
+            <div><span>Valor</span><strong id="receipt-amount">R$ 0,00</strong></div>
+            <div><span>Para</span><strong id="receipt-name">-</strong></div>
+            <div><span>Banco</span><strong id="receipt-bank">-</strong></div>
+            <div><span>Data</span><strong id="receipt-date">-</strong></div>
+        </div>
+
+        <button type="button" class="ui-btn ui-btn-primary step-action" id="btn-finish-transfer">Voltar ao menu</button>
+    </section>
+</section>
+{% endblock %}
+
+{% block dashboard_scripts %}
+<script type="module" src="/static/js/pages/transacao.js"></script>
+{% endblock %}

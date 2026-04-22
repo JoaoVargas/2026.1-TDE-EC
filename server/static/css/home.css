@@ -1,0 +1,84 @@
+.greeting-block h1 {
+    margin: 0;
+    font-size: clamp(1.3rem, 2.6vw, 2rem);
+}
+
+.greeting-block p {
+    margin: 0.35rem 0 0;
+    color: var(--color-muted);
+}
+
+.balance-card {
+    background: linear-gradient(128deg, #163c3f 0%, #204c67 100%);
+    border-radius: var(--radius-xl);
+    padding: var(--space-5);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.balance-label {
+    margin: 0;
+    text-transform: uppercase;
+    color: #95d1cf;
+    font-size: 0.72rem;
+    letter-spacing: 0.12em;
+}
+
+.balance-value {
+    margin: 0.6rem 0 0;
+    font-family: var(--font-mono);
+    font-size: clamp(1.5rem, 4vw, 2.35rem);
+}
+
+.balance-arrow {
+    width: 42px;
+    height: 42px;
+    border-radius: 999px;
+    display: grid;
+    place-items: center;
+    font-weight: 700;
+    color: #ccf8f4;
+    border: 1px solid rgba(255, 255, 255, 0.22);
+}
+
+.balance-arrow:hover {
+    text-decoration: none;
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.cards-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--space-3);
+}
+
+.dashboard-card {
+    background: linear-gradient(150deg, #172c49 0%, #1f3555 100%);
+    padding: var(--space-4);
+    min-height: 186px;
+    display: grid;
+    align-content: start;
+    gap: 0.7rem;
+}
+
+.dashboard-card h3,
+.dashboard-card p {
+    margin: 0;
+}
+
+.dashboard-card p {
+    color: var(--color-muted);
+    line-height: 1.45;
+}
+
+.dashboard-card .ui-btn {
+    margin-top: auto;
+    justify-self: start;
+}
+
+@media (max-width: 920px) {
+    .cards-grid {
+        grid-template-columns: 1fr;
+    }
+}

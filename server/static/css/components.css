@@ -1,0 +1,121 @@
+* {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    margin: 0;
+    min-height: 100%;
+}
+
+body {
+    font-family: var(--font-sans);
+    color: var(--color-text);
+}
+
+a {
+    color: var(--color-link);
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+.ui-card {
+    border-radius: var(--radius-lg);
+    border: 1px solid color-mix(in srgb, var(--color-border), transparent 30%);
+    box-shadow: var(--shadow-soft);
+}
+
+.ui-input {
+    width: 100%;
+    background: color-mix(in srgb, var(--color-bg-900), #131d31 35%);
+    border: 1px solid color-mix(in srgb, var(--color-border), transparent 12%);
+    border-radius: var(--radius-sm);
+    padding: 0.7rem 0.8rem;
+    color: var(--color-text);
+    outline: none;
+    transition: border-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.ui-input:focus {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary), transparent 78%);
+}
+
+.ui-label {
+    font-size: 0.76rem;
+    color: var(--color-muted);
+}
+
+.ui-btn {
+    border: none;
+    border-radius: var(--radius-sm);
+    padding: 0.72rem 1.15rem;
+    cursor: pointer;
+    font-family: var(--font-sans);
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    transition: transform 0.12s ease, filter 0.18s ease;
+}
+
+.ui-btn:hover {
+    transform: translateY(-1px);
+}
+
+.ui-btn:active {
+    transform: translateY(0);
+}
+
+.ui-btn:disabled {
+    opacity: 0.66;
+    cursor: not-allowed;
+}
+
+.ui-btn-primary {
+    background: var(--color-primary);
+    color: #0d1a1a;
+}
+
+.ui-btn-primary:hover {
+    filter: brightness(0.94);
+}
+
+.ui-btn-secondary {
+    background: transparent;
+    border: 1px solid color-mix(in srgb, var(--color-border), white 14%);
+    color: var(--color-text);
+}
+
+.ui-btn-accent {
+    background: var(--color-accent);
+    color: #231504;
+}
+
+.feedback-message {
+    margin-top: var(--space-2);
+    padding: 0.62rem 0.8rem;
+    border-radius: var(--radius-sm);
+    font-size: 0.86rem;
+}
+
+.feedback-success {
+    background: #103c30;
+    border: 1px solid var(--color-success);
+    color: var(--color-success);
+}
+
+.feedback-error {
+    background: #451d1f;
+    border: 1px solid var(--color-danger);
+    color: var(--color-danger);
+}
+
+bb-insight-card,
+bb-investment-stat,
+bb-asset-card,
+bb-statement-item {
+    display: block;
+}

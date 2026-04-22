@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block body_class %}dashboard-layout{% endblock %}
+{% block main_class %}dashboard-main{% endblock %}
+
+{% block styles %}
+<link rel="stylesheet" href="/static/css/dashboard.css" />
+{% block dashboard_styles %}{% endblock %}
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-shell{% if not show_sidebar | default(true) %} dashboard-shell-no-sidebar{% endif %}">
+    {% if show_sidebar | default(true) %}
+    {% include sidebar_template | default("components/dashboard_sidebar.html") %}
+    {% endif %}
+
+    <section class="dashboard-content">
+        <div class="dashboard-topbar">
+            {% if show_sidebar | default(true) %}
+            <button type="button" id="btn-menu" class="ui-btn ui-btn-secondary menu-toggle">Menu</button>
+            {% endif %}
+            <div class="dashboard-topbar-right">
+                <div class="topbar-pill">{{ dashboard_label | default('Painel financeiro') }}</div>
+                {% block dashboard_topbar_actions %}{% endblock %}
+            </div>
+        </div>
+
+        {% block dashboard_content %}{% endblock %}
+    </section>
+</div>
+
+{% if show_sidebar | default(true) %}
+<div id="overlay" class="dashboard-overlay"></div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script type="module" src="/static/js/components/ui-cards.js"></script>
+<script type="module" src="/static/js/components/dashboard-shell.js"></script>
+{% block dashboard_scripts %}{% endblock %}
+{% endblock %}

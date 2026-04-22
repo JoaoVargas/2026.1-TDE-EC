@@ -1,241 +1,107 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>BetaBank — Investimentos</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../styles/investimentos.css">
+{% extends "dashboard_base.html" %}
 
-</head>
-<body>
+{% block title %}Investimentos | Banco Digital{% endblock %}
 
-<div class="shell">
+{% block dashboard_styles %}
+<link rel="stylesheet" href="/static/css/investimentos.css" />
+{% endblock %}
 
-  <!-- Sidebar -->
-  <aside class="sidebar">
-    <div class="sidebar-logo">
-      <div class="logo-mark">
-        <span><img src="http://localhost:8000/static/imagens/slogan.png" alt="" style="width: 140%; padding-right: 10px; padding-top: 5px;"></span>
-      </div>
-      <div>
-        <div class="logo-name">BetaBank</div>
-        <div class="logo-tag">Virtual Bank</div>
-      </div>
+{% block dashboard_topbar_actions %}
+<button class="ui-btn ui-btn-secondary" type="button">Extrato</button>
+<button class="ui-btn ui-btn-primary" type="button">Investir</button>
+{% endblock %}
+
+{% block dashboard_content %}
+<section class="investment-page" data-view="carteira">
+    <div class="investment-hero">
+        <article class="investment-stat ui-card main-stat">
+            <p class="investment-stat-label">Total em investimentos</p>
+            <p class="investment-stat-value"><span class="currency">R$</span><span id="total-val">0,00</span></p>
+            <p class="investment-stat-sub" id="total-change">- Sem variacao</p>
+        </article>
+        <bb-investment-stat label="Renda fixa" value="0,00" subtitle="- 0 ativos"></bb-investment-stat>
+        <bb-investment-stat label="Renda variavel" value="0,00" subtitle="- 0 ativos"></bb-investment-stat>
     </div>
 
-    <nav class="nav">
-      <div class="nav-section">Geral</div>
-
-      <a class="nav-item" href="#">
-        <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3">
-          <rect x="2" y="2" width="5" height="5" rx="1.2"/>
-          <rect x="9" y="2" width="5" height="5" rx="1.2"/>
-          <rect x="2" y="9" width="5" height="5" rx="1.2"/>
-          <rect x="9" y="9" width="5" height="5" rx="1.2"/>
-        </svg>
-        Visão geral
-      </a>
-
-      <a class="nav-item active" href="#">
-        <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3">
-          <polyline points="2,12 5,7 8,9 11,5 14,8"/>
-          <circle cx="14" cy="8" r="1" fill="currentColor" stroke="none"/>
-        </svg>
-        Investimentos
-      </a>
-
-      <a class="nav-item" href="#">
-        <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3">
-          <rect x="2" y="4" width="12" height="9" rx="1.5"/>
-          <path d="M5 4V3a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v1"/>
-        </svg>
-        Carteira
-      </a>
-
-      <a class="nav-item" href="#">
-        <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3">
-          <circle cx="8" cy="8" r="6"/>
-          <path d="M8 5v3l2 1.5"/>
-        </svg>
-        Histórico
-      </a>
-
-      <div class="nav-section">Conta</div>
-
-      <a class="nav-item" href="#">
-        <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3">
-          <circle cx="8" cy="5" r="2.5"/>
-          <path d="M3 14c0-2.76 2.24-5 5-5s5 2.24 5 5"/>
-        </svg>
-        Perfil
-      </a>
-
-      <a class="nav-item" href="#">
-        <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3">
-          <circle cx="8" cy="8" r="2"/>
-          <path d="M8 1v2M8 13v2M1 8h2M13 8h2M3.05 3.05l1.41 1.41M11.54 11.54l1.41 1.41M3.05 12.95l1.41-1.41M11.54 4.46l1.41-1.41"/>
-        </svg>
-        Configurações
-      </a>
+    <nav class="investment-tabs">
+        <a class="investment-tab is-active" href="/investimentos">Minha carteira</a>
+        <a class="investment-tab" href="/investimentos/distribuicao">Analise de distribuicao</a>
     </nav>
 
-    <div class="sidebar-footer">
-      <div class="user-row">
-        <div class="avatar">U</div>
-        <div>
-          <div class="user-name">Usuário</div>
-          <div class="user-plan">Conta básica</div>
+    <section class="investment-section">
+        <header class="investment-section-header">
+            <h2>Renda fixa</h2>
+            <a href="#">Ver todos</a>
+        </header>
+        <div class="investment-card-grid">
+            <bb-asset-card
+                kind="Titulo publico"
+                title="Tesouro Prefixado"
+                subtitle="Vencimento 2027"
+                tag="100% CDI"
+            ></bb-asset-card>
+            <bb-asset-card
+                kind="Meta pessoal"
+                title="Carro Novo"
+                subtitle="Caixinha de objetivo"
+                tag="100% CDI"
+            ></bb-asset-card>
+            <bb-asset-card
+                kind="Novo"
+                title="Nova caixinha disponivel"
+                subtitle="Descubra objetivos automatizados"
+                tag="Conhecer"
+                tone="accent"
+            ></bb-asset-card>
         </div>
-      </div>
-    </div>
-  </aside>
+    </section>
 
-  <!-- Main content -->
-  <main class="main">
-
-    <!-- Topbar -->
-    <div class="topbar">
-      <div class="page-title">
-        Painel · <span>Minha carteira</span>
-      </div>
-      <div class="topbar-actions">
-        <button class="btn-secondary">
-          <svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5">
-            <path d="M7 1v12M1 7h12" stroke-linecap="round"/>
-          </svg>
-          Extrato
-        </button>
-        <button class="btn-primary">
-          Investir
-          <svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8">
-            <path d="M2 7h10M7 2l5 5-5 5" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </button>
-      </div>
-    </div>
-
-    <!-- Page -->
-    <div class="page">
-
-      <!-- Hero stats -->
-      <div class="hero">
-        <div class="stat-card primary">
-          <div class="stat-label">Total em investimentos</div>
-          <div class="stat-value"><span class="currency">R$</span>0,00</div>
-          <div class="stat-change zero">— Sem variação</div>
+    <section class="investment-section">
+        <header class="investment-section-header">
+            <h2>Renda variavel</h2>
+            <a href="#">Ver todos</a>
+        </header>
+        <div class="investment-card-grid">
+            <bb-asset-card
+                kind="FII"
+                title="XMLT"
+                subtitle="Fundo imobiliario"
+                tag="1% proventos"
+            ></bb-asset-card>
+            <bb-asset-card
+                kind="FII"
+                title="XCORTI"
+                subtitle="Fundo imobiliario"
+                tag="15% proventos"
+            ></bb-asset-card>
         </div>
-        <div class="stat-card">
-          <div class="stat-label">Renda fixa</div>
-          <div class="stat-value"><span class="currency">R$</span>0,00</div>
-          <div class="stat-change zero">— 0 ativos</div>
+    </section>
+
+    <section class="investment-section">
+        <header class="investment-section-header">
+            <h2>Criptomoedas</h2>
+            <a href="#">Ver todos</a>
+        </header>
+        <div class="investment-card-grid">
+            <bb-asset-card
+                kind="Criptoativo"
+                title="Bitcoin"
+                subtitle="BTC · Proof of Work"
+                tag="+16% crescimento"
+                tone="gold"
+            ></bb-asset-card>
+            <bb-asset-card
+                kind="Criptoativo"
+                title="Memecoin"
+                subtitle="MEME · Token"
+                tag="+16% crescimento"
+                tone="gold"
+            ></bb-asset-card>
         </div>
-        <div class="stat-card">
-          <div class="stat-label">Renda variável</div>
-          <div class="stat-value"><span class="currency">R$</span>0,00</div>
-          <div class="stat-change zero">— 0 ativos</div>
-        </div>
-      </div>
+    </section>
+</section>
+{% endblock %}
 
-      <!-- Tabs -->
-      <div class="tabs">
-        <div class="tab" onclick="location.href='investimentos.html'">Minha carteira</div>
-        <div class="tab" onclick="location.href='investimentos2.html'">Análise de distribuição</div>
-      </div>
-
-      <!-- Renda Fixa -->
-      <div class="invest-section">
-        <div class="section-header">
-          <div class="section-title">Renda Fixa</div>
-          <div class="section-link">Ver todos →</div>
-        </div>
-        <div class="cards-grid">
-
-          <div class="inv-card green">
-            <div class="inv-card-type">Título público</div>
-            <div class="inv-card-name">Tesouro Prefixado</div>
-            <div class="inv-card-sub">Vencimento 2027</div>
-            <div class="inv-tag tag-green"><span class="inv-dot"></span>100% CDI</div>
-          </div>
-
-          <div class="inv-card green">
-            <div class="inv-card-type">Meta pessoal</div>
-            <div class="inv-card-name">Carro Novo</div>
-            <div class="inv-card-sub">Caixinha de objetivo</div>
-            <div class="inv-tag tag-green"><span class="inv-dot"></span>100% CDI</div>
-          </div>
-
-          <div class="inv-card new">
-            <span class="new-badge">Novo</span>
-            <div class="new-title">Nova caixinha disponível</div>
-            <button class="btn-ghost">Conhecer</button>
-          </div>
-
-          <div></div>
-
-        </div>
-      </div>
-
-      <div class="divider"></div>
-
-      <!-- Renda Variável -->
-      <div class="invest-section">
-        <div class="section-header">
-          <div class="section-title">Renda Variável</div>
-          <div class="section-link">Ver todos →</div>
-        </div>
-        <div class="cards-grid">
-
-          <div class="inv-card green">
-            <div class="inv-card-type">FII</div>
-            <div class="inv-card-name">XMLT</div>
-            <div class="inv-card-sub">Fundo imobiliário</div>
-            <div class="inv-tag tag-teal"><span class="inv-dot"></span>1% proventos</div>
-          </div>
-
-          <div class="inv-card green">
-            <div class="inv-card-type">FII</div>
-            <div class="inv-card-name">XCORTI</div>
-            <div class="inv-card-sub">Fundo imobiliário</div>
-            <div class="inv-tag tag-teal"><span class="inv-dot"></span>15% proventos</div>
-          </div>
-
-          <div></div><div></div>
-        </div>
-      </div>
-
-      <div class="divider"></div>
-
-      <!-- Criptomoedas -->
-      <div class="invest-section">
-        <div class="section-header">
-          <div class="section-title">Criptomoedas</div>
-          <div class="section-link">Ver todos →</div>
-        </div>
-        <div class="cards-grid">
-
-          <div class="inv-card gold">
-            <div class="inv-card-type">Criptoativo</div>
-            <div class="inv-card-name">Bitcoin</div>
-            <div class="inv-card-sub">BTC · Proof of Work</div>
-            <div class="inv-tag tag-gold"><span class="inv-dot"></span>+16% crescimento</div>
-          </div>
-
-          <div class="inv-card gold">
-            <div class="inv-card-type">Criptoativo</div>
-            <div class="inv-card-name">Memecoin</div>
-            <div class="inv-card-sub">MEME · Token</div>
-            <div class="inv-tag tag-gold"><span class="inv-dot"></span>+16% crescimento</div>
-          </div>
-
-          <div></div><div></div>
-        </div>
-      </div>
-
-    </div>
-  </main>
-</div>
-
-</body>
-</html>
+{% block dashboard_scripts %}
+<script type="module" src="/static/js/pages/investimentos.js"></script>
+{% endblock %}

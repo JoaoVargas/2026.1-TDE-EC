@@ -1,77 +1,45 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-  <meta charset="UTF-8">
-  <title>BetaBank</title>
-  <link rel="stylesheet" href="../styles/home.css">
-</head>
-<body>
-  <script src="../requisições/auth.js">
-  </script>
-<script>
-  verificarLogin().then(usuario => {
-    if (usuario) {
-      console.log("Logado como:", usuario.nome);
-    }
-  });
-</script>
-  <div class="pagina">
+{% extends "dashboard_base.html" %}
 
-    <!-- Coluna esquerda: menu -->
-    <aside class="sidebar">
-      <h2 class="logo">BetaBank</h2>
+{% block title %}Home | Banco Digital{% endblock %}
 
-  <nav>
-  <a href="home.html"          class="menu-item ativo">Início</a>
-  <a href="/transacao"    class="menu-item" id="transacao">Transferências</a>
-  <a href="/investimentos" class="menu-item" id="investimento">Investimentos</a>
-</nav>
+{% block dashboard_styles %}
+<link rel="stylesheet" href="/static/css/home.css" />
+{% endblock %}
 
-      <div class="perfil">
-        <div class="avatar">V</div>
-        <span>Vinicius</span>
-      </div>
-    </aside>
+{% block dashboard_content %}
+<header class="greeting-block">
+    <h1 id="welcome-title">Ola, Usuario</h1>
+    <p>Resumo rapido da sua conta e atalhos do BetaBank.</p>
+</header>
 
-    <!-- Coluna direita: conteúdo -->
-    <main class="conteudo">
+<section class="balance-card ui-card">
+    <div>
+        <p class="balance-label">Saldo total</p>
+        <p class="balance-value" id="saldo-valor">R$ 1.250,00</p>
+    </div>
+    <a href="/extrato" class="balance-arrow" aria-label="Abrir extrato">></a>
+</section>
 
-      <h1 class="saudacao">Olá, Vinicius 👋</h1>
+<section class="cards-grid">
+    <bb-insight-card
+        title="Seguros BetaBank"
+        text="Protecao inteligente para voce e sua familia."
+        button-label="Conhecer"
+        button-variant="ui-btn-accent"
+    ></bb-insight-card>
+    <bb-insight-card
+        title="Cartao de credito"
+        text="Fatura atual: R$ 0,00"
+    ></bb-insight-card>
+    <bb-insight-card
+        title="Termos de uso"
+        text="Leia os principais pontos e regras da conta."
+        button-label="Ver termos"
+        button-variant="ui-btn-secondary"
+    ></bb-insight-card>
+</section>
+{% endblock %}
 
-      <!-- Card de saldo -->
-      <div class="card-saldo">
-        <div>
-          <p class="saldo-label">SALDO TOTAL</p>
-          <p class="saldo-valor">R$ 1.250,00</p>
-        </div>
-       <a href="extrato.html" class="seta">›</a>
-      </div>
-
-      <!-- Grid de cards informativos -->
-      <div class="grid-cards">
-
-        <div class="card card--escuro">
-          <h3>Seguros BetaBank</h3>
-          <p>Todo seguro que sua família precisa</p>
-          <button class="btn btn--dourado">Conhecer</button>
-        </div>
-
-        <div class="card card--escuro">
-          <h3>Cartão de crédito</h3>
-          <p class="label-fatura">Fatura atual</p>
-          <p class="valor-fatura">R$ 0,00</p>
-        </div>
-
-        <div class="card card--dourado">
-          <h3>Termos de uso</h3>
-          <p>Entenda o documento do BetaBank</p>
-          <button class="btn btn--verde">Conhecer</button>
-        </div>
-
-      </div>
-    </main>
-
-  </div>
-
-</body>
-</html>
+{% block dashboard_scripts %}
+<script type="module" src="/static/js/pages/home.js"></script>
+{% endblock %}

@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block title %}Healthcheck | Banco Digital{% endblock %}
+
+{% block content %}
+<section class="card">
+    <h1>Healthcheck</h1>
+    <ul class="status-list">
+        <li>
+            <span>API</span>
+            <strong class="status status-ok">{{ api_status }}</strong>
+        </li>
+        <li>
+            <span>Banco de dados</span>
+            {% if db_status == "ok" %}
+            <strong class="status status-ok">{{ db_status }}</strong>
+            {% else %}
+            <strong class="status status-error">{{ db_status }}</strong>
+            {% endif %}
+        </li>
+    </ul>
+
+    {% if db_error %}
+    <p class="error-detail">{{ db_error }}</p>
+    {% endif %}
+
+    <section class="wc-demo">
+        <h2>Web Component Demo</h2>
+        <health-live-status endpoint="/api/health"></health-live-status>
+    </section>
+
+    <div class="links">
+        <a href="/">Voltar para pagina inicial</a>
+        <a href="/api/health">Abrir endpoint JSON</a>
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script type="module" src="/static/js/pages/healthcheck.js"></script>
+{% endblock %}
