@@ -8,3 +8,12 @@ __pycache__/
 Thumbs.db
 
 .OLD
+
+docker/mysql_data/*
+!docker/mysql_data/.gitkeep
+docker/portainer_data/*
+!docker/portainer_data/.gitkeep
+docker/workbench_data/*
+!docker/workbench_data/.gitkeep
+
+docker/.env
