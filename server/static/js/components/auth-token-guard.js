@@ -1,10 +1,10 @@
 const TOKEN_STORAGE_KEY = "token";
-const USER_STORAGE_KEY = "usuario";
+const USER_STORAGE_KEY = "user";
 const AUTH_ME_ENDPOINT = "/api/me";
 
 function isManagerUser(user) {
-    const role = String(user?.tipo_usuario || "").trim().toLowerCase();
-    return role === "manager" || role === "tipousuario.manager";
+    const role = String(user?.type || "").trim().toLowerCase();
+    return role === "manager";
 }
 
 function getPostLoginRoute(user) {

@@ -13,7 +13,7 @@ const rules = {
         if (v.length < 3) {
             return "Nome deve ter pelo menos 3 caracteres.";
         }
-        return /^[A-Za-z\u00C0-\u017F\s]+$/.test(v) ? null : "Nome nao pode conter numeros ou simbolos.";
+        return /^[A-Za-zÀ-ſ\s]+$/.test(v) ? null : "Nome nao pode conter numeros ou simbolos.";
     },
     email: (v) => {
         if (!v) {
@@ -197,18 +197,18 @@ async function lookupCep() {
 
 function buildPayload() {
     return {
-        nome: document.getElementById("nome").value.trim(),
+        name: document.getElementById("nome").value.trim(),
         email: document.getElementById("email").value.trim(),
         cpf: onlyDigits(document.getElementById("cpf").value),
-        nascimento: document.getElementById("nascimento").value,
-        senha: document.getElementById("senha").value,
-        endereco: {
+        birthday: document.getElementById("nascimento").value,
+        password: document.getElementById("senha").value,
+        address: {
             cep: onlyDigits(document.getElementById("cep").value),
-            logradouro: document.getElementById("logradouro").value.trim(),
-            numero: document.getElementById("numero").value.trim(),
-            bairro: document.getElementById("bairro").value.trim(),
-            cidade: document.getElementById("cidade").value.trim(),
-            estado: document.getElementById("estado").value.trim().toUpperCase(),
+            street: document.getElementById("logradouro").value.trim(),
+            number: document.getElementById("numero").value.trim(),
+            neighborhood: document.getElementById("bairro").value.trim(),
+            city: document.getElementById("cidade").value.trim(),
+            state: document.getElementById("estado").value.trim().toUpperCase(),
         },
     };
 }
@@ -262,22 +262,22 @@ function hydrateDraft() {
         return;
     }
 
-    document.getElementById("nome").value = draft.nome || "";
+    document.getElementById("nome").value = draft.name || "";
     document.getElementById("email").value = draft.email || "";
     document.getElementById("cpf").value = formatCpf(draft.cpf || "");
-    document.getElementById("nascimento").value = draft.nascimento || "";
+    document.getElementById("nascimento").value = draft.birthday || "";
 
-    document.getElementById("cep").value = formatCep(draft.endereco?.cep || "");
-    document.getElementById("logradouro").value = draft.endereco?.logradouro || "";
-    document.getElementById("numero").value = draft.endereco?.numero || "";
-    document.getElementById("bairro").value = draft.endereco?.bairro || "";
-    document.getElementById("cidade").value = draft.endereco?.cidade || "";
-    document.getElementById("estado").value = draft.endereco?.estado || "";
+    document.getElementById("cep").value = formatCep(draft.address?.cep || "");
+    document.getElementById("logradouro").value = draft.address?.street || "";
+    document.getElementById("numero").value = draft.address?.number || "";
+    document.getElementById("bairro").value = draft.address?.neighborhood || "";
+    document.getElementById("cidade").value = draft.address?.city || "";
+    document.getElementById("estado").value = draft.address?.state || "";
 }
 
 function persistDraft() {
     const payload = buildPayload();
-    delete payload.senha;
+    delete payload.password;
     localStorage.setItem("cadastro_rascunho", JSON.stringify(payload));
 }
 

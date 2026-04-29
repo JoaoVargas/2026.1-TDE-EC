@@ -1,12 +1,12 @@
 import { requireAuthenticatedUser, logout } from "/static/js/components/auth-token-guard.js";
 
 function isManagerUser(user) {
-    const role = String(user?.tipo_usuario || "").trim().toLowerCase();
-    return role === "manager" || role === "tipousuario.manager";
+    const role = String(user?.type || "").trim().toLowerCase();
+    return role === "manager";
 }
 
 function getCachedUser() {
-    const raw = localStorage.getItem("usuario");
+    const raw = localStorage.getItem("user");
     if (!raw) {
         return null;
     }
@@ -14,7 +14,7 @@ function getCachedUser() {
     try {
         return JSON.parse(raw);
     } catch {
-        localStorage.removeItem("usuario");
+        localStorage.removeItem("user");
         return null;
     }
 }
@@ -60,7 +60,7 @@ function setupMobileSidebar() {
 }
 
 function hydrateUser(user) {
-    const userName = user?.nome || "Usuario";
+    const userName = user?.name || "Usuario";
     const userEmail = user?.email || "conta@betabank.local";
 
     const welcomeTitle = document.getElementById("welcome-title");

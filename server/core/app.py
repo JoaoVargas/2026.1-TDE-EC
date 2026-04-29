@@ -7,15 +7,15 @@ from fastapi.staticfiles import StaticFiles
 
 from server.api.router import api_router
 from server.core.settings import get_settings
-from server.db.init_db import init_orm
-from server.db.session import check_database_connection
+from server.db.connection import check_database_connection
+from server.db.init_db import init_db
 from server.web.router import web_router
 
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
     check_database_connection()
-    init_orm()
+    init_db()
     yield
 
 

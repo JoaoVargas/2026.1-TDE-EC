@@ -1,198 +1,174 @@
 from datetime import date
 
-from sqlalchemy import inspect, text
+import mysql.connector
 
 from server.core.security import hash_password
-from server.db.base import Base
-from server.db.session import SessionLocal, engine
-from server.models.orm_models import TipoUsuario
-from server.repositories.usuario_repository import UsuarioRepository
+from server.db.connection import _get_pool
+from server.models.user import UserType
 
 
-def _ensure_usuario_tipo_column() -> None:
-    inspector = inspect(engine)
-    if "usuarios" not in inspector.get_table_names():
+def _table_exists(cursor, table_name: str) -> bool:
+    cursor.execute(
+        "SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES "
+        "WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = %s",
+        (table_name,),
+    )
+    return cursor.fetchone()[0] > 0
+
+
+def _create_tables(conn) -> None:
+    cursor = conn.cursor()
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS addresses (
+            id           INT           AUTO_INCREMENT PRIMARY KEY,
+            cep          VARCHAR(8)    NOT NULL,
+            street       VARCHAR(200)  NOT NULL,
+            state        VARCHAR(2)    NOT NULL,
+            city         VARCHAR(100)  NOT NULL,
+            neighborhood VARCHAR(100)  NOT NULL,
+            number       VARCHAR(10)   NOT NULL,
+            created_at   DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            updated_at   DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+        )
+    """)
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS users (
+            id           INT           AUTO_INCREMENT PRIMARY KEY,
+            cpf          VARCHAR(11)   NOT NULL UNIQUE,
+            type         ENUM('client', 'manager') NOT NULL DEFAULT 'client',
+            name         VARCHAR(100)  NOT NULL,
+            email        VARCHAR(150)  NOT NULL UNIQUE,
+            password     VARCHAR(255)  NOT NULL,
+            birthday     DATE          NOT NULL,
+            address_id   INT           NOT NULL,
+            created_at   DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            updated_at   DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            FOREIGN KEY (address_id) REFERENCES addresses(id)
+        )
+    """)
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS accounts (
+            id             INT               AUTO_INCREMENT PRIMARY KEY,
+            user_id        INT               NOT NULL,
+            type           ENUM('checking', 'savings') NOT NULL DEFAULT 'checking',
+            account_number VARCHAR(10)       NOT NULL UNIQUE,
+            agency         VARCHAR(4)        NOT NULL DEFAULT '0001',
+            balance        DECIMAL(15, 2)    NOT NULL DEFAULT 0.00,
+            created_at     DATETIME          NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            updated_at     DATETIME          NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES users(id)
+        )
+    """)
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS transactions (
+            id              INT             AUTO_INCREMENT PRIMARY KEY,
+            type            ENUM('internal', 'transaction', 'expense', 'other') NOT NULL,
+            from_account_id INT,
+            to_account_id   INT,
+            amount          DECIMAL(15, 2)  NOT NULL,
+            description     VARCHAR(255),
+            created_at      DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            updated_at      DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            FOREIGN KEY (from_account_id) REFERENCES accounts(id),
+            FOREIGN KEY (to_account_id) REFERENCES accounts(id)
+        )
+    """)
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS portfolios (
+            id          INT             AUTO_INCREMENT PRIMARY KEY,
+            name        VARCHAR(100)    NOT NULL,
+            stock_code  VARCHAR(20)     NOT NULL,
+            stock_name  VARCHAR(100)    NOT NULL,
+            stock_price DECIMAL(15, 2)  NOT NULL,
+            created_at  DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            updated_at  DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+        )
+    """)
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS manager_portfolios (
+            id           INT      AUTO_INCREMENT PRIMARY KEY,
+            portfolio_id INT      NOT NULL,
+            manager_id   INT      NOT NULL,
+            created_at   DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            updated_at   DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            FOREIGN KEY (portfolio_id) REFERENCES portfolios(id),
+            FOREIGN KEY (manager_id) REFERENCES users(id)
+        )
+    """)
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS user_portfolios (
+            id           INT             AUTO_INCREMENT PRIMARY KEY,
+            portfolio_id INT             NOT NULL,
+            user_id      INT             NOT NULL,
+            stock_amount DECIMAL(15, 4)  NOT NULL DEFAULT 0.0000,
+            created_at   DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            updated_at   DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            FOREIGN KEY (portfolio_id) REFERENCES portfolios(id),
+            FOREIGN KEY (user_id) REFERENCES users(id)
+        )
+    """)
+    cursor.close()
+    conn.commit()
+
+
+def _seed_default_users_if_empty(conn) -> None:
+    from server.repositories.address_repository import AddressRepository
+    from server.repositories.user_repository import UserRepository
+
+    cursor = conn.cursor()
+    cursor.execute("SELECT COUNT(*) FROM users")
+    count = cursor.fetchone()[0]
+    cursor.close()
+
+    if count > 0:
         return
 
-    columns = {column["name"] for column in inspector.get_columns("usuarios")}
-    if "tipo_usuario" in columns:
-        return
+    manager_address = AddressRepository.create(
+        conn,
+        cep="80000000",
+        street="Rua Gerente",
+        state="PR",
+        city="Curitiba",
+        neighborhood="Centro",
+        number="100",
+    )
+    UserRepository.create(
+        conn,
+        cpf="39053344705",
+        type=UserType.MANAGER,
+        name="Gerente Padrao",
+        email="gerente@gerente.com",
+        password_hash=hash_password("ASDasd123"),
+        birthday=date(1988, 1, 10),
+        address_id=manager_address.id,
+    )
 
-    with engine.begin() as connection:
-        connection.execute(
-            text(
-                "ALTER TABLE usuarios "
-                "ADD COLUMN tipo_usuario VARCHAR(20) NOT NULL DEFAULT 'client'"
-            )
-        )
-
-
-def _normalize_usuario_tipo_values() -> None:
-    inspector = inspect(engine)
-    if "usuarios" not in inspector.get_table_names():
-        return
-
-    with engine.begin() as connection:
-        connection.execute(
-            text(
-                "UPDATE usuarios SET tipo_usuario = 'manager' "
-                "WHERE UPPER(tipo_usuario) = 'MANAGER'"
-            )
-        )
-        connection.execute(
-            text(
-                "UPDATE usuarios SET tipo_usuario = 'client' "
-                "WHERE tipo_usuario IS NULL OR UPPER(tipo_usuario) = 'CLIENT'"
-            )
-        )
-        connection.execute(
-            text(
-                "UPDATE usuarios SET tipo_usuario = 'client' "
-                "WHERE LOWER(tipo_usuario) NOT IN ('client', 'manager')"
-            )
-        )
-
-
-def _seed_default_users_if_empty() -> None:
-    with SessionLocal() as db:
-        if not UsuarioRepository.is_empty(db):
-            return
-
-        UsuarioRepository.create(
-            db,
-            nome="Gerente Padrao",
-            email="gerente@gerente.com",
-            senha_hash=hash_password("ASDasd123"),
-            data_nascimento=date(1988, 1, 10),
-            cpf="39053344705",
-            cep="80000000",
-            logradouro="Rua Gerente",
-            numero="100",
-            bairro="Centro",
-            cidade="Curitiba",
-            estado="PR",
-            tipo_usuario=TipoUsuario.MANAGER,
-        )
-        UsuarioRepository.create(
-            db,
-            nome="Usuario Padrao",
-            email="usuario@usuario.com",
-            senha_hash=hash_password("ASDasd123"),
-            data_nascimento=date(1995, 5, 20),
-            cpf="11144477735",
-            cep="80010000",
-            logradouro="Rua Cliente",
-            numero="200",
-            bairro="Batel",
-            cidade="Curitiba",
-            estado="PR",
-            tipo_usuario=TipoUsuario.CLIENT,
-        )
-        db.commit()
+    client_address = AddressRepository.create(
+        conn,
+        cep="80010000",
+        street="Rua Cliente",
+        state="PR",
+        city="Curitiba",
+        neighborhood="Batel",
+        number="200",
+    )
+    UserRepository.create(
+        conn,
+        cpf="11144477735",
+        type=UserType.CLIENT,
+        name="Usuario Padrao",
+        email="usuario@usuario.com",
+        password_hash=hash_password("ASDasd123"),
+        birthday=date(1995, 5, 20),
+        address_id=client_address.id,
+    )
+    conn.commit()
 
 
-def _ensure_audit_columns() -> None:
-    inspector = inspect(engine)
-    existing_tables = set(inspector.get_table_names())
-    target_tables = {"usuarios", "contas", "transacoes", "investimentos"}
-
-    with engine.begin() as connection:
-        for table_name in sorted(target_tables.intersection(existing_tables)):
-            columns = {column["name"] for column in inspector.get_columns(table_name)}
-
-            if "created_at" not in columns:
-                connection.execute(
-                    text(
-                        f"ALTER TABLE {table_name} "
-                        "ADD COLUMN created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP"
-                    )
-                )
-
-            if "updated_at" not in columns:
-                connection.execute(
-                    text(
-                        f"ALTER TABLE {table_name} "
-                        "ADD COLUMN updated_at DATETIME NOT NULL "
-                        "DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP"
-                    )
-                )
-
-
-def _drop_gastos_table_if_exists() -> None:
-    with engine.begin() as connection:
-        connection.execute(text("DROP TABLE IF EXISTS gastos"))
-
-
-def _ensure_conta_schema_and_data() -> None:
-    inspector = inspect(engine)
-    if "contas" not in inspector.get_table_names():
-        return
-
-    with engine.begin() as connection:
-        connection.execute(
-            text(
-                "UPDATE contas SET tipo_conta = 'checking' "
-                "WHERE tipo_conta IS NULL OR LOWER(tipo_conta) IN ('corrente', 'checkings')"
-            )
-        )
-        connection.execute(
-            text(
-                "UPDATE contas SET tipo_conta = 'savings' "
-                "WHERE LOWER(tipo_conta) IN ('poupanca')"
-            )
-        )
-        connection.execute(
-            text(
-                "UPDATE contas SET tipo_conta = 'checking' "
-                "WHERE LOWER(tipo_conta) NOT IN ('checking', 'savings')"
-            )
-        )
-
-        connection.execute(
-            text(
-                "UPDATE contas SET numero_conta = LPAD(CAST(id AS CHAR), 10, '0') "
-                "WHERE numero_conta IS NULL OR numero_conta = '' OR numero_conta REGEXP '[^0-9]'"
-            )
-        )
-        connection.execute(
-            text(
-                "UPDATE contas SET numero_conta = LPAD(numero_conta, 10, '0') "
-                "WHERE numero_conta REGEXP '^[0-9]+$' AND CHAR_LENGTH(numero_conta) < 10"
-            )
-        )
-        connection.execute(
-            text(
-                "UPDATE contas SET agencia = '0001' "
-                "WHERE agencia IS NULL OR agencia = '' OR agencia REGEXP '[^0-9]' "
-                "OR CHAR_LENGTH(agencia) <> 4"
-            )
-        )
-
-        connection.execute(
-            text(
-                "ALTER TABLE contas MODIFY COLUMN numero_conta VARCHAR(10) NOT NULL"
-            )
-        )
-        connection.execute(
-            text(
-                "ALTER TABLE contas MODIFY COLUMN agencia VARCHAR(4) NOT NULL DEFAULT '0001'"
-            )
-        )
-        connection.execute(
-            text(
-                "ALTER TABLE contas MODIFY COLUMN tipo_conta "
-                "ENUM('checking', 'savings') NOT NULL DEFAULT 'checking'"
-            )
-        )
-
-
-def init_orm() -> None:
-    from server.models import orm_models  # noqa: F401
-
-    Base.metadata.create_all(bind=engine)
-    _ensure_usuario_tipo_column()
-    _normalize_usuario_tipo_values()
-    _ensure_audit_columns()
-    _ensure_conta_schema_and_data()
-    _drop_gastos_table_if_exists()
-    _seed_default_users_if_empty()
+def init_db() -> None:
+    conn = _get_pool().get_connection()
+    try:
+        _create_tables(conn)
+        _seed_default_users_if_empty(conn)
+    finally:
+        conn.close()

@@ -71,7 +71,7 @@ async function submitLogin() {
     const loginValue = cpfField.value.includes("@") ? cpfField.value.trim() : onlyDigits(cpfField.value);
     const payload = {
         cpf: loginValue,
-        senha: senhaField.value,
+        password: senhaField.value,
     };
 
     submitBtn.disabled = true;
@@ -91,9 +91,9 @@ async function submitLogin() {
         }
 
         localStorage.setItem("token", result.token);
-        localStorage.setItem("usuario", JSON.stringify(result.usuario));
+        localStorage.setItem("user", JSON.stringify(result.user));
         showGlobalMessage(messageEl, "Login realizado com sucesso!", "sucesso");
-        window.location.href = getDefaultRouteForUser(result.usuario);
+        window.location.href = getDefaultRouteForUser(result.user);
     } catch {
         showGlobalMessage(messageEl, "Nao foi possivel conectar ao servidor.", "erro");
     } finally {
