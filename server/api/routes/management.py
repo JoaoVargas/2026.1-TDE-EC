@@ -1,10 +1,10 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, Field
-from sqlalchemy.orm import Session
 
 from server.api.routes.auth import get_current_manager_user
-from server.db.session import get_db
-from server.models.orm_models import TipoUsuario, Usuario
+from server.db.connection import get_db
+from server.models.conta import Conta
+from server.models.usuario import TipoUsuario, Usuario
 from server.repositories.conta_repository import ContaRepository
 from server.repositories.usuario_repository import UsuarioRepository
 
@@ -20,7 +20,7 @@ def _tipo_usuario_value(user: Usuario) -> str:
     return tipo.value if hasattr(tipo, "value") else str(tipo)
 
 
-def _tipo_conta_value(conta) -> str:
+def _tipo_conta_value(conta: Conta) -> str:
     tipo = conta.tipo_conta
     return tipo.value if hasattr(tipo, "value") else str(tipo)
 
@@ -28,7 +28,7 @@ def _tipo_conta_value(conta) -> str:
 @router.get("/overview")
 def management_overview(
     _: Usuario = Depends(get_current_manager_user),
-    db: Session = Depends(get_db),
+    db=Depends(get_db),
 ) -> dict[str, int]:
     return {
         "total_usuarios": UsuarioRepository.count_all(db),
@@ -40,7 +40,7 @@ def management_overview(
 @router.get("/users-accounts")
 def list_users_and_accounts(
     _: Usuario = Depends(get_current_manager_user),
-    db: Session = Depends(get_db),
+    db=Depends(get_db),
 ) -> dict[str, object]:
     usuarios = UsuarioRepository.list_all(db)
     usuario_ids = [usuario.id for usuario in usuarios]
@@ -77,7 +77,7 @@ def update_user_name(
     usuario_id: int,
     payload: UpdateUserNamePayload,
     _: Usuario = Depends(get_current_manager_user),
-    db: Session = Depends(get_db),
+    db=Depends(get_db),
 ) -> dict[str, object]:
     nome = payload.nome.strip()
     if not nome:

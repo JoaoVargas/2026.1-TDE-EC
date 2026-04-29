@@ -1,17 +1,16 @@
 from datetime import date, datetime, timedelta, timezone
 import re
 
+import mysql.connector.errors
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from jose import JWTError, jwt
 from pydantic import BaseModel, Field
-from sqlalchemy.exc import IntegrityError
-from sqlalchemy.orm import Session
 
 from server.core.security import hash_password, verify_password
 from server.core.settings import get_settings
-from server.db.session import get_db
-from server.models.orm_models import TipoUsuario, Usuario
+from server.db.connection import get_db
+from server.models.usuario import TipoUsuario, Usuario
 from server.repositories.usuario_repository import UsuarioRepository
 
 router = APIRouter(tags=["auth"])
@@ -78,7 +77,7 @@ def _decode_access_token(token: str) -> dict[str, object]:
 
 def get_current_user(
     credentials: HTTPAuthorizationCredentials | None = Depends(security),
-    db: Session = Depends(get_db),
+    db=Depends(get_db),
 ) -> Usuario:
     if not credentials:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Nao autenticado.")
@@ -114,7 +113,7 @@ def get_current_manager_user(current_user: Usuario = Depends(get_current_user)) 
 def verificar_disponibilidade(
     cpf: str | None = Query(default=None),
     email: str | None = Query(default=None),
-    db: Session = Depends(get_db),
+    db=Depends(get_db),
 ) -> dict[str, bool]:
     if not cpf and not email:
         raise HTTPException(
@@ -127,7 +126,7 @@ def verificar_disponibilidade(
 
 
 @router.post("/cadastro", status_code=status.HTTP_201_CREATED)
-def cadastrar_usuario(payload: CadastroPayload, db: Session = Depends(get_db)) -> dict[str, str]:
+def cadastrar_usuario(payload: CadastroPayload, db=Depends(get_db)) -> dict[str, str]:
     cpf = _normalize_cpf(payload.cpf)
     email = _normalize_email(payload.email)
     nome = payload.nome.strip()
@@ -175,7 +174,7 @@ def cadastrar_usuario(payload: CadastroPayload, db: Session = Depends(get_db)) -
 
     try:
         db.commit()
-    except IntegrityError:
+    except mysql.connector.errors.IntegrityError:
         db.rollback()
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
@@ -186,7 +185,7 @@ def cadastrar_usuario(payload: CadastroPayload, db: Session = Depends(get_db)) -
 
 
 @router.post("/login")
-def login(payload: LoginPayload, db: Session = Depends(get_db)) -> dict[str, object]:
+def login(payload: LoginPayload, db=Depends(get_db)) -> dict[str, object]:
     login_value = payload.cpf.strip()
     if not login_value:
         raise HTTPException(

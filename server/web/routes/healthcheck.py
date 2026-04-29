@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Request
 
-from server.db.session import check_database_connection
+from server.db.connection import check_database_connection
 from server.web.routes._shared import templates
 
 router = APIRouter(tags=["pages"])
