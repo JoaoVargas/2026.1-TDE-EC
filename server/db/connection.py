@@ -15,7 +15,6 @@ def _get_pool() -> mysql.connector.pooling.MySQLConnectionPool:
         _pool = mysql.connector.pooling.MySQLConnectionPool(
             pool_name="bancodigital",
             pool_size=settings.db_pool_size,
-            pool_timeout=settings.db_pool_timeout,
             host=settings.db_host,
             port=settings.db_port,
             user=settings.db_user,
@@ -42,6 +41,7 @@ def check_database_connection() -> None:
         conn = _get_pool().get_connection()
         cursor = conn.cursor()
         cursor.execute("SELECT 1")
+        cursor.fetchone()
         cursor.close()
         conn.close()
     except Exception as exc:

@@ -1,57 +1,84 @@
 -- BetaBank Digital — initial schema
 -- Executed automatically by MySQL on first container start (empty data volume).
 
-CREATE TABLE IF NOT EXISTS usuarios (
-    id            INT           AUTO_INCREMENT PRIMARY KEY,
-    nome          VARCHAR(100)  NOT NULL,
-    email         VARCHAR(150)  NOT NULL UNIQUE,
-    senha         VARCHAR(255)  NOT NULL,
-    data_nascimento DATE         NOT NULL,
-    cpf           VARCHAR(14)   NOT NULL UNIQUE,
-    cep           VARCHAR(9)    NOT NULL,
-    logradouro    VARCHAR(200),
-    numero        VARCHAR(10),
-    bairro        VARCHAR(100),
-    cidade        VARCHAR(100),
-    estado        VARCHAR(2),
-    tipo_usuario  VARCHAR(20)   NOT NULL DEFAULT 'client',
-    created_at    DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at    DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+CREATE TABLE IF NOT EXISTS addresses (
+    id           INT           AUTO_INCREMENT PRIMARY KEY,
+    cep          VARCHAR(8)    NOT NULL,
+    street       VARCHAR(200)  NOT NULL,
+    state        VARCHAR(2)    NOT NULL,
+    city         VARCHAR(100)  NOT NULL,
+    neighborhood VARCHAR(100)  NOT NULL,
+    number       VARCHAR(10)   NOT NULL,
+    created_at   DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at   DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
-CREATE TABLE IF NOT EXISTS contas (
-    id            INT               AUTO_INCREMENT PRIMARY KEY,
-    usuario_id    INT               NOT NULL,
-    numero_conta  VARCHAR(10)       NOT NULL UNIQUE,
-    agencia       VARCHAR(4)        NOT NULL DEFAULT '0001',
-    saldo         DECIMAL(15, 2)    NOT NULL DEFAULT 0.00,
-    tipo_conta    ENUM('checking', 'savings') NOT NULL DEFAULT 'checking',
-    created_at    DATETIME          NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at    DATETIME          NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (usuario_id) REFERENCES usuarios(id)
+CREATE TABLE IF NOT EXISTS users (
+    id           INT           AUTO_INCREMENT PRIMARY KEY,
+    cpf          VARCHAR(11)   NOT NULL UNIQUE,
+    type         ENUM('client', 'manager') NOT NULL DEFAULT 'client',
+    name         VARCHAR(100)  NOT NULL,
+    email        VARCHAR(150)  NOT NULL UNIQUE,
+    password     VARCHAR(255)  NOT NULL,
+    birthday     DATE          NOT NULL,
+    address_id   INT           NOT NULL,
+    created_at   DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at   DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (address_id) REFERENCES addresses(id)
 );
 
-CREATE TABLE IF NOT EXISTS transacoes (
+CREATE TABLE IF NOT EXISTS accounts (
+    id             INT               AUTO_INCREMENT PRIMARY KEY,
+    user_id        INT               NOT NULL,
+    type           ENUM('checking', 'savings') NOT NULL DEFAULT 'checking',
+    account_number VARCHAR(10)       NOT NULL UNIQUE,
+    agency         VARCHAR(4)        NOT NULL DEFAULT '0001',
+    balance        DECIMAL(15, 2)    NOT NULL DEFAULT 0.00,
+    created_at     DATETIME          NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at     DATETIME          NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id)
+);
+
+CREATE TABLE IF NOT EXISTS transactions (
     id              INT             AUTO_INCREMENT PRIMARY KEY,
-    conta_id        INT             NOT NULL,
-    tipo_transacao  VARCHAR(30)     NOT NULL,
-    descricao       VARCHAR(255),
-    valor           DECIMAL(15, 2)  NOT NULL,
-    data_transacao  DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    type            ENUM('internal', 'transaction', 'expense', 'other') NOT NULL,
+    from_account_id INT,
+    to_account_id   INT,
+    amount          DECIMAL(15, 2)  NOT NULL,
+    description     VARCHAR(255),
     created_at      DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at      DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (conta_id) REFERENCES contas(id)
+    FOREIGN KEY (from_account_id) REFERENCES accounts(id),
+    FOREIGN KEY (to_account_id) REFERENCES accounts(id)
 );
 
-CREATE TABLE IF NOT EXISTS investimentos (
-    id                  INT             AUTO_INCREMENT PRIMARY KEY,
-    usuario_id          INT             NOT NULL,
-    tipo_investimento   VARCHAR(50)     NOT NULL,
-    nome_ativo          VARCHAR(100)    NOT NULL,
-    valor_aplicado      DECIMAL(15, 2)  NOT NULL,
-    rentabilidade       DECIMAL(8, 4),
-    data_aplicacao      DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    created_at          DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at          DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (usuario_id) REFERENCES usuarios(id)
+CREATE TABLE IF NOT EXISTS portfolios (
+    id          INT             AUTO_INCREMENT PRIMARY KEY,
+    name        VARCHAR(100)    NOT NULL,
+    stock_code  VARCHAR(20)     NOT NULL,
+    stock_name  VARCHAR(100)    NOT NULL,
+    stock_price DECIMAL(15, 2)  NOT NULL,
+    created_at  DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at  DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS manager_portfolios (
+    id           INT      AUTO_INCREMENT PRIMARY KEY,
+    portfolio_id INT      NOT NULL,
+    manager_id   INT      NOT NULL,
+    created_at   DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at   DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (portfolio_id) REFERENCES portfolios(id),
+    FOREIGN KEY (manager_id) REFERENCES users(id)
+);
+
+CREATE TABLE IF NOT EXISTS user_portfolios (
+    id           INT             AUTO_INCREMENT PRIMARY KEY,
+    portfolio_id INT             NOT NULL,
+    user_id      INT             NOT NULL,
+    stock_amount DECIMAL(15, 4)  NOT NULL DEFAULT 0.0000,
+    created_at   DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at   DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (portfolio_id) REFERENCES portfolios(id),
+    FOREIGN KEY (user_id) REFERENCES users(id)
 );

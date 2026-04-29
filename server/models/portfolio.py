@@ -4,12 +4,11 @@ from decimal import Decimal
 
 
 @dataclass
-class Transacao:
+class Portfolio:
     id: int
-    conta_id: int
-    tipo_transacao: str
-    descricao: str | None
-    valor: Decimal
-    data_transacao: datetime
+    name: str
+    stock_code: str
+    stock_name: str
+    stock_price: Decimal
     created_at: datetime
     updated_at: datetime

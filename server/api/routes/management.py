@@ -3,91 +3,91 @@ from pydantic import BaseModel, Field
 
 from server.api.routes.auth import get_current_manager_user
 from server.db.connection import get_db
-from server.models.conta import Conta
-from server.models.usuario import TipoUsuario, Usuario
-from server.repositories.conta_repository import ContaRepository
-from server.repositories.usuario_repository import UsuarioRepository
+from server.models.account import Account
+from server.models.user import User, UserType
+from server.repositories.account_repository import AccountRepository
+from server.repositories.user_repository import UserRepository
 
 router = APIRouter(prefix="/management", tags=["management"])
 
 
 class UpdateUserNamePayload(BaseModel):
-    nome: str = Field(min_length=1, max_length=100)
+    name: str = Field(min_length=1, max_length=100)
 
 
-def _tipo_usuario_value(user: Usuario) -> str:
-    tipo = user.tipo_usuario
-    return tipo.value if hasattr(tipo, "value") else str(tipo)
+def _user_type_value(user: User) -> str:
+    t = user.type
+    return t.value if hasattr(t, "value") else str(t)
 
 
-def _tipo_conta_value(conta: Conta) -> str:
-    tipo = conta.tipo_conta
-    return tipo.value if hasattr(tipo, "value") else str(tipo)
+def _account_type_value(account: Account) -> str:
+    t = account.type
+    return t.value if hasattr(t, "value") else str(t)
 
 
 @router.get("/overview")
 def management_overview(
-    _: Usuario = Depends(get_current_manager_user),
+    _: User = Depends(get_current_manager_user),
     db=Depends(get_db),
 ) -> dict[str, int]:
     return {
-        "total_usuarios": UsuarioRepository.count_all(db),
-        "total_gerentes": UsuarioRepository.count_by_tipo(db, TipoUsuario.MANAGER),
-        "total_contas": ContaRepository.count_all(db),
+        "total_users": UserRepository.count_all(db),
+        "total_managers": UserRepository.count_by_type(db, UserType.MANAGER),
+        "total_accounts": AccountRepository.count_all(db),
     }
 
 
 @router.get("/users-accounts")
 def list_users_and_accounts(
-    _: Usuario = Depends(get_current_manager_user),
+    _: User = Depends(get_current_manager_user),
     db=Depends(get_db),
 ) -> dict[str, object]:
-    usuarios = UsuarioRepository.list_all(db)
-    usuario_ids = [usuario.id for usuario in usuarios]
-    contas_por_usuario = ContaRepository.get_grouped_by_usuario_ids(db, usuario_ids)
+    users = UserRepository.list_all(db)
+    user_ids = [user.id for user in users]
+    accounts_by_user = AccountRepository.get_grouped_by_user_ids(db, user_ids)
 
     data = []
-    for usuario in usuarios:
-        contas = contas_por_usuario.get(usuario.id, [])
+    for user in users:
+        accounts = accounts_by_user.get(user.id, [])
         data.append(
             {
-                "id": usuario.id,
-                "nome": usuario.nome,
-                "email": usuario.email,
-                "cpf": usuario.cpf,
-                "tipo_usuario": _tipo_usuario_value(usuario),
-                "contas": [
+                "id": user.id,
+                "name": user.name,
+                "email": user.email,
+                "cpf": user.cpf,
+                "type": _user_type_value(user),
+                "accounts": [
                     {
-                        "id": conta.id,
-                        "numero_conta": conta.numero_conta,
-                        "agencia": conta.agencia,
-                        "tipo_conta": _tipo_conta_value(conta),
-                        "saldo": str(conta.saldo),
+                        "id": account.id,
+                        "account_number": account.account_number,
+                        "agency": account.agency,
+                        "type": _account_type_value(account),
+                        "balance": str(account.balance),
                     }
-                    for conta in contas
+                    for account in accounts
                 ],
             }
         )
 
-    return {"usuarios": data}
+    return {"users": data}
 
 
-@router.patch("/users/{usuario_id}/name")
+@router.patch("/users/{user_id}/name")
 def update_user_name(
-    usuario_id: int,
+    user_id: int,
     payload: UpdateUserNamePayload,
-    _: Usuario = Depends(get_current_manager_user),
+    _: User = Depends(get_current_manager_user),
     db=Depends(get_db),
 ) -> dict[str, object]:
-    nome = payload.nome.strip()
-    if not nome:
+    name = payload.name.strip()
+    if not name:
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             detail="Nome nao pode ser vazio.",
         )
 
-    usuario = UsuarioRepository.update_nome(db, usuario_id=usuario_id, nome=nome)
-    if not usuario:
+    user = UserRepository.update_name(db, user_id=user_id, name=name)
+    if not user:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Usuario nao encontrado.",
@@ -95,7 +95,7 @@ def update_user_name(
 
     db.commit()
     return {
-        "id": usuario.id,
-        "nome": usuario.nome,
+        "id": user.id,
+        "name": user.name,
         "message": "Nome do usuario atualizado com sucesso.",
     }

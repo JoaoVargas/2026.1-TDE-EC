@@ -73,12 +73,12 @@ function formatMoney(value) {
     });
 }
 
-function humanizeTipoUsuario(tipoUsuario) {
-    return tipoUsuario === "manager" ? "Gerente" : "Cliente";
+function humanizeUserType(type) {
+    return type === "manager" ? "Gerente" : "Cliente";
 }
 
-function humanizeTipoConta(tipoConta) {
-    return tipoConta === "savings" ? "Poupanca" : "Corrente";
+function humanizeAccountType(type) {
+    return type === "savings" ? "Poupanca" : "Corrente";
 }
 
 function showFeedback(message, kind = "neutral") {
@@ -138,10 +138,10 @@ function createAccountRow(account) {
     const accountMeta = document.createElement("p");
     const balance = document.createElement("span");
 
-    const type = humanizeTipoConta(account.tipo_conta);
-    number.textContent = account.numero_conta || "-";
-    accountMeta.textContent = `Agencia ${account.agencia || "-"} - ${type}`;
-    balance.textContent = formatMoney(account.saldo);
+    const type = humanizeAccountType(account.type);
+    number.textContent = account.account_number || "-";
+    accountMeta.textContent = `Agencia ${account.agency || "-"} - ${type}`;
+    balance.textContent = formatMoney(account.balance);
 
     details.append(number, accountMeta);
     item.append(details, balance);
@@ -211,7 +211,7 @@ function openRenameModal(user, nameEl, triggerEl) {
     renameContext.nameEl = nameEl;
     renameContext.triggerEl = triggerEl;
 
-    input.value = user?.nome || "";
+    input.value = user?.name || "";
     setRenameModalFeedback("");
     setRenameModalBusyState(false);
     backdrop.hidden = false;
@@ -278,8 +278,8 @@ async function submitRenameModal() {
         return;
     }
 
-    const updatedName = result.payload?.nome || nextName;
-    renameContext.user.nome = updatedName;
+    const updatedName = result.payload?.name || nextName;
+    renameContext.user.name = updatedName;
     renameContext.nameEl.textContent = updatedName;
     showFeedback(`Nome do usuario ${renameContext.user.id} atualizado.`, "success");
     closeRenameModal();
@@ -339,7 +339,7 @@ function createPenIcon() {
     return icon;
 }
 
-async function updateUserName(userId, nome) {
+async function updateUserName(userId, name) {
     const token = getToken();
     if (!token) {
         return { ok: false, status: 401, detail: "Nao autenticado." };
@@ -352,7 +352,7 @@ async function updateUserName(userId, nome) {
                 "Content-Type": "application/json",
                 Authorization: `Bearer ${token}`,
             },
-            body: JSON.stringify({ nome }),
+            body: JSON.stringify({ name }),
         });
 
         let payload = {};
@@ -377,7 +377,7 @@ function createUserCard(user) {
     const card = document.createElement("article");
     card.className = "management-user-card ui-card";
 
-    const accounts = user.contas ?? [];
+    const accounts = user.accounts ?? [];
     const accountItems = document.createElement("ul");
     accountItems.className = "management-account-list";
 
@@ -392,7 +392,7 @@ function createUserCard(user) {
         });
     }
 
-    const perfil = humanizeTipoUsuario(user.tipo_usuario);
+    const perfil = humanizeUserType(user.type);
     const header = document.createElement("header");
     header.className = "management-user-header";
 
@@ -413,7 +413,7 @@ function createUserCard(user) {
     editLabel.textContent = "Editar";
     editBtn.append(editLabel);
 
-    name.textContent = user.nome || "Usuario";
+    name.textContent = user.name || "Usuario";
     email.textContent = user.email || "-";
     badge.className = "management-badge";
     badge.textContent = perfil;
@@ -504,7 +504,7 @@ async function loadUsersAndAccounts() {
         }
 
         const payload = await response.json();
-        renderUsers(payload.usuarios ?? []);
+        renderUsers(payload.users ?? []);
     } catch {
         setGridVisibility(false);
         setEmptyState(false);
