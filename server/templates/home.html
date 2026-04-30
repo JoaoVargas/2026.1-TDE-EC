@@ -8,14 +8,20 @@
 
 {% block dashboard_content %}
 <header class="greeting-block">
-    <h1 id="welcome-title">Ola, Usuario</h1>
+    <h1>Ola, {{ user.name if user else 'Usuario' }}</h1>
     <p>Resumo rapido da sua conta e atalhos do BetaBank.</p>
 </header>
+
+{% if flash == 'transferencia_realizada' %}
+<div class="feedback-message mensagem sucesso feedback-success" style="display: block;">
+    Transferencia realizada com sucesso!
+</div>
+{% endif %}
 
 <section class="balance-card ui-card">
     <div>
         <p class="balance-label">Saldo total</p>
-        <p class="balance-value" id="saldo-valor">R$ 1.250,00</p>
+        <p class="balance-value">{{ account.balance | brl if account else 'R$ 0,00' }}</p>
     </div>
     <a href="/extrato" class="balance-arrow" aria-label="Abrir extrato">></a>
 </section>
@@ -38,8 +44,4 @@
         button-variant="ui-btn-secondary"
     ></bb-insight-card>
 </section>
-{% endblock %}
-
-{% block dashboard_scripts %}
-<script type="module" src="/static/js/pages/home.js"></script>
 {% endblock %}

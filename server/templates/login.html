@@ -12,16 +12,20 @@
     <section class="auth-form-panel">
         <h1>Acesso de Login</h1>
 
-        {{ input_field('cpf', 'CPF ou E-mail') }}
-        {{ input_field('senha', 'Senha', 'password', 'current-password') }}
+        <form method="post" action="/login" id="form-login" novalidate>
+            {{ input_field('cpf', 'CPF ou E-mail', value=cpf_value | default('')) }}
+            {{ input_field('senha', 'Senha', 'password', 'current-password') }}
 
-        <div class="forgot-link">
-            <a href="#" aria-disabled="true">Esqueci a senha</a>
-        </div>
+            <div class="forgot-link">
+                <a href="#" aria-disabled="true">Esqueci a senha</a>
+            </div>
 
-        <div id="mensagem" class="feedback-message" style="display: none;"></div>
+            {% if error %}
+            <div class="feedback-message mensagem erro feedback-error" style="display: block;">{{ error }}</div>
+            {% endif %}
 
-        <button class="ui-btn ui-btn-primary" id="btn-login" type="button">Entrar</button>
+            <button class="ui-btn ui-btn-primary" type="submit">Entrar</button>
+        </form>
 
         <p class="register-text">
             Nao tem conta?
@@ -32,5 +36,6 @@
 {% endblock %}
 
 {% block scripts %}
+<script type="module" src="/static/js/components/formatters.js"></script>
 <script type="module" src="/static/js/pages/login.js"></script>
 {% endblock %}

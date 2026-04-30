@@ -11,11 +11,11 @@
     <section class="statement-balance ui-card">
         <div>
             <p class="statement-label">Saldo atual</p>
-            <p class="statement-value">R$ 1.250,00</p>
+            <p class="statement-value">{{ balance_str }}</p>
         </div>
         <div class="statement-badges">
-            <span class="statement-badge badge-in">+ R$ 3.200,00</span>
-            <span class="statement-badge badge-out">- R$ 1.950,00</span>
+            <span class="statement-badge badge-in">+ {{ total_in_str }}</span>
+            <span class="statement-badge badge-out">- {{ total_out_str }}</span>
         </div>
     </section>
 
@@ -26,60 +26,20 @@
         <button type="button" class="statement-filter" data-filter="month">Este mes</button>
     </nav>
 
-    <section class="statement-chart ui-card">
-        <p class="chart-title">Saidas por periodo</p>
-        <div class="chart-columns">
-            <div class="chart-col"><span class="col-bar" style="height:60%"></span><span>Jan</span></div>
-            <div class="chart-col"><span class="col-bar" style="height:80%"></span><span>Fev</span></div>
-            <div class="chart-col"><span class="col-bar" style="height:45%"></span><span>Mar</span></div>
-            <div class="chart-col"><span class="col-bar emphasis" style="height:70%"></span><span>Abr</span></div>
-            <div class="chart-col"><span class="col-bar" style="height:55%"></span><span>Mai</span></div>
-            <div class="chart-col"><span class="col-bar" style="height:90%"></span><span>Jun</span></div>
-        </div>
-    </section>
-
     <p class="statement-list-title">Transacoes recentes</p>
 
     <section class="statement-list" id="statement-list">
+        {% for tx in transactions %}
         <bb-statement-item
-            kind="in"
-            month="4"
-            title="Salario"
-            date="11/04/2026 · 09:00"
-            amount="+ R$ 3.200,00"
+            kind="{{ tx.kind }}"
+            month="{{ tx.month }}"
+            title="{{ tx.title }}"
+            date="{{ tx.date_str }}"
+            amount="{{ tx.amount_str }}"
         ></bb-statement-item>
-
-        <bb-statement-item
-            kind="out"
-            month="4"
-            title="Transferencia - Gersio Caminhoes"
-            date="11/04/2026 · 14:27"
-            amount="- R$ 88.854,11"
-        ></bb-statement-item>
-
-        <bb-statement-item
-            kind="out"
-            month="4"
-            title="Fatura Cartao de Credito"
-            date="05/04/2026 · 10:00"
-            amount="- R$ 450,00"
-        ></bb-statement-item>
-
-        <bb-statement-item
-            kind="in"
-            month="4"
-            title="Pix recebido - Amanda Ferreira"
-            date="02/04/2026 · 18:45"
-            amount="+ R$ 250,00"
-        ></bb-statement-item>
-
-        <bb-statement-item
-            kind="out"
-            month="4"
-            title="Mercado Extra"
-            date="01/04/2026 · 12:30"
-            amount="- R$ 312,40"
-        ></bb-statement-item>
+        {% else %}
+        <p class="no-transactions">Nenhuma transacao encontrada.</p>
+        {% endfor %}
     </section>
 </section>
 {% endblock %}
