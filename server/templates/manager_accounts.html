@@ -17,19 +17,68 @@
         <p>Consulta completa de usuarios cadastrados e suas contas associadas.</p>
     </header>
 
-    <p class="manager-feedback" id="manager-feedback" role="status" aria-live="polite"></p>
+    {% if feedback %}
+    <p class="manager-feedback is-success" role="status">{{ feedback }}</p>
+    {% endif %}
 
-    <section class="management-loader ui-card" id="management-loader" aria-live="polite">
-        <div class="management-spinner" aria-hidden="true"></div>
-        <p>Carregando usuarios e contas...</p>
+    {% if users %}
+    <section class="management-users-grid">
+        {% for u in users %}
+        <article class="management-user-card ui-card">
+            <header class="management-user-header">
+                <div class="management-user-identity">
+                    <div class="management-user-name-row">
+                        <h2 class="management-user-name" id="name-{{ u.id }}">{{ u.name }}</h2>
+                        <button
+                            type="button"
+                            class="management-name-edit-trigger"
+                            title="Alterar nome"
+                            data-user-id="{{ u.id }}"
+                            data-user-name="{{ u.name }}"
+                        >
+                            <svg viewBox="0 0 24 24" aria-hidden="true">
+                                <path d="M3 17.25V21h3.75l11-11-3.75-3.75-11 11zM20.71 7.04a1.003 1.003 0 000-1.42l-2.34-2.34a1.003 1.003 0 00-1.42 0l-1.83 1.83 3.75 3.75 1.84-1.82z"/>
+                            </svg>
+                            <span>Editar</span>
+                        </button>
+                    </div>
+                    <p>{{ u.email }}</p>
+                </div>
+                <span class="management-badge">{{ 'Gerente' if u.type == 'manager' else 'Cliente' }}</span>
+            </header>
+
+            <div class="management-user-meta">
+                <span><strong>ID: </strong>{{ u.id }}</span>
+                <span><strong>CPF: </strong>{{ u.cpf[:3] }}.{{ u.cpf[3:6] }}.{{ u.cpf[6:9] }}-{{ u.cpf[9:] }}</span>
+                <span><strong>Contas: </strong>{{ u.accounts | length }}</span>
+            </div>
+
+            {% if u.accounts %}
+            <ul class="management-account-list">
+                {% for acc in u.accounts %}
+                <li class="management-account-item">
+                    <div>
+                        <strong>{{ acc.account_number }}</strong>
+                        <p>Agencia {{ acc.agency }} - {{ 'Poupanca' if acc.type == 'savings' else 'Corrente' }}</p>
+                    </div>
+                    <span>R$ {{ "%.2f"|format(acc.balance) | replace('.', ',') }}</span>
+                </li>
+                {% endfor %}
+            </ul>
+            {% else %}
+            <ul class="management-account-list">
+                <li class="management-account-empty">Nenhuma conta vinculada.</li>
+            </ul>
+            {% endif %}
+        </article>
+        {% endfor %}
     </section>
-
-    <article class="management-empty-card ui-card" id="management-empty" hidden>
+    {% else %}
+    <article class="management-empty-card ui-card">
         <h2>Nenhum usuario encontrado</h2>
         <p>Ainda nao existem usuarios cadastrados para exibir nesta area.</p>
     </article>
-
-    <section class="management-users-grid" id="management-users-grid" hidden></section>
+    {% endif %}
 
     <div class="management-modal-backdrop" id="rename-modal-backdrop" hidden>
         <div
@@ -45,22 +94,23 @@
                 </button>
             </header>
 
-            <label class="ui-label" for="rename-modal-input">Novo nome</label>
-            <input
-                class="ui-input"
-                id="rename-modal-input"
-                type="text"
-                maxlength="100"
-                autocomplete="off"
-                placeholder="Digite o novo nome"
-            />
+            <form id="rename-form" method="post" action="">
+                <label class="ui-label" for="rename-modal-input">Novo nome</label>
+                <input
+                    class="ui-input"
+                    id="rename-modal-input"
+                    name="name"
+                    type="text"
+                    maxlength="100"
+                    autocomplete="off"
+                    placeholder="Digite o novo nome"
+                />
 
-            <p class="management-modal-feedback" id="rename-modal-feedback" role="status" aria-live="polite"></p>
-
-            <div class="management-modal-actions">
-                <button type="button" class="ui-btn ui-btn-secondary" id="rename-modal-cancel">Cancelar</button>
-                <button type="button" class="ui-btn ui-btn-primary" id="rename-modal-save">Salvar</button>
-            </div>
+                <div class="management-modal-actions">
+                    <button type="button" class="ui-btn ui-btn-secondary" id="rename-modal-cancel">Cancelar</button>
+                    <button type="submit" class="ui-btn ui-btn-primary" id="rename-modal-save">Salvar</button>
+                </div>
+            </form>
         </div>
     </div>
 </section>

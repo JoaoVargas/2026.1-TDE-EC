@@ -14,14 +14,18 @@
     </nav>
 
     <div class="sidebar-profile">
-        <div class="avatar" id="user-avatar">U</div>
+        <div class="avatar">{{ user_initials(user.name) if user else 'U' }}</div>
         <div>
-            <strong id="profile-name">Usuario</strong>
-            <p id="profile-email">conta@betabank.local</p>
+            <strong>{{ user.name if user else 'Usuario' }}</strong>
+            <p>{{ user.email if user else 'conta@betabank.local' }}</p>
         </div>
     </div>
 
-    <a href="/manager" id="manager-nav-link" class="ui-btn ui-btn-primary manager-entry-btn">Acessar gerencia</a>
+    {% if user and is_manager(user) %}
+    <a href="/manager" class="ui-btn ui-btn-primary manager-entry-btn">Acessar gerencia</a>
+    {% endif %}
 
-    <button id="btn-logout" type="button" class="ui-btn ui-btn-secondary logout-btn">Sair</button>
+    <form method="post" action="/logout">
+        <button type="submit" class="ui-btn ui-btn-secondary logout-btn">Sair</button>
+    </form>
 </aside>

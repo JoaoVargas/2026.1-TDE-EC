@@ -12,33 +12,37 @@
     <section class="auth-form-panel">
         <h1>Criar Conta</h1>
 
-        <div class="form-grid">
-            {{ input_field('nome', 'Nome completo') }}
-            {{ input_field('email', 'E-mail', 'email', 'email') }}
-            {{ input_field('cpf', 'CPF') }}
-            {{ input_field('nascimento', 'Data de nascimento', 'date') }}
-            {{ input_field('senha', 'Senha', 'password', 'new-password') }}
-            {{ input_field('confirmar', 'Confirmar senha', 'password', 'new-password') }}
-        </div>
+        <form method="post" action="/cadastro" id="form-cadastro" novalidate>
+            <div class="form-grid">
+                {{ input_field('nome', 'Nome completo', value=(form.nome | default(''))) }}
+                {{ input_field('email', 'E-mail', 'email', 'email', value=(form.email | default(''))) }}
+                {{ input_field('cpf', 'CPF', value=(form.cpf | default(''))) }}
+                {{ input_field('nascimento', 'Data de nascimento', 'date', value=(form.nascimento | default(''))) }}
+                {{ input_field('senha', 'Senha', 'password', 'new-password') }}
+                {{ input_field('confirmar', 'Confirmar senha', 'password', 'new-password') }}
+            </div>
 
-        <hr class="divider" />
-        <h2>Endereco</h2>
+            <hr class="divider" />
+            <h2>Endereco</h2>
 
-        <div class="form-grid">
-            {{ input_field('cep', 'CEP', 'text', 'off', 'highlight') }}
-            {{ input_field('logradouro', 'Logradouro', 'text', 'street-address', 'highlight') }}
-            {{ input_field('numero', 'Numero') }}
-            {{ input_field('bairro', 'Bairro') }}
-            {{ input_field('cidade', 'Cidade') }}
-            {{ input_field('estado', 'Estado') }}
-        </div>
+            <div class="form-grid">
+                {{ input_field('cep', 'CEP', 'text', 'off', 'highlight', value=(form.cep | default(''))) }}
+                {{ input_field('logradouro', 'Logradouro', 'text', 'street-address', 'highlight', value=(form.logradouro | default(''))) }}
+                {{ input_field('numero', 'Numero', value=(form.numero | default(''))) }}
+                {{ input_field('bairro', 'Bairro', value=(form.bairro | default(''))) }}
+                {{ input_field('cidade', 'Cidade', value=(form.cidade | default(''))) }}
+                {{ input_field('estado', 'Estado', value=(form.estado | default(''))) }}
+            </div>
 
-        <div id="mensagem" class="feedback-message" style="display: none;"></div>
+            {% if error %}
+            <div class="feedback-message mensagem erro feedback-error" style="display: block;">{{ error }}</div>
+            {% endif %}
 
-        <div class="actions">
-            <button class="ui-btn ui-btn-secondary" type="button" onclick="history.back()">Voltar</button>
-            <button class="ui-btn ui-btn-primary" id="btn-finalizar" type="button">Finalizar cadastro</button>
-        </div>
+            <div class="actions">
+                <button class="ui-btn ui-btn-secondary" type="button" onclick="history.back()">Voltar</button>
+                <button class="ui-btn ui-btn-primary" type="submit" id="btn-finalizar">Finalizar cadastro</button>
+            </div>
+        </form>
     </section>
 </div>
 {% endblock %}

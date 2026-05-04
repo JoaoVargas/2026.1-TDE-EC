@@ -7,27 +7,23 @@
 {% endblock %}
 
 {% block dashboard_topbar_actions %}
-<button class="ui-btn ui-btn-secondary" type="button">Extrato</button>
-<button class="ui-btn ui-btn-primary" type="button">Investir</button>
+<a class="ui-btn ui-btn-secondary" href="/extrato">Extrato</a>
 {% endblock %}
 
 {% block dashboard_content %}
-<section class="investment-page" data-view="distribuicao">
+<section class="investment-page" data-view="distribuicao" data-portfolio="{{ chart_json | e }}">
     <div class="investment-hero">
         <article class="investment-stat ui-card main-stat">
             <p class="investment-stat-label">Total em investimentos</p>
-            <p class="investment-stat-value"><span class="currency">R$</span><span id="total-val">0,00</span></p>
-            <p class="investment-stat-sub" id="total-change">- Sem variacao</p>
+            <p class="investment-stat-value"><span class="currency">R$</span>{{ total_str }}</p>
         </article>
         <article class="investment-stat ui-card">
             <p class="investment-stat-label">Renda fixa</p>
-            <p class="investment-stat-value"><span class="currency">R$</span><span id="fixo-val">0,00</span></p>
-            <p class="investment-stat-sub" id="fixo-pct">- 0 ativos</p>
+            <p class="investment-stat-value"><span class="currency">R$</span>{{ fixo_str }}</p>
         </article>
         <article class="investment-stat ui-card">
             <p class="investment-stat-label">Renda variavel</p>
-            <p class="investment-stat-value"><span class="currency">R$</span><span id="variavel-val">0,00</span></p>
-            <p class="investment-stat-sub" id="variavel-pct">- 0 ativos</p>
+            <p class="investment-stat-value"><span class="currency">R$</span>{{ variavel_str }}</p>
         </article>
     </div>
 
@@ -58,13 +54,6 @@
             <h2>Participacao por ativo</h2>
         </header>
         <div class="bar-list" id="asset-bars"></div>
-    </section>
-
-    <section class="dist-section ui-card">
-        <header class="investment-section-header compact">
-            <h2>Rentabilidade acumulada por classe</h2>
-        </header>
-        <div class="bar-list" id="return-bars"></div>
     </section>
 </section>
 {% endblock %}

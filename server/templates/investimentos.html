@@ -7,8 +7,7 @@
 {% endblock %}
 
 {% block dashboard_topbar_actions %}
-<button class="ui-btn ui-btn-secondary" type="button">Extrato</button>
-<button class="ui-btn ui-btn-primary" type="button">Investir</button>
+<a class="ui-btn ui-btn-secondary" href="/extrato">Extrato</a>
 {% endblock %}
 
 {% block dashboard_content %}
@@ -16,11 +15,10 @@
     <div class="investment-hero">
         <article class="investment-stat ui-card main-stat">
             <p class="investment-stat-label">Total em investimentos</p>
-            <p class="investment-stat-value"><span class="currency">R$</span><span id="total-val">0,00</span></p>
-            <p class="investment-stat-sub" id="total-change">- Sem variacao</p>
+            <p class="investment-stat-value"><span class="currency">R$</span>{{ total_str }}</p>
         </article>
-        <bb-investment-stat label="Renda fixa" value="0,00" subtitle="- 0 ativos"></bb-investment-stat>
-        <bb-investment-stat label="Renda variavel" value="0,00" subtitle="- 0 ativos"></bb-investment-stat>
+        <bb-investment-stat label="Renda fixa" value="{{ fixo_str }}" subtitle="na carteira"></bb-investment-stat>
+        <bb-investment-stat label="Renda variavel" value="{{ variavel_str }}" subtitle="na carteira"></bb-investment-stat>
     </div>
 
     <nav class="investment-tabs">
@@ -28,80 +26,29 @@
         <a class="investment-tab" href="/investimentos/distribuicao">Analise de distribuicao</a>
     </nav>
 
+    {% if holdings %}
     <section class="investment-section">
         <header class="investment-section-header">
-            <h2>Renda fixa</h2>
-            <a href="#">Ver todos</a>
+            <h2>Meus ativos</h2>
         </header>
         <div class="investment-card-grid">
+            {% for h in holdings %}
             <bb-asset-card
-                kind="Titulo publico"
-                title="Tesouro Prefixado"
-                subtitle="Vencimento 2027"
-                tag="100% CDI"
+                kind="{{ h.class }}"
+                title="{{ h.name }}"
+                subtitle="{{ h.stock_code }} · {{ h.amount }} unidades"
+                tag="R$ {{ h.value_str }}"
             ></bb-asset-card>
-            <bb-asset-card
-                kind="Meta pessoal"
-                title="Carro Novo"
-                subtitle="Caixinha de objetivo"
-                tag="100% CDI"
-            ></bb-asset-card>
-            <bb-asset-card
-                kind="Novo"
-                title="Nova caixinha disponivel"
-                subtitle="Descubra objetivos automatizados"
-                tag="Conhecer"
-                tone="accent"
-            ></bb-asset-card>
+            {% endfor %}
         </div>
     </section>
-
+    {% else %}
     <section class="investment-section">
         <header class="investment-section-header">
-            <h2>Renda variavel</h2>
-            <a href="#">Ver todos</a>
+            <h2>Meus ativos</h2>
         </header>
-        <div class="investment-card-grid">
-            <bb-asset-card
-                kind="FII"
-                title="XMLT"
-                subtitle="Fundo imobiliario"
-                tag="1% proventos"
-            ></bb-asset-card>
-            <bb-asset-card
-                kind="FII"
-                title="XCORTI"
-                subtitle="Fundo imobiliario"
-                tag="15% proventos"
-            ></bb-asset-card>
-        </div>
+        <p class="no-investments">Nenhum investimento encontrado em sua carteira.</p>
     </section>
-
-    <section class="investment-section">
-        <header class="investment-section-header">
-            <h2>Criptomoedas</h2>
-            <a href="#">Ver todos</a>
-        </header>
-        <div class="investment-card-grid">
-            <bb-asset-card
-                kind="Criptoativo"
-                title="Bitcoin"
-                subtitle="BTC · Proof of Work"
-                tag="+16% crescimento"
-                tone="gold"
-            ></bb-asset-card>
-            <bb-asset-card
-                kind="Criptoativo"
-                title="Memecoin"
-                subtitle="MEME · Token"
-                tag="+16% crescimento"
-                tone="gold"
-            ></bb-asset-card>
-        </div>
-    </section>
+    {% endif %}
 </section>
-{% endblock %}
-
-{% block dashboard_scripts %}
-<script type="module" src="/static/js/pages/investimentos.js"></script>
 {% endblock %}

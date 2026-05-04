@@ -11,6 +11,15 @@
 {% endblock %}
 
 {% block dashboard_content %}
+{% if error %}
+<div class="feedback-message mensagem erro feedback-error" style="display: block; margin-bottom: 1rem;">{{ error }}</div>
+{% endif %}
+
+<form id="transfer-form" method="post" action="/transacao" hidden>
+    <input type="hidden" name="amount_cents" id="hidden-amount" value="0" />
+    <input type="hidden" name="to_account_id" id="hidden-to-account" value="" />
+</form>
+
 <section class="transfer-flow ui-card" data-step="amount">
     <header class="transfer-header">
         <h1>Transferencia</h1>
@@ -20,7 +29,7 @@
     <section class="transfer-step step-amount is-active" data-step-panel="amount">
         <div class="info-card ui-card">
             <p class="info-title">Saldo disponivel na conta</p>
-            <p class="info-value">R$ 12.500,00</p>
+            <p class="info-value">{{ account.balance | brl if account else 'R$ 0,00' }}</p>
         </div>
 
         <div class="amount-display" id="amount-display">R$ 0,00</div>
@@ -50,9 +59,24 @@
         </div>
 
         <label class="ui-label" for="recipient-search">Buscar contato</label>
-        <input class="ui-input" type="text" id="recipient-search" placeholder="Nome, banco ou chave" />
+        <input class="ui-input" type="text" id="recipient-search" placeholder="Nome ou numero de conta" />
 
-        <div class="recipient-grid" id="recipient-grid"></div>
+        <div class="recipient-grid" id="recipient-grid">
+            {% for acc in other_accounts %}
+            <button
+                type="button"
+                class="recipient-card"
+                data-account-id="{{ acc.id }}"
+                data-name="{{ acc.owner_name }}"
+            >
+                <span class="recipient-initial">{{ acc.owner_name[:2].upper() }}</span>
+                <span class="recipient-name">{{ acc.owner_name }}</span>
+                <span class="recipient-bank">BetaBank · {{ acc.account_number }}</span>
+            </button>
+            {% else %}
+            <p class="no-recipients">Nenhum destinatario disponivel.</p>
+            {% endfor %}
+        </div>
 
         <button type="button" class="ui-btn ui-btn-primary step-action" id="btn-to-success" disabled>Transferir</button>
     </section>
@@ -65,7 +89,7 @@
         <div class="receipt ui-card">
             <div><span>Valor</span><strong id="receipt-amount">R$ 0,00</strong></div>
             <div><span>Para</span><strong id="receipt-name">-</strong></div>
-            <div><span>Banco</span><strong id="receipt-bank">-</strong></div>
+            <div><span>Banco</span><strong id="receipt-bank">BetaBank</strong></div>
             <div><span>Data</span><strong id="receipt-date">-</strong></div>
         </div>
 
