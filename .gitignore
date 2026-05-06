@@ -17,3 +17,5 @@ docker/workbench_data/*
 !docker/workbench_data/.gitkeep
 
 docker/.env
+
+.venv

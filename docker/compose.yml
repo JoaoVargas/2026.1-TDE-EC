@@ -64,7 +64,7 @@ services:
       DB_PASSWORD: ${MYSQL_PASSWORD}
       DB_NAME: ${MYSQL_DATABASE}
       PYTHONUNBUFFERED: 1
-    command: bash -c "source /app/server/.venv/bin/activate && pip install -r /app/server/requirements.txt && uvicorn server.main:app --host 0.0.0.0 --port 8000 --reload"
+    command: bash -c "python -m venv /app/server/.venv && source /app/server/.venv/bin/activate && pip install -r /app/server/requirements.txt && uvicorn server.main:app --host 0.0.0.0 --port 8000 --reload"
     depends_on:
       - betabank-db
     networks:
