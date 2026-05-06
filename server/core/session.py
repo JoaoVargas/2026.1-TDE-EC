@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 from fastapi import Request, Response
 
@@ -33,7 +33,7 @@ def set_session_user(
     from server.repositories.session_repository import SessionRepository
 
     timeout = _timeout()
-    expires_at = datetime.utcnow() + timedelta(seconds=timeout)
+    expires_at = datetime.now(timezone.utc) + timedelta(seconds=timeout)
     token = SessionRepository.create(db, user_id, expires_at, ip_address, user_agent)
     response.set_cookie(
         key=SESSION_COOKIE_NAME,

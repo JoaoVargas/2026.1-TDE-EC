@@ -5,6 +5,7 @@ from server.core.security import verify_password
 from server.core.session import get_session_user_id, set_session_user
 from server.db.connection import get_db
 from server.models.user import UserType
+from server.repositories.session_repository import SessionRepository
 from server.repositories.user_repository import UserRepository
 from server.web.routes._shared import templates
 
@@ -49,6 +50,7 @@ async def login_submit(
             status_code=422,
         )
 
+    SessionRepository.cleanup_expired(db)
     role = user.type.value if hasattr(user.type, "value") else str(user.type)
     redirect_to = "/manager/select" if role == UserType.MANAGER.value else "/home"
     response = RedirectResponse(redirect_to, status_code=302)

@@ -1,21 +1,21 @@
 services:
-  betabank-workbench:
-    image: lscr.io/linuxserver/mysql-workbench:latest
-    container_name: betabank-workbench
-    cap_add:
-      - IPC_LOCK
-    environment:
-      PUID: "1000"
-      PGID: "1000"
-      TZ: Etc/UTC
-    ports:
-      - "${MYSQL_WORKBENCH_PORT:-3003}:3000"
-      - "${MYSQL_WORKBENCH_HTTPS_PORT:-3004}:3001"
-    volumes:
-      - betabank_workbench_data:/config
-    shm_size: "1gb"
-    networks:
-      - betabank_network
+  # betabank-workbench:
+  #   image: lscr.io/linuxserver/mysql-workbench:latest
+  #   container_name: betabank-workbench
+  #   cap_add:
+  #     - IPC_LOCK
+  #   environment:
+  #     PUID: "1000"
+  #     PGID: "1000"
+  #     TZ: Etc/UTC
+  #   ports:
+  #     - "${MYSQL_WORKBENCH_PORT:-3003}:3000"
+  #     - "${MYSQL_WORKBENCH_HTTPS_PORT:-3004}:3001"
+  #   volumes:
+  #     - betabank_workbench_data:/config
+  #   shm_size: "1gb"
+  #   networks:
+  #     - betabank_network
   betabank-portainer:
     image: portainer/portainer-ce
     container_name: betabank-portainer

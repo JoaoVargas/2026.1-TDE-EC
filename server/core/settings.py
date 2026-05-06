@@ -25,7 +25,7 @@ class Settings(BaseModel):
     db_pool_recycle: int = 3600
 
     session_secret: str = "change-me-in-production"
-    session_timeout_seconds: int = 5
+    session_timeout_seconds: int = 30
 
     @property
     def database_url(self) -> str:

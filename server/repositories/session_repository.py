@@ -29,7 +29,7 @@ class SessionRepository:
     def get_user_id(cls, db, token: str) -> int | None:
         cursor = db.cursor(dictionary=True)
         cursor.execute(
-            "SELECT user_id FROM sessions WHERE id = %s AND expires_at > NOW()",
+            "SELECT user_id FROM sessions WHERE id = %s AND expires_at > UTC_TIMESTAMP()",
             (token,),
         )
         row = cursor.fetchone()
@@ -65,7 +65,7 @@ class SessionRepository:
     def cleanup_expired(cls, db) -> int:
         """Delete expired sessions. Call periodically to keep the table clean."""
         cursor = db.cursor()
-        cursor.execute("DELETE FROM sessions WHERE expires_at <= NOW()")
+        cursor.execute("DELETE FROM sessions WHERE expires_at <= UTC_TIMESTAMP()")
         count = cursor.rowcount
         db.commit()
         cursor.close()
