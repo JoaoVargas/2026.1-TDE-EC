@@ -1,8 +1,8 @@
 from fastapi import APIRouter
+from fastapi.responses import RedirectResponse
 
 from server.web.routes.cadastro import router as cadastro_router
 from server.web.routes.extrato import router as extrato_router
-from server.web.routes.healthcheck import router as healthcheck_router
 from server.web.routes.home import router as home_router
 from server.web.routes.index import router as index_router
 from server.web.routes.investimentos import router as investimentos_router
@@ -25,4 +25,8 @@ web_router.include_router(extrato_router)
 web_router.include_router(manager_router)
 web_router.include_router(manager_accounts_router)
 web_router.include_router(manager_select_router)
-web_router.include_router(healthcheck_router)
+
+
+@web_router.get("/{path:path}")
+def catch_all():
+    return RedirectResponse(url="/home")
