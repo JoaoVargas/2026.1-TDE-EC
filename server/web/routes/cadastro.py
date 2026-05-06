@@ -22,13 +22,13 @@ def _only_digits(value: str) -> str:
 
 
 @router.get("/cadastro")
-def cadastro_page(request: Request):
-    if get_session_user_id(request):
+def cadastro_page(request: Request, db=Depends(get_db)):
+    if get_session_user_id(request, db):
         return RedirectResponse("/home", status_code=302)
     return templates.TemplateResponse(
         request=request,
         name="cadastro.html",
-        context={"request": request},
+        context={"request": request, "form": {}},
     )
 
 
