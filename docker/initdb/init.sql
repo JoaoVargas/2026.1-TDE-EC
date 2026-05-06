@@ -82,3 +82,15 @@ CREATE TABLE IF NOT EXISTS user_portfolios (
     FOREIGN KEY (portfolio_id) REFERENCES portfolios(id),
     FOREIGN KEY (user_id) REFERENCES users(id)
 );
+
+CREATE TABLE IF NOT EXISTS sessions (
+    id          CHAR(64)     NOT NULL PRIMARY KEY,
+    user_id     INT          NOT NULL,
+    expires_at  DATETIME     NOT NULL,
+    ip_address  VARCHAR(45)  NULL,
+    user_agent  VARCHAR(512) NULL,
+    created_at  DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_sessions_user_id (user_id),
+    INDEX idx_sessions_expires_at (expires_at),
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
