@@ -5,6 +5,7 @@ from fastapi import Request
 from fastapi.responses import RedirectResponse
 from fastapi.templating import Jinja2Templates
 
+from server.core.session import SESSION_COOKIE_NAME, get_session_token
 from server.models.user import User, UserType
 
 BASE_DIR = Path(__file__).resolve().parents[2]
@@ -33,16 +34,25 @@ templates.env.globals["is_manager"] = _is_manager
 
 
 def require_user(request: Request, db) -> User | RedirectResponse:
+    from server.repositories.session_repository import SessionRepository
     from server.repositories.user_repository import UserRepository
 
-    user_id = request.session.get("user_id")
-    if not user_id:
+    token = get_session_token(request)
+    if not token:
         return RedirectResponse("/login", status_code=302)
+
+    user_id = SessionRepository.get_user_id(db, token)
+    if not user_id:
+        response = RedirectResponse("/login", status_code=302)
+        response.delete_cookie(SESSION_COOKIE_NAME)
+        return response
 
     user = UserRepository.get_by_id(db, user_id)
     if not user:
-        request.session.clear()
-        return RedirectResponse("/login", status_code=302)
+        SessionRepository.delete(db, token)
+        response = RedirectResponse("/login", status_code=302)
+        response.delete_cookie(SESSION_COOKIE_NAME)
+        return response
 
     return user
 

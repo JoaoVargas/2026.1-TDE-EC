@@ -12,8 +12,8 @@ router = APIRouter(tags=["pages"])
 
 
 @router.get("/login")
-def login_page(request: Request):
-    if get_session_user_id(request):
+def login_page(request: Request, db=Depends(get_db)):
+    if get_session_user_id(request, db):
         return RedirectResponse("/home", status_code=302)
     return templates.TemplateResponse(
         request=request,
@@ -49,7 +49,14 @@ async def login_submit(
             status_code=422,
         )
 
-    set_session_user(request, user.id)
     role = user.type.value if hasattr(user.type, "value") else str(user.type)
     redirect_to = "/manager/select" if role == UserType.MANAGER.value else "/home"
-    return RedirectResponse(redirect_to, status_code=302)
+    response = RedirectResponse(redirect_to, status_code=302)
+    set_session_user(
+        response,
+        db,
+        user.id,
+        ip_address=request.client.host if request.client else None,
+        user_agent=request.headers.get("user-agent"),
+    )
+    return response
