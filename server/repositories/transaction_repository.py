@@ -60,3 +60,21 @@ class TransactionRepository:
         new_id = cursor.lastrowid
         cursor.close()
         return cls.get_by_id(db, new_id)
+
+    @classmethod
+    def update_description(cls, db, *, transaction_id: int, description: str | None) -> Transaction | None:
+        cursor = db.cursor()
+        cursor.execute(
+            "UPDATE transactions SET description = %s WHERE id = %s",
+            (description, transaction_id),
+        )
+        cursor.close()
+        return cls.get_by_id(db, transaction_id)
+    
+    @classmethod
+    def delete(cls, db, *, transaction_id: int) -> bool:
+        cursor = db.cursor()
+        cursor.execute("DELETE FROM transactions WHERE id = %s", (transaction_id,))
+        affected = cursor.rowcount
+        cursor.close()
+        return affected > 0

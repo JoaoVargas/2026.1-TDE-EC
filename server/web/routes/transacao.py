@@ -113,3 +113,36 @@ async def transacao_submit(
     db.commit()
 
     return RedirectResponse("/home?flash=transferencia_realizada", status_code=302)
+
+@router.post("/transacao/{transaction_id}/descricao")
+def transacao_update_descricao(
+    transaction_id: int,
+    request: Request,
+    descricao: str = Form(default=""),
+    db=Depends(get_db),
+):
+    result = require_user(request, db)
+    if isinstance(result, RedirectResponse):
+        return result
+    
+    TransactionRepository.update_description(
+        db,
+        transaction_id=transaction_id,
+        description=descricao.strip() or None,
+    )
+    db.commit()
+    return RedirectResponse("/extrato", status_code=302)
+
+@router.post("/transacao/{transaction_id}/deletar")
+def transacao_delete(
+    transaction_id: int,
+    request: Request,
+    db=Depends(get_db),
+):
+    result = require_user(request, db)
+    if isinstance(result, RedirectResponse):
+        return result
+    
+    TransactionRepository.delete(db, transaction_id=transaction_id)
+    db.commit()
+    return RedirectResponse("/extrato", status_code=302)
