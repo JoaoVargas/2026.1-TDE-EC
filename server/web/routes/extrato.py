@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends, Request
 from fastapi.responses import RedirectResponse
 
 from server.db.connection import get_db
+from server.models.transaction import TransactionType
 from server.repositories.account_repository import AccountRepository
 from server.repositories.transaction_repository import TransactionRepository
 from server.web.routes._shared import require_user, templates
@@ -17,13 +18,23 @@ def _fmt_brl(value: Decimal) -> str:
 
 
 def _enrich_transaction(tx, account_id: int) -> dict:
-    is_incoming = tx.to_account_id == account_id
-    kind = "in" if is_incoming else "out"
-    prefix = "+" if is_incoming else "-"
-    amount_str = f"{prefix} {_fmt_brl(tx.amount)}"
     date_str = tx.created_at.strftime("%d/%m/%Y · %H:%M") if tx.created_at else "-"
     month = str(tx.created_at.month) if tx.created_at else "0"
-    label = tx.description or ("Transferência recebida" if is_incoming else "Transferência enviada")
+
+    if tx.type == TransactionType.DEPOSIT:
+        kind = "in"
+        label = tx.description or "Depósito"
+    elif tx.type == TransactionType.WITHDRAWAL:
+        kind = "out"
+        label = tx.description or "Saque"
+    else:
+        is_incoming = tx.to_account_id == account_id
+        kind = "in" if is_incoming else "out"
+        label = tx.description or ("Transferência recebida" if is_incoming else "Transferência enviada")
+
+    prefix = "+" if kind == "in" else "-"
+    amount_str = f"{prefix} {_fmt_brl(tx.amount)}"
+
     return {
         "kind": kind,
         "month": month,

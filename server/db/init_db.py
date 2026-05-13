@@ -62,7 +62,7 @@ def _create_tables(conn) -> None:
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS transactions (
             id              INT             AUTO_INCREMENT PRIMARY KEY,
-            type            ENUM('internal', 'transaction', 'expense', 'other') NOT NULL,
+            type            ENUM('internal', 'transaction', 'expense', 'other', 'deposit', 'withdrawal') NOT NULL,
             from_account_id INT,
             to_account_id   INT,
             amount          DECIMAL(15, 2)  NOT NULL,
@@ -178,10 +178,27 @@ def _seed_default_users_if_empty(conn) -> None:
     conn.commit()
 
 
+def _apply_migrations(conn) -> None:
+    cursor = conn.cursor()
+    cursor.execute(
+        "SELECT COLUMN_TYPE FROM INFORMATION_SCHEMA.COLUMNS "
+        "WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'transactions' AND COLUMN_NAME = 'type'"
+    )
+    row = cursor.fetchone()
+    if row and "deposit" not in row[0]:
+        cursor.execute(
+            "ALTER TABLE transactions MODIFY COLUMN type "
+            "ENUM('internal','transaction','expense','other','deposit','withdrawal') NOT NULL"
+        )
+        conn.commit()
+    cursor.close()
+
+
 def init_db() -> None:
     conn = _get_pool().get_connection()
     try:
         _create_tables(conn)
+        _apply_migrations(conn)
         _seed_default_users_if_empty(conn)
     finally:
         conn.close()

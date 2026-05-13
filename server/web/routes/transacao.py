@@ -28,7 +28,7 @@ def _build_other_accounts(db, exclude_user_id: int) -> list[dict]:
     return result
 
 
-@router.get("/transacao")
+@router.get("/transferir")
 def transacao_page(request: Request, db=Depends(get_db)):
     result = require_user(request, db)
     if isinstance(result, RedirectResponse):
@@ -53,7 +53,7 @@ def transacao_page(request: Request, db=Depends(get_db)):
         context={
             "request": request,
             "active_page": "transacao",
-            "dashboard_label": "Nova transferência",
+            "dashboard_label": "Transferir",
             "user": user,
             "account": account,
             "other_accounts": other_accounts,
@@ -62,7 +62,7 @@ def transacao_page(request: Request, db=Depends(get_db)):
     )
 
 
-@router.post("/transacao")
+@router.post("/transferir")
 async def transacao_submit(
     request: Request,
     amount_cents: int = Form(...),
@@ -76,20 +76,20 @@ async def transacao_submit(
 
     accounts = AccountRepository.get_by_user_id(db, user.id)
     if not accounts:
-        return RedirectResponse("/transacao?error=sem_conta", status_code=302)
+        return RedirectResponse("/transferir?error=sem_conta", status_code=302)
 
     from_account = accounts[0]
     amount = Decimal(amount_cents) / 100
 
     if amount <= 0:
-        return RedirectResponse("/transacao?error=valor_invalido", status_code=302)
+        return RedirectResponse("/transferir?error=valor_invalido", status_code=302)
 
     to_account = AccountRepository.get_by_id(db, to_account_id)
     if not to_account:
-        return RedirectResponse("/transacao?error=destinatario_invalido", status_code=302)
+        return RedirectResponse("/transferir?error=destinatario_invalido", status_code=302)
 
     if from_account.balance < amount:
-        return RedirectResponse("/transacao?error=saldo_insuficiente", status_code=302)
+        return RedirectResponse("/transferir?error=saldo_insuficiente", status_code=302)
 
     cursor = db.cursor()
     cursor.execute(
@@ -113,3 +113,36 @@ async def transacao_submit(
     db.commit()
 
     return RedirectResponse("/home?flash=transferencia_realizada", status_code=302)
+
+@router.post("/transferir/{transaction_id}/descricao")
+def transacao_update_descricao(
+    transaction_id: int,
+    request: Request,
+    descricao: str = Form(default=""),
+    db=Depends(get_db),
+):
+    result = require_user(request, db)
+    if isinstance(result, RedirectResponse):
+        return result
+    
+    TransactionRepository.update_description(
+        db,
+        transaction_id=transaction_id,
+        description=descricao.strip() or None,
+    )
+    db.commit()
+    return RedirectResponse("/extrato", status_code=302)
+
+@router.post("/transferir/{transaction_id}/deletar")
+def transacao_delete(
+    transaction_id: int,
+    request: Request,
+    db=Depends(get_db),
+):
+    result = require_user(request, db)
+    if isinstance(result, RedirectResponse):
+        return result
+    
+    TransactionRepository.delete(db, transaction_id=transaction_id)
+    db.commit()
+    return RedirectResponse("/extrato", status_code=302)

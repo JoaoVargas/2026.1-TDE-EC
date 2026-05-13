@@ -9,6 +9,8 @@ class TransactionType(str, Enum):
     TRANSACTION = "transaction"
     EXPENSE = "expense"
     OTHER = "other"
+    DEPOSIT = "deposit"
+    WITHDRAWAL = "withdrawal"
 
 
 @dataclass
