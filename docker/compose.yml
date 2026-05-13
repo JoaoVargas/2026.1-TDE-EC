@@ -56,6 +56,7 @@ services:
       - "${API_PORT:-3001}:8000"
     volumes:
       - ../server:/app/server
+      - betabank_server_venv:/app/server/.venv
     working_dir: /app
     environment:
       DB_HOST: ${DB_HOST:-betabank-db}
@@ -64,13 +65,19 @@ services:
       DB_PASSWORD: ${MYSQL_PASSWORD}
       DB_NAME: ${MYSQL_DATABASE}
       PYTHONUNBUFFERED: 1
-    command: bash -c "python -m venv /app/server/.venv && source /app/server/.venv/bin/activate && pip install -r /app/server/requirements.txt && uvicorn server.main:app --host 0.0.0.0 --port 8000 --reload"
+    command: >
+      bash -c "
+        python -m venv /app/server/.venv &&
+        /app/server/.venv/bin/pip install -r /app/server/requirements.txt &&
+        /app/server/.venv/bin/uvicorn server.main:app --host 0.0.0.0 --port 8000 --reload
+      "
     depends_on:
       - betabank-db
     networks:
       - betabank_network
 
 volumes:
+  betabank_server_venv:
   betabank_db_data:
     driver: local
     driver_opts:
