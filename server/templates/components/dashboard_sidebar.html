@@ -8,7 +8,9 @@
 
     <nav class="sidebar-nav">
         {{ nav_link('/home', 'Inicio', active_page == 'home') }}
-        {{ nav_link('/transacao', 'Transferencias', active_page == 'transacao', 'transacao') }}
+        {{ nav_link('/depositar', 'Depositar', active_page == 'deposito', 'deposito') }}
+        {{ nav_link('/sacar', 'Sacar', active_page == 'saque', 'saque') }}
+        {{ nav_link('/transferir', 'Transferir', active_page == 'transacao', 'transacao') }}
         {{ nav_link('/extrato', 'Extrato', active_page == 'extrato', 'extrato') }}
         {{ nav_link('/investimentos', 'Investimentos', active_page == 'investimentos', 'investimento') }}
     </nav>
