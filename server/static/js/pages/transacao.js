@@ -10,8 +10,15 @@ function formatAmount(digits) {
     return (cents / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 }
 
+function clearInlineError() {
+    const errorDiv = document.getElementById("inline-transfer-error");
+    if (errorDiv) errorDiv.style.display = "none";
+}
+
 function setStep(step) {
     state.step = step;
+    clearInlineError();
+
     const flow = document.querySelector(".transfer-flow");
     if (flow) flow.dataset.step = step;
 
@@ -69,7 +76,7 @@ function writeReceipt() {
     if (receiptDate) receiptDate.textContent = dateText;
 }
 
-function submitTransfer() {
+async function submitAndCheck() {
     const form = document.getElementById("transfer-form");
     const hiddenAmount = document.getElementById("hidden-amount");
     const hiddenAccount = document.getElementById("hidden-to-account");
@@ -77,7 +84,48 @@ function submitTransfer() {
     if (!form || !hiddenAmount || !hiddenAccount) return;
     hiddenAmount.value = state.amountDigits || "0";
     hiddenAccount.value = state.selectedAccountId || "";
-    form.submit();
+
+    const btn = document.getElementById("btn-to-success");
+    if (btn) btn.disabled = true;
+
+    const errorMap = {
+        saldo_insuficiente: "Saldo insuficiente para esta transferência.",
+        valor_invalido: "Valor de transferência inválido.",
+        destinatario_invalido: "Destinatário não encontrado.",
+        sem_conta: "Nenhuma conta encontrada para o usuário.",
+    };
+
+    try {
+        const response = await fetch("/transacao", {
+            method: "POST",
+            body: new FormData(form),
+        });
+
+        const finalUrl = new URL(response.url);
+
+        if (finalUrl.pathname === "/home") {
+            writeReceipt();
+            setStep("success");
+        } else {
+            const errorKey = finalUrl.searchParams.get("error");
+            const msg = errorMap[errorKey] || "Erro ao realizar transferência.";
+            let errorDiv = document.getElementById("inline-transfer-error");
+            if (!errorDiv) {
+                errorDiv = document.createElement("div");
+                errorDiv.id = "inline-transfer-error";
+                errorDiv.className = "feedback-message mensagem erro feedback-error";
+                errorDiv.style.marginBottom = "1rem";
+                form.parentElement.insertBefore(errorDiv, form.nextSibling);
+            }
+            errorDiv.textContent = msg;
+            errorDiv.style.display = "block";
+            setTimeout(() => { errorDiv.style.display = "none"; }, 3000);
+        }
+    } catch {
+        alert("Erro de conexão. Tente novamente.");
+    } finally {
+        if (btn) btn.disabled = false;
+    }
 }
 
 function wireAmountStep() {
@@ -115,14 +163,13 @@ function wireRecipientStep() {
 
     document.getElementById("btn-to-success")?.addEventListener("click", () => {
         if (!state.selectedAccountId) return;
-        writeReceipt();
-        setStep("success");
+        submitAndCheck();
     });
 }
 
 function wireSuccessStep() {
     document.getElementById("btn-finish-transfer")?.addEventListener("click", () => {
-        submitTransfer();
+        window.location.href = "/home";
     });
 }
 
