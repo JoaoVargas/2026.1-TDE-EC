@@ -25,7 +25,7 @@ class Settings(BaseModel):
     db_pool_recycle: int = 3600
 
     session_secret: str = "change-me-in-production"
-    session_timeout_seconds: int = 30
+    session_timeout_seconds: int = 300
 
     @property
     def database_url(self) -> str:
@@ -55,5 +55,5 @@ def get_settings() -> Settings:
         db_pool_timeout=int(os.getenv("DB_POOL_TIMEOUT", "30")),
         db_pool_recycle=int(os.getenv("DB_POOL_RECYCLE", "3600")),
         session_secret=os.getenv("SESSION_SECRET", "change-me-in-production"),
-        session_timeout_seconds=int(os.getenv("SESSION_TIMEOUT_SECONDS", "30")),
+        session_timeout_seconds=int(os.getenv("SESSION_TIMEOUT_SECONDS", "300")),
     )

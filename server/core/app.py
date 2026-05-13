@@ -16,8 +16,6 @@ from server.web.router import web_router
 
 
 class SessionRefreshMiddleware(BaseHTTPMiddleware):
-    """Sliding-window inactivity timeout: refreshes expires_at and cookie max_age on every authenticated request."""
-
     async def dispatch(self, request: Request, call_next) -> Response:
         response = await call_next(request)
 
