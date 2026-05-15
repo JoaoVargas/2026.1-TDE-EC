@@ -32,10 +32,67 @@
 {% if show_sidebar | default(true) %}
 <div id="overlay" class="dashboard-overlay"></div>
 {% endif %}
+
+<div id="perfil-overlay" class="perfil-overlay" hidden>
+  <div class="perfil-modal">
+
+    <div class="perfil-modal-header">
+      <div class="perfil-modal-avatar" id="perfil-avatar">U</div>
+      <div>
+        <p class="perfil-modal-nome" id="perfil-nome-display">Carregando...</p>
+        <p class="perfil-modal-tipo">cliente · BetaBank</p>
+      </div>
+      <button type="button" class="perfil-close" id="perfil-close" aria-label="Fechar">✕</button>
+    </div>
+
+    <div class="perfil-section">
+      <p class="perfil-section-label">Dados pessoais</p>
+      <div class="perfil-row"><span>E-mail</span><span id="perfil-email">—</span></div>
+      <div class="perfil-row"><span>CPF</span><span id="perfil-cpf">—</span></div>
+    </div>
+
+    <div class="perfil-section">
+      <div class="perfil-section-header">
+        <p class="perfil-section-label">Nome</p>
+        <button type="button" class="perfil-edit-btn" data-target="form-nome">✏ Editar</button>
+      </div>
+      <p class="perfil-valor" id="perfil-nome-valor">—</p>
+      <form id="form-nome" action="/perfil/nome" method="post" class="perfil-form" hidden>
+        <input type="text" name="name" id="input-nome" placeholder="Novo nome" required />
+        <button type="submit">Salvar</button>
+      </form>
+    </div>
+
+    <div class="perfil-section">
+      <div class="perfil-section-header">
+        <p class="perfil-section-label">Endereço</p>
+        <button type="button" class="perfil-edit-btn" data-target="form-endereco">✏ Editar</button>
+      </div>
+      <div id="perfil-endereco-display">
+        <div class="perfil-row"><span>Rua</span><span id="perfil-street">—</span></div>
+        <div class="perfil-row"><span>Bairro</span><span id="perfil-neighborhood">—</span></div>
+        <div class="perfil-row"><span>Cidade/UF</span><span id="perfil-city-state">—</span></div>
+        <div class="perfil-row"><span>CEP</span><span id="perfil-cep">—</span></div>
+      </div>
+      <form id="form-endereco" action="/perfil/endereco" method="post" class="perfil-form" hidden>
+        <input type="text" name="cep"          placeholder="CEP (só números)" />
+        <input type="text" name="street"       placeholder="Rua" />
+        <input type="text" name="number"       placeholder="Número" />
+        <input type="text" name="neighborhood" placeholder="Bairro" />
+        <input type="text" name="city"         placeholder="Cidade" />
+        <input type="text" name="state"        placeholder="UF (ex: PR)" maxlength="2" />
+        <button type="submit">Salvar endereço</button>
+      </form>
+    </div>
+
+  </div>
+</div>
+
 {% endblock %}
 
 {% block scripts %}
 <script type="module" src="/static/js/components/ui-cards.js"></script>
 <script type="module" src="/static/js/components/sidebar.js"></script>
+<script src="/static/js/components/perfil.js"></script>
 {% block dashboard_scripts %}{% endblock %}
 {% endblock %}

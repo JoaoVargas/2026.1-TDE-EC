@@ -21,6 +21,7 @@
             <strong>{{ user.name if user else 'Usuario' }}</strong>
             <p>{{ user.email if user else 'conta@betabank.local' }}</p>
         </div>
+        <button type="button" class="perfil-gear-btn" id="btn-abrir-perfil" aria-label="Editar perfil">⚙</button>
     </div>
 
     {% if user and is_manager(user) %}

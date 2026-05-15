@@ -252,3 +252,156 @@
         justify-content: space-between;
     }
 }
+
+/* ── Perfil Modal ───────────────────────────────────── */
+.perfil-gear-btn {
+    background: none;
+    border: none;
+    color: var(--color-muted);
+    cursor: pointer;
+    padding: 2px;
+    font-size: 16px;
+    margin-left: auto;
+    opacity: 0.7;
+    transition: opacity 0.15s, color 0.15s;
+    line-height: 1;
+}
+.perfil-gear-btn:hover { opacity: 1; color: var(--color-primary); }
+
+.perfil-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    z-index: 200;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+}
+.perfil-overlay[hidden] { display: none; }
+
+.perfil-modal {
+    background: var(--color-surface-700);
+    border: 0.5px solid var(--color-border);
+    border-radius: 16px;
+    width: 100%;
+    max-width: 420px;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.perfil-modal-header {
+    background: var(--color-surface-600);
+    border-radius: 16px 16px 0 0;
+    padding: 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    position: relative;
+}
+
+.perfil-modal-avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: var(--color-accent);
+    color: #2b1b08;
+    font-weight: 700;
+    font-size: 16px;
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+}
+
+.perfil-modal-nome { font-weight: 500; font-size: 15px; margin: 0; color: var(--color-text); }
+.perfil-modal-tipo { font-size: 12px; color: var(--color-muted); margin: 3px 0 0; }
+
+.perfil-close {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: rgba(255,255,255,0.1);
+    border: none;
+    border-radius: 50%;
+    width: 28px;
+    height: 28px;
+    cursor: pointer;
+    color: var(--color-text);
+    font-size: 14px;
+    display: grid;
+    place-items: center;
+}
+.perfil-close:hover { background: rgba(255,255,255,0.2); }
+
+.perfil-section {
+    padding: 1rem 1.25rem;
+    border-bottom: 0.5px solid var(--color-border);
+}
+.perfil-section:last-child { border-bottom: none; }
+
+.perfil-section-label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--color-muted);
+    margin: 0 0 10px;
+}
+
+.perfil-section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.perfil-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    padding: 4px 0;
+}
+.perfil-row span:first-child { color: var(--color-muted); }
+.perfil-row span:last-child  { color: var(--color-text); }
+
+.perfil-valor { font-size: 14px; color: var(--color-text); margin: 0; }
+
+.perfil-edit-btn {
+    background: none;
+    border: none;
+    color: var(--color-primary);
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    padding: 0;
+}
+.perfil-edit-btn:hover { text-decoration: underline; }
+
+.perfil-form {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 10px;
+}
+.perfil-form input {
+    background: var(--color-bg-800);
+    border: 0.5px solid var(--color-border);
+    border-radius: 8px;
+    padding: 8px 12px;
+    color: var(--color-text);
+    font-size: 13px;
+    width: 100%;
+    box-sizing: border-box;
+}
+.perfil-form input:focus { outline: none; border-color: var(--color-primary); }
+.perfil-form button[type="submit"] {
+    background: var(--color-primary);
+    color: #0b1320;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 16px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    align-self: flex-end;
+}
