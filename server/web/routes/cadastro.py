@@ -11,6 +11,8 @@ from server.db.connection import get_db
 from server.repositories.address_repository import AddressRepository
 from server.repositories.user_repository import UserRepository
 from server.web.routes._shared import templates
+from server.repositories.account_repository import AccountRepository
+from server.models.account import AccountType
 
 router = APIRouter(tags=["pages"])
 
@@ -106,7 +108,8 @@ async def cadastro_submit(
     )
 
     try:
-        UserRepository.create(
+        # 1. Cria o usuário e recupera o objeto para pegar o ID
+        user = UserRepository.create(
             db,
             cpf=cpf_digits,
             name=name_norm,
@@ -115,7 +118,24 @@ async def cadastro_submit(
             birthday=date.fromisoformat(nascimento),
             address_id=address.id,
         )
+
+        # 2. Cria a CONTA CORRENTE (CHECKING)
+        AccountRepository.create(
+            db, 
+            user_id=user.id, 
+            type=AccountType.CHECKING
+        )
+
+        # 3. Cria a CONTA POUPANÇA (SAVINGS)
+        AccountRepository.create(
+            db, 
+            user_id=user.id, 
+            type=AccountType.SAVINGS # Verifique se no seu Enum o nome é SAVINGS ou POUPANCA
+        )
+
         db.commit()
+    except Exception as e: # Captura erros genéricos ou de integridade
+        db.rollback()
     except mysql.connector.errors.IntegrityError:
         db.rollback()
         return templates.TemplateResponse(

@@ -17,14 +17,40 @@
     Transferencia realizada com sucesso!
 </div>
 {% endif %}
-
+<select id="account-selector" class="ui-select" onchange="toggleBalance()" style="background: transparent; color: rgb(0, 0, 0); border: 1px solid #444; border-radius: 4px; margin-bottom: 8px; cursor: pointer;">
+            <option value="corrente">Conta Corrente</option>
+            <option value="poupanca">Conta Poupança</option>
+        </select>
 <section class="balance-card ui-card">
-    <div>
-        <p class="balance-label">Saldo total</p>
-        <p class="balance-value">{{ account.balance | brl if account else 'R$ 0,00' }}</p>
+    <div id="balance-container">
+        <div id="balance-corrente">
+            <p class="balance-label">Saldo disponível</p>
+            <p class="balance-value">{{ checking_account.balance | brl if checking_account else 'R$ 0,00' }}</p>
+        </div>
+
+        <div id="balance-poupanca" style="display: none;">
+            <p class="balance-label">Saldo guardado</p>
+            <p class="balance-value">{{ savings_account.balance | brl if savings_account else 'R$ 0,00' }}</p>
+        </div>
     </div>
     <a href="/extrato" class="balance-arrow" aria-label="Abrir extrato">></a>
 </section>
+
+<script>
+function toggleBalance() {
+    const selector = document.getElementById('account-selector');
+    const divCorrente = document.getElementById('balance-corrente');
+    const divPoupanca = document.getElementById('balance-poupanca');
+
+    if (selector.value === 'corrente') {
+        divCorrente.style.display = 'block';
+        divPoupanca.style.display = 'none';
+    } else {
+        divCorrente.style.display = 'none';
+        divPoupanca.style.display = 'block';
+    }
+}
+</script>
 
 <section class="cards-grid">
     <bb-insight-card
