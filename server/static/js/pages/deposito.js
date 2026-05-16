@@ -75,9 +75,15 @@ function submitDeposito() {
     const form = document.getElementById("deposito-form");
     const hiddenAmount = document.getElementById("hidden-amount");
     const hiddenAccountType = document.getElementById("hidden-account-type");
+    const selector = document.getElementById("account-selector");
+
     if (!form || !hiddenAmount) return;
+
     hiddenAmount.value = state.amountDigits || "0";
-    if (hiddenAccountType) hiddenAccountType.value = state.accountType; 
+    if (hiddenAccountType && selector) {
+        hiddenAccountType.value = selector.value; // ← lê direto do DOM, ignora state
+    }
+
     form.submit();
 }
 
