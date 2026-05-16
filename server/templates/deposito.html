@@ -17,18 +17,35 @@
 
 <form id="deposito-form" method="post" action="/depositar" hidden>
     <input type="hidden" name="amount_cents" id="hidden-amount" value="0" />
+    <input type="hidden" name="account_type" id="hidden-account-type" value="corrente" />
 </form>
 
 <section class="transfer-flow ui-card" data-step="amount">
     <header class="transfer-header">
         <h1>Depositar</h1>
-        <p id="transfer-subtitle">Qual e o valor do deposito?</p>
+        <p id="transfer-subtitle">Qual é o valor do depósito?</p>
     </header>
 
     <section class="transfer-step step-amount is-active" data-step-panel="amount">
+
+        <!-- Seletor de conta -->
+        <select id="account-selector" class="ui-select" >
+            <option value="corrente">Conta Corrente</option>
+            <option value="poupanca">Conta Poupança</option>
+        </select>
+
         <div class="info-card ui-card">
-            <p class="info-title">Saldo disponivel na conta</p>
-            <p class="info-value">{{ account.balance | brl if account else 'R$ 0,00' }}</p>
+            <p class="info-title">Saldo disponível na conta</p>
+            <p class="info-value" id="balance-display">
+                {{ checking_account.balance | brl if checking_account else 'R$ 0,00' }}
+            </p>
+        </div>
+
+        <!-- Saldos em data attributes para o JS ler -->
+        <div id="balance-data"
+            data-corrente="{{ checking_account.balance | brl if checking_account else 'R$ 0,00' }}"
+            data-poupanca="{{ savings_account.balance | brl if savings_account else 'R$ 0,00' }}"
+            hidden>
         </div>
 
         <div class="amount-display" id="amount-display">R$ 0,00</div>
@@ -58,9 +75,10 @@
         </div>
 
         <div class="info-card ui-card" style="text-align: center;">
-            <p class="info-title">Confirmar deposito</p>
+            <p class="info-title">Confirmar depósito</p>
             <p class="info-value" id="confirm-amount">R$ 0,00</p>
-            <p style="color: var(--color-muted); font-size: 0.82rem; margin: 0.5rem 0 0;">O valor sera creditado na sua conta.</p>
+            <p id="confirm-account-label" style="color: var(--color-muted); font-size: 0.85rem; margin: 0.25rem 0 0;"></p>
+            <p style="color: var(--color-muted); font-size: 0.82rem; margin: 0.5rem 0 0;">O valor será creditado na sua conta.</p>
         </div>
 
         <button type="button" class="ui-btn ui-btn-primary step-action" id="btn-confirmar">Depositar</button>
@@ -68,12 +86,13 @@
 
     <section class="transfer-step step-success" data-step-panel="success">
         <div class="success-mark">OK</div>
-        <h2>Deposito concluido!</h2>
+        <h2>Depósito concluído!</h2>
         <p>O valor foi creditado com sucesso.</p>
 
         <div class="receipt ui-card">
             <div><span>Valor</span><strong id="receipt-amount">R$ 0,00</strong></div>
-            <div><span>Tipo</span><strong>Deposito</strong></div>
+            <div><span>Conta</span><strong id="receipt-account">-</strong></div>
+            <div><span>Tipo</span><strong>Depósito</strong></div>
             <div><span>Data</span><strong id="receipt-date">-</strong></div>
         </div>
 

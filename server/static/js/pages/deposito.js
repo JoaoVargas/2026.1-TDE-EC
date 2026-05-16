@@ -1,11 +1,29 @@
 const state = {
     step: "amount",
     amountDigits: "",
+    accountType: "corrente", // novo
 };
 
 function formatAmount(digits) {
     const cents = Number(digits || "0");
     return (cents / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+}
+
+function getAccountLabel() {
+    return state.accountType === "poupanca" ? "Conta Poupança" : "Conta Corrente";
+}
+
+function updateAccountDisplay() {
+    const balanceData = document.getElementById("balance-data");
+    const balanceDisplay = document.getElementById("balance-display");
+    const hiddenAccountType = document.getElementById("hidden-account-type");
+
+    if (balanceData && balanceDisplay) {
+        balanceDisplay.textContent = balanceData.dataset[state.accountType];
+    }
+    if (hiddenAccountType) {
+        hiddenAccountType.value = state.accountType;
+    }
 }
 
 function setStep(step) {
@@ -16,9 +34,9 @@ function setStep(step) {
     const subtitle = document.getElementById("transfer-subtitle");
     if (subtitle) {
         subtitle.textContent =
-            step === "amount" ? "Qual e o valor do deposito?"
-            : step === "confirm" ? "Confirme o valor do deposito"
-            : "Comprovante da operacao";
+            step === "amount"   ? "Qual é o valor do depósito?"
+            : step === "confirm"  ? "Confirme o valor do depósito"
+            : "Comprovante da operação";
     }
 
     document.querySelectorAll("[data-step-panel]").forEach((panel) => {
@@ -36,24 +54,44 @@ function updateAmountDisplay() {
     if (confirmAmount) confirmAmount.textContent = value;
 }
 
-function submitDeposito() {
-    const form = document.getElementById("deposito-form");
-    const hiddenAmount = document.getElementById("hidden-amount");
-    if (!form || !hiddenAmount) return;
-    hiddenAmount.value = state.amountDigits || "0";
-    form.submit();
+function populateConfirmStep() {
+    updateAmountDisplay();
+    const confirmAccountLabel = document.getElementById("confirm-account-label");
+    if (confirmAccountLabel) {
+        confirmAccountLabel.textContent = `Destino: ${getAccountLabel()}`;
+    }
 }
 
 function writeReceipt() {
     const receiptAmount = document.getElementById("receipt-amount");
     const receiptDate = document.getElementById("receipt-date");
+    const receiptAccount = document.getElementById("receipt-account");
     if (receiptAmount) receiptAmount.textContent = formatAmount(state.amountDigits);
     if (receiptDate) receiptDate.textContent = new Date().toLocaleString("pt-BR");
+    if (receiptAccount) receiptAccount.textContent = getAccountLabel();
+}
+
+function submitDeposito() {
+    const form = document.getElementById("deposito-form");
+    const hiddenAmount = document.getElementById("hidden-amount");
+    const hiddenAccountType = document.getElementById("hidden-account-type");
+    if (!form || !hiddenAmount) return;
+    hiddenAmount.value = state.amountDigits || "0";
+    if (hiddenAccountType) hiddenAccountType.value = state.accountType; 
+    form.submit();
 }
 
 document.addEventListener("DOMContentLoaded", () => {
     updateAmountDisplay();
+    updateAccountDisplay();
 
+    // Seletor de conta
+    document.getElementById("account-selector")?.addEventListener("change", (e) => {
+        state.accountType = e.target.value;
+        updateAccountDisplay();
+    });
+
+    // Numpad
     document.querySelectorAll(".numpad-key[data-number]").forEach((button) => {
         button.addEventListener("click", () => {
             if (state.amountDigits.length >= 9) return;
@@ -69,7 +107,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     document.getElementById("btn-to-confirm")?.addEventListener("click", () => {
         if (!state.amountDigits || Number(state.amountDigits) === 0) return;
-        updateAmountDisplay();
+        populateConfirmStep(); // substitui o updateAmountDisplay() direto
         setStep("confirm");
     });
 

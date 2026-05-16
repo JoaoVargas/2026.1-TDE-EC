@@ -17,15 +17,17 @@
     Transferencia realizada com sucesso!
 </div>
 {% endif %}
-<select id="account-selector" class="ui-select" onchange="toggleBalance()" style="background: transparent; color: rgb(0, 0, 0); border: 1px solid #444; border-radius: 4px; margin-bottom: 8px; cursor: pointer;">
-            <option value="corrente">Conta Corrente</option>
-            <option value="poupanca">Conta Poupança</option>
-        </select>
+<div id="seletor-conta" style="display: none;">
+    <select id="account-selector" class="ui-select" onchange="toggleBalance()">
+        <option value="corrente">Conta Corrente</option>
+        <option value="poupanca">Conta Poupança</option>
+    </select>
+</div>
 <section class="balance-card ui-card">
     <div id="balance-container">
         <div id="balance-corrente">
             <p class="balance-label">Saldo disponível</p>
-            <p class="balance-value">{{ checking_account.balance | brl if checking_account else 'R$ 0,00' }}</p>
+            <p class="balance-value">{{ checking_account.balance | brl if checking_account  else 'R$ 0,00' }}</p>
         </div>
 
         <div id="balance-poupanca" style="display: none;">
@@ -50,6 +52,10 @@ function toggleBalance() {
         divPoupanca.style.display = 'block';
     }
 }
+function abrirSeletorConta() {
+    document.getElementById('card-poupanca').style.display = 'none';
+    document.getElementById('seletor-conta').style.display = 'block';
+}
 </script>
 
 <section class="cards-grid">
@@ -69,5 +75,14 @@ function toggleBalance() {
         button-label="Ver termos"
         button-variant="ui-btn-secondary"
     ></bb-insight-card>
+    <bb-insight-card
+    id="card-poupanca"
+    title="Conta Poupança"
+    text="Crie e acesse sua conta poupança."
+    button-label="Abrir"
+    button-variant="ui-btn-accent"
+    style="cursor: pointer;"
+    onclick="abrirSeletorConta()"
+></bb-insight-card>
 </section>
 {% endblock %}

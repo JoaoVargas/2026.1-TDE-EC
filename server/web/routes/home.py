@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, Request
 from fastapi.responses import RedirectResponse
 
 from server.db.connection import get_db
+from server.models.account import AccountType
 from server.repositories.account_repository import AccountRepository
 from server.web.routes._shared import require_user, templates
 
@@ -15,8 +16,8 @@ def home_page(request: Request, db=Depends(get_db)):
         return result
     user = result
 
-    accounts = AccountRepository.get_by_user_id(db, user.id)
-    account = accounts[0] if accounts else None
+    checking_account = AccountRepository.get_by_user_and_type(db, user.id, AccountType.CHECKING)
+    savings_account = AccountRepository.get_by_user_and_type(db, user.id, AccountType.SAVINGS)
 
     flash = request.query_params.get("flash")
 
@@ -28,7 +29,8 @@ def home_page(request: Request, db=Depends(get_db)):
             "active_page": "home",
             "dashboard_label": "Painel financeiro",
             "user": user,
-            "account": account,
+            "checking_account": checking_account,
+            "savings_account": savings_account,
             "flash": flash,
         },
     )

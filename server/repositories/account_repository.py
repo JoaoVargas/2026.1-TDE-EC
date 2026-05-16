@@ -34,6 +34,17 @@ class AccountRepository:
         cursor.close()
         next_number = (current_max or 0) + 1
         return f"{next_number:010d}"
+    
+    @staticmethod
+    def get_by_user_and_type(db, user_id: int, account_type: AccountType):
+        cursor = db.cursor(dictionary=True)
+        cursor.execute(
+            "SELECT * FROM accounts WHERE user_id = %s AND type = %s ORDER BY id ASC LIMIT 1",
+            (user_id, account_type.value),
+        )
+        row = cursor.fetchone()
+        cursor.close()
+        return _row_to_account(row) if row else None
 
     @classmethod
     def create(
@@ -121,3 +132,4 @@ class AccountRepository:
             grouped.setdefault(account.user_id, []).append(account)
 
         return grouped
+    

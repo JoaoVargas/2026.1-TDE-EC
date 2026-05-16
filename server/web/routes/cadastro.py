@@ -108,7 +108,6 @@ async def cadastro_submit(
     )
 
     try:
-        # 1. Cria o usuário e recupera o objeto para pegar o ID
         user = UserRepository.create(
             db,
             cpf=cpf_digits,
@@ -118,24 +117,27 @@ async def cadastro_submit(
             birthday=date.fromisoformat(nascimento),
             address_id=address.id,
         )
-
-        # 2. Cria a CONTA CORRENTE (CHECKING)
-        AccountRepository.create(
-            db, 
-            user_id=user.id, 
-            type=AccountType.CHECKING
-        )
-
-        # 3. Cria a CONTA POUPANÇA (SAVINGS)
-        AccountRepository.create(
-            db, 
-            user_id=user.id, 
-            type=AccountType.SAVINGS # Verifique se no seu Enum o nome é SAVINGS ou POUPANCA
-        )
-
+        AccountRepository.create(db, user_id=user.id, type=AccountType.CHECKING)
+        AccountRepository.create(db, user_id=user.id, type=AccountType.SAVINGS)
         db.commit()
-    except Exception as e: # Captura erros genéricos ou de integridade
+
+    except mysql.connector.errors.IntegrityError:  # ← mais específico PRIMEIRO
         db.rollback()
+        return templates.TemplateResponse(
+            request=request,
+            name="cadastro.html",
+            context={"request": request, "error": "CPF ou e-mail já cadastrado.", "form": form_ctx},
+            status_code=409,
+        )
+
+    except Exception as e:  # ← genérico por último
+        db.rollback()
+        return templates.TemplateResponse(
+            request=request,
+            name="cadastro.html",
+            context={"request": request, "error": "Erro interno. Tente novamente.", "form": form_ctx},
+            status_code=500,
+        )
     except mysql.connector.errors.IntegrityError:
         db.rollback()
         return templates.TemplateResponse(
