@@ -78,6 +78,7 @@ function submitDeposito() {
     if (!form || !hiddenAmount) return;
     hiddenAmount.value = state.amountDigits || "0";
     if (hiddenAccountType) hiddenAccountType.value = state.accountType;
+    console.log('[DEBUG] enviando account_type =', state.accountType);
     form.submit();
 }
 
