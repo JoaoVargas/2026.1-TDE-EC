@@ -1,11 +1,29 @@
 const state = {
     step: "amount",
     amountDigits: "",
+    accountType: localStorage.getItem('conta_selecionada') || 'corrente',
 };
 
 function formatAmount(digits) {
     const cents = Number(digits || "0");
     return (cents / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+}
+
+function getAccountLabel() {
+    return state.accountType === "poupanca" ? "Conta Poupança" : "Conta Corrente";
+}
+
+function updateAccountDisplay() {
+    const balanceData = document.getElementById("balance-data");
+    const balanceDisplay = document.getElementById("balance-display");
+    const hiddenAccountType = document.getElementById("hidden-account-type");
+
+    if (balanceData && balanceDisplay) {
+        balanceDisplay.textContent = balanceData.dataset[state.accountType];
+    }
+    if (hiddenAccountType) {
+        hiddenAccountType.value = state.accountType;
+    }
 }
 
 function setStep(step) {
@@ -16,9 +34,9 @@ function setStep(step) {
     const subtitle = document.getElementById("transfer-subtitle");
     if (subtitle) {
         subtitle.textContent =
-            step === "amount" ? "Qual e o valor do saque?"
+            step === "amount"  ? "Qual é o valor do saque?"
             : step === "confirm" ? "Confirme o valor do saque"
-            : "Comprovante da operacao";
+            : "Comprovante da operação";
     }
 
     document.querySelectorAll("[data-step-panel]").forEach((panel) => {
@@ -36,23 +54,28 @@ function updateAmountDisplay() {
     if (confirmAmount) confirmAmount.textContent = value;
 }
 
-function submitSaque() {
-    const form = document.getElementById("saque-form");
-    const hiddenAmount = document.getElementById("hidden-amount");
-    if (!form || !hiddenAmount) return;
-    hiddenAmount.value = state.amountDigits || "0";
-    form.submit();
-}
-
 function writeReceipt() {
     const receiptAmount = document.getElementById("receipt-amount");
     const receiptDate = document.getElementById("receipt-date");
+    const receiptAccount = document.getElementById("receipt-account");
     if (receiptAmount) receiptAmount.textContent = formatAmount(state.amountDigits);
     if (receiptDate) receiptDate.textContent = new Date().toLocaleString("pt-BR");
+    if (receiptAccount) receiptAccount.textContent = getAccountLabel();
+}
+
+function submitSaque() {
+    const form = document.getElementById("saque-form");
+    const hiddenAmount = document.getElementById("hidden-amount");
+    const hiddenAccountType = document.getElementById("hidden-account-type");
+    if (!form || !hiddenAmount) return;
+    hiddenAmount.value = state.amountDigits || "0";
+    if (hiddenAccountType) hiddenAccountType.value = state.accountType;
+    form.submit();
 }
 
 document.addEventListener("DOMContentLoaded", () => {
     updateAmountDisplay();
+    updateAccountDisplay();
 
     document.querySelectorAll(".numpad-key[data-number]").forEach((button) => {
         button.addEventListener("click", () => {
