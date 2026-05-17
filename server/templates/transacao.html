@@ -15,15 +15,16 @@
 <div class="feedback-message mensagem erro feedback-error" style="display: block; margin-bottom: 1rem;">{{ error }}</div>
 {% endif %}
 
-<form id="transfer-form" method="post" action="/transferir" hidden>
+<form id="transfer-form" method="post" action="/transacao" hidden>
     <input type="hidden" name="amount_cents" id="hidden-amount" value="0" />
     <input type="hidden" name="to_account_id" id="hidden-to-account" value="" />
+    <input type="hidden" name="from_account_type" id="hidden-from-account-type" value="corrente" />
 </form>
 
 <section class="transfer-flow ui-card" data-step="amount">
     <header class="transfer-header">
         <h1>Transferir</h1>
-        <p id="transfer-subtitle">Qual e o valor da transferencia?</p>
+        <p id="transfer-subtitle">Qual é o valor da transferência?</p>
     </header>
 
     <section class="transfer-step step-amount is-active" data-step-panel="amount">
@@ -35,6 +36,8 @@
         <div id="balance-data"
             data-corrente="{{ checking_account.balance | brl if checking_account else 'R$ 0,00' }}"
             data-poupanca="{{ savings_account.balance | brl if savings_account else 'R$ 0,00' }}"
+            data-corrente-id="{{ checking_account.id if checking_account else '' }}"
+            data-poupanca-id="{{ savings_account.id if savings_account else '' }}"
             hidden>
         </div>
 
@@ -64,8 +67,24 @@
             <p>Valor selecionado: <strong id="selected-amount">R$ 0,00</strong></p>
         </div>
 
+        <!-- Transferência interna entre contas próprias -->
+        <div style="margin-bottom: 1rem;">
+            <p class="info-title" style="margin-bottom: 0.5rem;">Transferir entre minhas contas</p>
+            <button
+                type="button"
+                class="recipient-card"
+                id="btn-own-account"
+                data-account-id=""
+                data-name=""
+            >
+                <span class="recipient-initial" id="own-account-initial">P</span>
+                <span class="recipient-name" id="own-account-name">Conta Poupança</span>
+                <span class="recipient-bank">BetaBank · sua conta</span>
+            </button>
+        </div>
+
         <label class="ui-label" for="recipient-search">Buscar contato</label>
-        <input class="ui-input" type="text" id="recipient-search" placeholder="Nome ou numero de conta" />
+        <input class="ui-input" type="text" id="recipient-search" placeholder="Nome ou número de conta" />
 
         <div class="recipient-grid" id="recipient-grid">
             {% for acc in other_accounts %}
@@ -80,7 +99,7 @@
                 <span class="recipient-bank">BetaBank · {{ acc.account_number }}</span>
             </button>
             {% else %}
-            <p class="no-recipients">Nenhum destinatario disponivel.</p>
+            <p class="no-recipients">Nenhum destinatário disponível.</p>
             {% endfor %}
         </div>
 
@@ -89,13 +108,14 @@
 
     <section class="transfer-step step-success" data-step-panel="success">
         <div class="success-mark">OK</div>
-        <h2>Transferencia concluida!</h2>
+        <h2>Transferência concluída!</h2>
         <p>Seu dinheiro foi enviado com sucesso.</p>
 
         <div class="receipt ui-card">
             <div><span>Valor</span><strong id="receipt-amount">R$ 0,00</strong></div>
+            <div><span>De</span><strong id="receipt-account">-</strong></div>
             <div><span>Para</span><strong id="receipt-name">-</strong></div>
-            <div><span>Banco</span><strong id="receipt-bank">BetaBank</strong></div>
+            <div><span>Banco</span><strong>BetaBank</strong></div>
             <div><span>Data</span><strong id="receipt-date">-</strong></div>
         </div>
 
@@ -105,5 +125,5 @@
 {% endblock %}
 
 {% block dashboard_scripts %}
-<script type="module" src="/static/js/pages/transacao.js"></script>
+<script type="module" src="/static/js/pages/transacao.js?v=3"></script>
 {% endblock %}

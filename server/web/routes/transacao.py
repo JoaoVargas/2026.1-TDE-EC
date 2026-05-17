@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends, Form, Request
 from fastapi.responses import RedirectResponse
 
 from server.db.connection import get_db
+from server.models.account import AccountType
 from server.models.transaction import TransactionType
 from server.repositories.account_repository import AccountRepository
 from server.repositories.transaction_repository import TransactionRepository
@@ -35,8 +36,8 @@ def transacao_page(request: Request, db=Depends(get_db)):
         return result
     user = result
 
-    accounts = AccountRepository.get_by_user_id(db, user.id)
-    account = accounts[0] if accounts else None
+    checking_account = AccountRepository.get_by_user_and_type(db, user.id, AccountType.CHECKING)
+    savings_account = AccountRepository.get_by_user_and_type(db, user.id, AccountType.SAVINGS)
     other_accounts = _build_other_accounts(db, user.id)
 
     error_map = {
@@ -55,18 +56,20 @@ def transacao_page(request: Request, db=Depends(get_db)):
             "active_page": "transacao",
             "dashboard_label": "Transferir",
             "user": user,
-            "account": account,
+            "checking_account": checking_account,
+            "savings_account": savings_account,
             "other_accounts": other_accounts,
             "error": error_map.get(error_key),
         },
     )
 
 
-@router.post("/transferir")
+@router.post("/transacao")
 async def transacao_submit(
     request: Request,
     amount_cents: int = Form(...),
     to_account_id: int = Form(...),
+    from_account_type: str = Form("corrente"),
     db=Depends(get_db),
 ):
     result = require_user(request, db)
@@ -74,13 +77,13 @@ async def transacao_submit(
         return result
     user = result
 
-    accounts = AccountRepository.get_by_user_id(db, user.id)
-    if not accounts:
+    tipo = AccountType.SAVINGS if from_account_type == "poupanca" else AccountType.CHECKING
+    from_account = AccountRepository.get_by_user_and_type(db, user.id, tipo)
+
+    if not from_account:
         return RedirectResponse("/transferir?error=sem_conta", status_code=302)
 
-    from_account = accounts[0]
     amount = Decimal(amount_cents) / 100
-
     if amount <= 0:
         return RedirectResponse("/transferir?error=valor_invalido", status_code=302)
 
@@ -114,6 +117,7 @@ async def transacao_submit(
 
     return RedirectResponse("/home?flash=transferencia_realizada", status_code=302)
 
+
 @router.post("/transferir/{transaction_id}/descricao")
 def transacao_update_descricao(
     transaction_id: int,
@@ -124,7 +128,7 @@ def transacao_update_descricao(
     result = require_user(request, db)
     if isinstance(result, RedirectResponse):
         return result
-    
+
     TransactionRepository.update_description(
         db,
         transaction_id=transaction_id,
@@ -132,6 +136,7 @@ def transacao_update_descricao(
     )
     db.commit()
     return RedirectResponse("/extrato", status_code=302)
+
 
 @router.post("/transferir/{transaction_id}/deletar")
 def transacao_delete(
@@ -142,7 +147,7 @@ def transacao_delete(
     result = require_user(request, db)
     if isinstance(result, RedirectResponse):
         return result
-    
+
     TransactionRepository.delete(db, transaction_id=transaction_id)
     db.commit()
     return RedirectResponse("/extrato", status_code=302)

@@ -171,6 +171,10 @@ function wireRecipientStep() {
     document.getElementById("btn-back-amount")?.addEventListener("click", () => {
         setStep("amount");
     });
+    setupOwnAccountButton();
+    document.getElementById("btn-own-account")?.addEventListener("click", () => {
+        selectRecipient(document.getElementById("btn-own-account"));
+    });
 
     document.getElementById("recipient-search")?.addEventListener("input", (event) => {
         filterRecipients(event.target.value);
@@ -212,3 +216,24 @@ document.addEventListener("DOMContentLoaded", () => {
     wireSuccessStep();
     wireCancelButton();
 });
+// Configura o botão de transferência entre contas próprias
+function setupOwnAccountButton() {
+    const balanceData = document.getElementById("balance-data");
+    const btn = document.getElementById("btn-own-account");
+    const nameEl = document.getElementById("own-account-name");
+    const initialEl = document.getElementById("own-account-initial");
+    if (!btn || !balanceData) return;
+
+    // A conta destino é sempre a oposta à selecionada
+    const targetType = state.accountType === "corrente" ? "poupanca" : "corrente";
+    const targetId = targetType === "corrente"
+        ? balanceData.dataset.correnteId
+        : balanceData.dataset.poupancaId;
+    const targetLabel = targetType === "corrente" ? "Conta Corrente" : "Conta Poupança";
+    const targetInitial = targetType === "corrente" ? "CC" : "CP";
+
+    btn.dataset.accountId = targetId;
+    btn.dataset.name = targetLabel;
+    if (nameEl) nameEl.textContent = targetLabel;
+    if (initialEl) initialEl.textContent = targetInitial;
+}
