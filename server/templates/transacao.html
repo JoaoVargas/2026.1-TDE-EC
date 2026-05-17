@@ -28,8 +28,14 @@
 
     <section class="transfer-step step-amount is-active" data-step-panel="amount">
         <div class="info-card ui-card">
-            <p class="info-title">Saldo disponivel na conta</p>
-            <p class="info-value">{{ account.balance | brl if account else 'R$ 0,00' }}</p>
+            <p class="info-title">Saldo disponível na conta</p>
+            <p class="info-value" id="balance-display">R$ 0,00</p>
+        </div>
+
+        <div id="balance-data"
+            data-corrente="{{ checking_account.balance | brl if checking_account else 'R$ 0,00' }}"
+            data-poupanca="{{ savings_account.balance | brl if savings_account else 'R$ 0,00' }}"
+            hidden>
         </div>
 
         <div class="amount-display" id="amount-display">R$ 0,00</div>

@@ -3,11 +3,29 @@ const state = {
     amountDigits: "",
     selectedAccountId: null,
     selectedName: null,
+    accountType: localStorage.getItem('conta_selecionada') || 'corrente',
 };
 
 function formatAmount(digits) {
     const cents = Number(digits || "0");
     return (cents / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+}
+
+function getAccountLabel() {
+    return state.accountType === "poupanca" ? "Conta Poupança" : "Conta Corrente";
+}
+
+function updateAccountDisplay() {
+    const balanceData = document.getElementById("balance-data");
+    const balanceDisplay = document.getElementById("balance-display");
+    const hiddenAccountType = document.getElementById("hidden-from-account-type");
+
+    if (balanceData && balanceDisplay) {
+        balanceDisplay.textContent = balanceData.dataset[state.accountType];
+    }
+    if (hiddenAccountType) {
+        hiddenAccountType.value = state.accountType;
+    }
 }
 
 function clearInlineError() {
@@ -25,9 +43,9 @@ function setStep(step) {
     const subtitle = document.getElementById("transfer-subtitle");
     if (subtitle) {
         subtitle.textContent =
-            step === "amount" ? "Qual e o valor da transferencia?"
-            : step === "recipient" ? "Para quem voce quer transferir?"
-            : "Comprovante da operacao";
+            step === "amount"    ? "Qual é o valor da transferência?"
+            : step === "recipient" ? "Para quem você quer transferir?"
+            : "Comprovante da operação";
     }
 
     document.querySelectorAll("[data-step-panel]").forEach((panel) => {
@@ -64,26 +82,27 @@ function selectRecipient(card) {
 }
 
 function writeReceipt() {
-    const amountText = formatAmount(state.amountDigits);
-    const dateText = new Date().toLocaleString("pt-BR");
-
     const receiptAmount = document.getElementById("receipt-amount");
     const receiptName = document.getElementById("receipt-name");
     const receiptDate = document.getElementById("receipt-date");
+    const receiptAccount = document.getElementById("receipt-account");
 
-    if (receiptAmount) receiptAmount.textContent = amountText;
+    if (receiptAmount) receiptAmount.textContent = formatAmount(state.amountDigits);
     if (receiptName) receiptName.textContent = state.selectedName || "-";
-    if (receiptDate) receiptDate.textContent = dateText;
+    if (receiptDate) receiptDate.textContent = new Date().toLocaleString("pt-BR");
+    if (receiptAccount) receiptAccount.textContent = getAccountLabel();
 }
 
 async function submitAndCheck() {
     const form = document.getElementById("transfer-form");
     const hiddenAmount = document.getElementById("hidden-amount");
     const hiddenAccount = document.getElementById("hidden-to-account");
+    const hiddenAccountType = document.getElementById("hidden-from-account-type");
 
     if (!form || !hiddenAmount || !hiddenAccount) return;
     hiddenAmount.value = state.amountDigits || "0";
     hiddenAccount.value = state.selectedAccountId || "";
+    if (hiddenAccountType) hiddenAccountType.value = state.accountType;
 
     const btn = document.getElementById("btn-to-success");
     if (btn) btn.disabled = true;
@@ -187,6 +206,7 @@ function wireCancelButton() {
 
 document.addEventListener("DOMContentLoaded", () => {
     updateAmountDisplay();
+    updateAccountDisplay();
     wireAmountStep();
     wireRecipientStep();
     wireSuccessStep();
