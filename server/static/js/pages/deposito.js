@@ -1,7 +1,7 @@
 const state = {
     step: "amount",
     amountDigits: "",
-    accountType: "corrente", // novo
+    accountType: localStorage.getItem('conta_selecionada') || 'corrente', // lê direto do localStorage
 };
 
 function formatAmount(digits) {
@@ -75,29 +75,16 @@ function submitDeposito() {
     const form = document.getElementById("deposito-form");
     const hiddenAmount = document.getElementById("hidden-amount");
     const hiddenAccountType = document.getElementById("hidden-account-type");
-    const selector = document.getElementById("account-selector");
-
     if (!form || !hiddenAmount) return;
-
     hiddenAmount.value = state.amountDigits || "0";
-    if (hiddenAccountType && selector) {
-        hiddenAccountType.value = selector.value; // ← lê direto do DOM, ignora state
-    }
-
+    if (hiddenAccountType) hiddenAccountType.value = state.accountType;
     form.submit();
 }
 
 document.addEventListener("DOMContentLoaded", () => {
     updateAmountDisplay();
-    updateAccountDisplay();
+    updateAccountDisplay(); // aplica saldo e hidden-account-type baseado no localStorage
 
-    // Seletor de conta
-    document.getElementById("account-selector")?.addEventListener("change", (e) => {
-        state.accountType = e.target.value;
-        updateAccountDisplay();
-    });
-
-    // Numpad
     document.querySelectorAll(".numpad-key[data-number]").forEach((button) => {
         button.addEventListener("click", () => {
             if (state.amountDigits.length >= 9) return;
@@ -113,7 +100,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     document.getElementById("btn-to-confirm")?.addEventListener("click", () => {
         if (!state.amountDigits || Number(state.amountDigits) === 0) return;
-        populateConfirmStep(); // substitui o updateAmountDisplay() direto
+        populateConfirmStep();
         setStep("confirm");
     });
 
