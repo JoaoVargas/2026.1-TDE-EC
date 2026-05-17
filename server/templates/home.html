@@ -10,6 +10,7 @@
 <header class="greeting-block">
     <h1>Ola, {{ user.name if user else 'Usuario' }}</h1>
     <p>Resumo rapido da sua conta e atalhos do BetaBank.</p>
+    <button>Alternar para conta {{ user.account if user else 'Usuario' }} </button>
 </header>
 
 {% if flash == 'transferencia_realizada' %}
