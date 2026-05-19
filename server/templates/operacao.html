@@ -8,10 +8,6 @@
 <link rel="stylesheet" href="/static/css/transacao.css" />
 {% endblock %}
 
-{% block dashboard_topbar_actions %}
-<button class="ui-btn ui-btn-secondary" type="button" id="btn-cancelar">Cancelar</button>
-{% endblock %}
-
 {% block dashboard_content %}
 {% if error %}
 <div class="feedback-message feedback-error" style="display: block; margin-bottom: 1rem; width: min(560px, 100%); margin-left: auto; margin-right: auto;">{{ error }}</div>

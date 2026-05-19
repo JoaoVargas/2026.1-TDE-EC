@@ -63,6 +63,7 @@ a:hover {
 
 .ui-btn:hover {
     transform: translateY(-1px);
+    text-decoration: none;
 }
 
 .ui-btn:active {
