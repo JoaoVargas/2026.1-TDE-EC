@@ -16,11 +16,15 @@ _ERROR_MESSAGES = {
     "tipo_invalido": "Formato de imagem inválido. Use JPEG, PNG, WEBP ou GIF.",
     "arquivo_grande": "Imagem muito grande. O limite é 4 MB.",
     "arquivo_vazio": "Selecione um arquivo de imagem.",
+    "dados_invalidos": "Nome ou email inválido.",
+    "endereco_invalido": "Endereço inválido. Verifique os campos.",
 }
 
 _FLASH_MESSAGES = {
     "foto_atualizada": "Foto de perfil atualizada com sucesso.",
     "foto_removida": "Foto de perfil removida.",
+    "dados_atualizados": "Dados atualizados com sucesso.",
+    "endereco_atualizado": "Endereço atualizado com sucesso.",
 }
 
 
@@ -75,18 +79,25 @@ def perfil_dados(request: Request, db=Depends(get_db)):
 
 
 @router.post("/perfil/nome")
-async def update_perfil_nome(request: Request, name: str = Form(...), db=Depends(get_db)):
+async def update_perfil_nome(
+    request: Request,
+    name: str = Form(...),
+    email: str = Form(...),
+    db=Depends(get_db),
+):
     result = require_user(request, db)
     if isinstance(result, RedirectResponse):
         return result
     user = result
 
-    if not name or len(name) < 3:
-        return RedirectResponse(url="/perfil", status_code=303)
-    
-    UserRepository.update_name(db, user_id=user.id, name=name)
+    name = name.strip()
+    email = email.strip()
+    if not name or len(name) < 3 or not email or "@" not in email:
+        return RedirectResponse(url="/perfil?error=dados_invalidos", status_code=303)
+
+    UserRepository.update_profile(db, user_id=user.id, name=name, email=email)
     db.commit()
-    return RedirectResponse(url="/perfil", status_code=303)
+    return RedirectResponse(url="/perfil?flash=dados_atualizados", status_code=303)
 
 
 @router.post("/perfil/endereco")
@@ -106,23 +117,22 @@ async def update_perfil_endereco(
         return result
     user = result
     
-    if not cep or not street or not state or not city or not neighborhood or not number:
-        return RedirectResponse(url="/perfil", status_code=303)
-    
     cep_clean = "".join(c for c in cep if c.isdigit())
-    if len(cep_clean) != 8 or not cep_clean.isdigit():
-        return RedirectResponse(url="/perfil", status_code=303)
-    
+    if not all([cep_clean, street.strip(), state.strip(), city.strip(), neighborhood.strip(), number.strip()]) or len(cep_clean) != 8:
+        return RedirectResponse(url="/perfil?error=endereco_invalido", status_code=303)
+
     AddressRepository.update(
         db,
         address_id=user.address_id,
-        cep=cep_clean, street=street,
-        state=state, city=city,
-        neighborhood=neighborhood,
-        number=number
-        )
+        cep=cep_clean,
+        street=street.strip(),
+        state=state.strip().upper(),
+        city=city.strip(),
+        neighborhood=neighborhood.strip(),
+        number=number.strip(),
+    )
     db.commit()
-    return RedirectResponse(url="/perfil", status_code=303)
+    return RedirectResponse(url="/perfil?flash=endereco_atualizado", status_code=303)
 
 
 @router.post("/perfil/avatar")

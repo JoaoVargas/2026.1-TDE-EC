@@ -22,15 +22,53 @@
     align-content: start;
 }
 
+.perfil-card-header {
+    display: grid;
+    gap: 0.3rem;
+}
+
+.perfil-card-title-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-2);
+}
+
 .perfil-card-header h2 {
     margin: 0;
     font-size: 1.05rem;
 }
 
 .perfil-card-header p {
-    margin: 0.3rem 0 0;
+    margin: 0;
     color: var(--color-muted);
     font-size: 0.86rem;
+}
+
+.perfil-edit-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: var(--radius-sm);
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--color-text);
+    padding: 0.35rem 0.5rem;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.76rem;
+    font-family: var(--font-sans);
+    flex-shrink: 0;
+}
+
+.perfil-edit-btn:hover {
+    background: rgba(115, 219, 211, 0.12);
+}
+
+.perfil-edit-btn svg {
+    width: 0.85rem;
+    height: 0.85rem;
+    fill: currentColor;
 }
 
 .perfil-avatar-preview {

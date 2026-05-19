@@ -60,6 +60,8 @@ def manager_accounts_page(request: Request, db=Depends(get_db)):
     users_data = _serialize_users(users, accounts_by_user, addresses_by_id)
 
     feedback_map = {
+        "perfil_atualizado": "Nome e email atualizados com sucesso.",
+        "perfil_invalido": "Nome ou email inválido.",
         "nome_atualizado": "Nome atualizado com sucesso.",
         "nome_invalido": "Nome inválido.",
         "cpf_atualizado": "CPF atualizado com sucesso.",
@@ -83,6 +85,31 @@ def manager_accounts_page(request: Request, db=Depends(get_db)):
             "feedback": feedback_map.get(feedback_key),
         },
     )
+
+
+@router.post("/manager/accounts/{user_id}/profile")
+async def manager_update_profile(
+    user_id: int,
+    request: Request,
+    name: str = Form(...),
+    email: str = Form(...),
+    db=Depends(get_db),
+):
+    result = require_manager(request, db)
+    if isinstance(result, RedirectResponse):
+        return result
+
+    name = name.strip()
+    email = email.strip()
+    if not name or not email or "@" not in email:
+        return RedirectResponse("/manager/accounts?feedback=perfil_invalido", status_code=302)
+
+    updated = UserRepository.update_profile(db, user_id=user_id, name=name, email=email)
+    if not updated:
+        return RedirectResponse("/manager/accounts?feedback=usuario_nao_encontrado", status_code=302)
+
+    db.commit()
+    return RedirectResponse("/manager/accounts?feedback=perfil_atualizado", status_code=302)
 
 
 @router.post("/manager/accounts/{user_id}/rename")
