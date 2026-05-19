@@ -32,14 +32,22 @@ function renderDistributionView(data) {
 
     legendList.innerHTML = "";
     classes.forEach((item) => {
+        const dot = document.createElement("span");
+        dot.className = "legend-dot";
+        dot.style.backgroundColor = item.color;
+
+        const label = document.createElement("strong");
+        label.textContent = item.label;
+
+        const percentage = document.createElement("span");
+        percentage.textContent = `${pct(item.value, total)}%`;
+
+        const amount = document.createElement("em");
+        amount.textContent = `R$ ${toBRL(item.value)}`;
+
         const row = document.createElement("div");
         row.className = "legend-row";
-        row.innerHTML = `
-            <span class="legend-dot" style="background:${item.color};"></span>
-            <strong>${item.label}</strong>
-            <span>${pct(item.value, total)}%</span>
-            <em>R$ ${toBRL(item.value)}</em>
-        `;
+        row.append(dot, label, percentage, amount);
         legendList.appendChild(row);
     });
 
@@ -48,12 +56,23 @@ function renderDistributionView(data) {
     const colorMap = Object.fromEntries(classes.map((c) => [c.label, c.color]));
     assets.forEach((item) => {
         const color = colorMap[item.className] || "#6fd0ce";
+
+        const pctSpan = document.createElement("span");
+        pctSpan.textContent = `${pct(item.value, total)}%`;
+        const labelEl = document.createElement("label");
+        labelEl.append(item.name, pctSpan);
+
+        const fill = document.createElement("div");
+        fill.className = "bar-fill";
+        fill.style.width = `${(item.value / maxAsset) * 100}%`;
+        fill.style.backgroundColor = color;
+        const track = document.createElement("div");
+        track.className = "bar-track";
+        track.appendChild(fill);
+
         const row = document.createElement("div");
         row.className = "bar-row";
-        row.innerHTML = `
-            <label>${item.name}<span>${pct(item.value, total)}%</span></label>
-            <div class="bar-track"><div class="bar-fill" style="width:${(item.value / maxAsset) * 100}%; background:${color};"></div></div>
-        `;
+        row.append(labelEl, track);
         assetBars.appendChild(row);
     });
 }

@@ -10,7 +10,6 @@
 <header class="greeting-block">
     <h1>Ola, {{ user.name if user else 'Usuario' }}</h1>
     <p>Resumo rapido da sua conta e atalhos do BetaBank.</p>
-    <button>Alternar para conta {{ user.account if user else 'Usuario' }} </button>
 </header>
 
 {% if flash == 'transferencia_realizada' %}
@@ -19,22 +18,9 @@
 </div>
 {% endif %}
 <div id="seletor-conta" style="display: none; margin-bottom: 1rem;">
-    <button id="btn-toggle-conta" onclick="toggleConta()" style="
-    display: inline-flex;
-    align-items: center;
-    gap: 0.6rem;
-    padding: 0.5rem 1.3rem;
-    border-radius: 999px;
-    border: 1px solid rgba(149, 209, 207, 0.3);
-    background: rgba(22, 60, 63, 0.6);
-    color: #95d1cf;
-    font-size: 0.82rem;
-    font-weight: 500;
-    letter-spacing: 0.05em;
-    cursor: pointer;
-">
-    <span id="toggle-label">Conta Corrente</span>
-</button>
+    <button id="btn-toggle-conta" class="account-toggle-btn">
+        <span id="toggle-label">Conta Corrente</span>
+    </button>
     <select id="account-selector" hidden>
         <option value="corrente">Conta Corrente</option>
         <option value="poupanca">Conta Poupança</option>
@@ -54,67 +40,6 @@
     </div>
     <a href="/extrato" class="balance-arrow" aria-label="Abrir extrato">></a>
 </section>
-
-<script>
-// Substitui o bloco <script> no home.html
-function abrirSeletorConta() {
-    document.getElementById('card-poupanca').style.display = 'none';
-    document.getElementById('seletor-conta').style.display = 'block';
-    localStorage.setItem('poupanca_aberta', 'true');
-}
-
-function toggleBalance() {
-    const selector = document.getElementById('account-selector');
-    const divCorrente = document.getElementById('balance-corrente');
-    const divPoupanca = document.getElementById('balance-poupanca');
-    const isPoupanca = selector.value === 'poupanca';
-    divCorrente.style.display = isPoupanca ? 'none' : 'block';
-    divPoupanca.style.display = isPoupanca ? 'block' : 'none';
-    localStorage.setItem('conta_selecionada', selector.value);
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-    const poupancaAberta = localStorage.getItem('poupanca_aberta') === 'true';
-    const contaSelecionada = localStorage.getItem('conta_selecionada') || 'corrente';
-
-    if (poupancaAberta) {
-        document.getElementById('card-poupanca').style.display = 'none';
-        document.getElementById('seletor-conta').style.display = 'block';
-
-        const selector = document.getElementById('account-selector');
-        const label = document.getElementById('toggle-label');
-        if (selector) {
-            selector.value = contaSelecionada;
-            label.textContent = contaSelecionada === 'corrente' ? 'Conta Corrente' : 'Conta Poupança';
-            toggleBalance();
-        }
-    }
-});
-function selectAccount(value) {
-    // Atualiza o select hidden (usado pelo toggleBalance)
-    document.getElementById('account-selector').value = value;
-
-    // Atualiza visual dos botões
-    document.querySelectorAll('.account-toggle-btn').forEach(btn => {
-        btn.classList.toggle('active', btn.dataset.value === value);
-    });
-
-    // Persiste e atualiza saldo
-    localStorage.setItem('conta_selecionada', value);
-    toggleBalance();
-}
-function toggleConta() {
-    const selector = document.getElementById('account-selector');
-    const label = document.getElementById('toggle-label');
-
-    const novoValor = selector.value === 'corrente' ? 'poupanca' : 'corrente';
-    selector.value = novoValor;
-    label.textContent = novoValor === 'corrente' ? 'Conta Corrente' : 'Conta Poupança';
-
-    localStorage.setItem('conta_selecionada', novoValor);
-    toggleBalance();
-}
-</script>
 
 <section class="cards-grid">
     <bb-insight-card
@@ -140,7 +65,10 @@ function toggleConta() {
     button-label="Abrir"
     button-variant="ui-btn-accent"
     style="cursor: pointer;"
-    onclick="abrirSeletorConta()"
 ></bb-insight-card>
 </section>
+{% endblock %}
+
+{% block dashboard_scripts %}
+<script type="module" src="/static/js/pages/home.js"></script>
 {% endblock %}

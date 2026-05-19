@@ -1,18 +1,15 @@
+import { formatAmount, getAccountLabel as getLabel } from "/static/js/components/transaction-flow.js";
+
 const state = {
     step: "amount",
     amountDigits: "",
     selectedAccountId: null,
     selectedName: null,
-    accountType: localStorage.getItem('conta_selecionada') || 'corrente',
+    accountType: localStorage.getItem("conta_selecionada") || "corrente",
 };
 
-function formatAmount(digits) {
-    const cents = Number(digits || "0");
-    return (cents / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
-}
-
 function getAccountLabel() {
-    return state.accountType === "poupanca" ? "Conta Poupança" : "Conta Corrente";
+    return getLabel(state.accountType);
 }
 
 function updateAccountDisplay() {
