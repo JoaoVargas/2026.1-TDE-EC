@@ -1,11 +1,11 @@
-import { formatAmount, getAccountLabel as getLabel } from "/static/js/components/transaction-flow.js";
+import { formatAmount, getAccountLabel as getLabel, wireNumpadKeyboard } from "/static/js/components/transaction-flow.js";
 
 const state = {
     step: "amount",
     amountDigits: "",
     selectedAccountId: null,
     selectedName: null,
-    accountType: localStorage.getItem("conta_selecionada") || "corrente",
+    accountType: "corrente",
 };
 
 function getAccountLabel() {
@@ -56,6 +56,17 @@ function updateAmountDisplay() {
     const selectedAmount = document.getElementById("selected-amount");
     if (display) display.textContent = value;
     if (selectedAmount) selectedAmount.textContent = value;
+}
+
+function appendDigit(digit) {
+    if (state.amountDigits.length >= 9) return;
+    state.amountDigits += digit;
+    updateAmountDisplay();
+}
+
+function deleteDigit() {
+    state.amountDigits = state.amountDigits.slice(0, -1);
+    updateAmountDisplay();
 }
 
 function filterRecipients(filterText) {
@@ -144,76 +155,6 @@ async function submitAndCheck() {
     }
 }
 
-function wireAmountStep() {
-    document.querySelectorAll(".numpad-key[data-number]").forEach((button) => {
-        button.addEventListener("click", () => {
-            if (state.amountDigits.length >= 9) return;
-            state.amountDigits += button.dataset.number;
-            updateAmountDisplay();
-        });
-    });
-
-    document.getElementById("btn-delete")?.addEventListener("click", () => {
-        state.amountDigits = state.amountDigits.slice(0, -1);
-        updateAmountDisplay();
-    });
-
-    document.getElementById("btn-to-recipient")?.addEventListener("click", () => {
-        if (!state.amountDigits || Number(state.amountDigits) === 0) return;
-        setStep("recipient");
-    });
-}
-
-function wireRecipientStep() {
-    document.getElementById("btn-back-amount")?.addEventListener("click", () => {
-        setStep("amount");
-    });
-    setupOwnAccountButton();
-    document.getElementById("btn-own-account")?.addEventListener("click", () => {
-        selectRecipient(document.getElementById("btn-own-account"));
-    });
-
-    document.getElementById("recipient-search")?.addEventListener("input", (event) => {
-        filterRecipients(event.target.value);
-    });
-
-    document.querySelectorAll(".recipient-card").forEach((card) => {
-        card.addEventListener("click", () => selectRecipient(card));
-    });
-
-    document.getElementById("btn-to-success")?.addEventListener("click", () => {
-        if (!state.selectedAccountId) return;
-        submitAndCheck();
-    });
-}
-
-function wireSuccessStep() {
-    document.getElementById("btn-finish-transfer")?.addEventListener("click", () => {
-        window.location.href = "/home";
-    });
-}
-
-function wireCancelButton() {
-    document.getElementById("btn-cancelar-transferencia")?.addEventListener("click", () => {
-        if (state.step === "amount" || state.step === "success") {
-            window.location.href = "/home";
-            return;
-        }
-        if (state.step === "recipient") {
-            setStep("amount");
-        }
-    });
-}
-
-document.addEventListener("DOMContentLoaded", () => {
-    updateAmountDisplay();
-    updateAccountDisplay();
-    wireAmountStep();
-    wireRecipientStep();
-    wireSuccessStep();
-    wireCancelButton();
-});
-// Configura o botão de transferência entre contas próprias
 function setupOwnAccountButton() {
     const balanceData = document.getElementById("balance-data");
     const btn = document.getElementById("btn-own-account");
@@ -221,7 +162,6 @@ function setupOwnAccountButton() {
     const initialEl = document.getElementById("own-account-initial");
     if (!btn || !balanceData) return;
 
-    // A conta destino é sempre a oposta à selecionada
     const targetType = state.accountType === "corrente" ? "poupanca" : "corrente";
     const targetId = targetType === "corrente"
         ? balanceData.dataset.correnteId
@@ -234,3 +174,80 @@ function setupOwnAccountButton() {
     if (nameEl) nameEl.textContent = targetLabel;
     if (initialEl) initialEl.textContent = targetInitial;
 }
+
+document.addEventListener("DOMContentLoaded", () => {
+    updateAmountDisplay();
+    updateAccountDisplay();
+
+    // source account tabs
+    document.querySelectorAll(".transfer-account-tab").forEach((tab) => {
+        tab.addEventListener("click", () => {
+            document.querySelectorAll(".transfer-account-tab").forEach((t) => t.classList.remove("is-active"));
+            tab.classList.add("is-active");
+            state.accountType = tab.dataset.account;
+            updateAccountDisplay();
+            setupOwnAccountButton();
+        });
+    });
+
+    // numpad clicks
+    document.querySelectorAll(".numpad-key[data-number]").forEach((button) => {
+        button.addEventListener("click", () => appendDigit(button.dataset.number));
+    });
+    document.getElementById("btn-delete")?.addEventListener("click", deleteDigit);
+
+    // amount step
+    document.getElementById("btn-to-recipient")?.addEventListener("click", () => {
+        if (!state.amountDigits || Number(state.amountDigits) === 0) return;
+        setStep("recipient");
+    });
+
+    // recipient step
+    document.getElementById("btn-back-amount")?.addEventListener("click", () => setStep("amount"));
+    setupOwnAccountButton();
+    document.getElementById("btn-own-account")?.addEventListener("click", () => {
+        selectRecipient(document.getElementById("btn-own-account"));
+    });
+    document.getElementById("recipient-search")?.addEventListener("input", (e) => {
+        filterRecipients(e.target.value);
+    });
+    document.querySelectorAll(".recipient-card").forEach((card) => {
+        card.addEventListener("click", () => selectRecipient(card));
+    });
+    document.getElementById("btn-to-success")?.addEventListener("click", () => {
+        if (!state.selectedAccountId) return;
+        submitAndCheck();
+    });
+
+    // success step
+    document.getElementById("btn-finish-transfer")?.addEventListener("click", () => {
+        window.location.href = "/home";
+    });
+
+    // cancel
+    document.getElementById("btn-cancelar-transferencia")?.addEventListener("click", () => {
+        if (state.step === "amount" || state.step === "success") {
+            window.location.href = "/home";
+        } else if (state.step === "recipient") {
+            setStep("amount");
+        }
+    });
+
+    // keyboard
+    wireNumpadKeyboard({
+        onDigit: appendDigit,
+        onDelete: deleteDigit,
+        onEnter: () => {
+            if (state.step === "amount") {
+                if (!state.amountDigits || Number(state.amountDigits) === 0) return;
+                setStep("recipient");
+            } else if (state.step === "recipient") {
+                if (!state.selectedAccountId) return;
+                submitAndCheck();
+            } else if (state.step === "success") {
+                window.location.href = "/home";
+            }
+        },
+        onEscape: () => document.getElementById("btn-cancelar-transferencia")?.click(),
+    });
+});

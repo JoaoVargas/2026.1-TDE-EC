@@ -53,6 +53,37 @@
     border-color: rgba(240, 115, 115, 0.28);
 }
 
+.account-tabs {
+    display: flex;
+    gap: 0.4rem;
+    border-bottom: 1px solid rgba(110, 162, 196, 0.18);
+    padding-bottom: 0;
+}
+
+.account-tab {
+    padding: 0.5rem 1.1rem;
+    border-radius: var(--radius-md) var(--radius-md) 0 0;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--color-muted);
+    border: 1px solid transparent;
+    border-bottom: none;
+    text-decoration: none;
+    transition: color 0.15s, background 0.15s;
+}
+
+.account-tab:hover {
+    color: var(--color-text);
+    text-decoration: none;
+}
+
+.account-tab.is-active {
+    color: var(--color-primary);
+    background: rgba(78, 207, 181, 0.07);
+    border-color: rgba(110, 162, 196, 0.25);
+    border-bottom-color: transparent;
+}
+
 .statement-filters {
     display: flex;
     gap: 0.55rem;

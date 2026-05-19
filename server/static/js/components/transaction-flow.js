@@ -1,3 +1,28 @@
+/**
+ * Wires physical keyboard input to a numpad-based flow.
+ * Ignored when focus is on an input or textarea.
+ *
+ * @param {{ onDigit: (key: string) => void, onDelete: () => void, onEnter?: () => void, onEscape?: () => void }} config
+ */
+export function wireNumpadKeyboard({ onDigit, onDelete, onEnter, onEscape }) {
+    document.addEventListener("keydown", (e) => {
+        if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") return;
+        if (e.key >= "0" && e.key <= "9") {
+            e.preventDefault();
+            onDigit(e.key);
+        } else if (e.key === "Backspace") {
+            e.preventDefault();
+            onDelete();
+        } else if (e.key === "Enter") {
+            e.preventDefault();
+            onEnter?.();
+        } else if (e.key === "Escape") {
+            e.preventDefault();
+            onEscape?.();
+        }
+    });
+}
+
 export function formatAmount(digits) {
     const cents = Number(digits || "0");
     return (cents / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
@@ -76,22 +101,40 @@ export function createNumpadFlow({ subtitles, formId }) {
         form.submit();
     }
 
+    function appendDigit(digit) {
+        if (state.amountDigits.length >= 9) return;
+        state.amountDigits += digit;
+        updateAmountDisplay();
+    }
+
+    function deleteDigit() {
+        state.amountDigits = state.amountDigits.slice(0, -1);
+        updateAmountDisplay();
+    }
+
+    function advanceStep() {
+        if (state.step === "amount") {
+            if (!state.amountDigits || Number(state.amountDigits) === 0) return;
+            populateConfirmStep();
+            setStep("confirm");
+        } else if (state.step === "confirm") {
+            writeReceipt();
+            setStep("success");
+            submitForm();
+        } else if (state.step === "success") {
+            window.location.href = "/home";
+        }
+    }
+
     function init() {
         updateAmountDisplay();
         updateAccountDisplay();
 
         document.querySelectorAll(".numpad-key[data-number]").forEach((button) => {
-            button.addEventListener("click", () => {
-                if (state.amountDigits.length >= 9) return;
-                state.amountDigits += button.dataset.number;
-                updateAmountDisplay();
-            });
+            button.addEventListener("click", () => appendDigit(button.dataset.number));
         });
 
-        document.getElementById("btn-delete")?.addEventListener("click", () => {
-            state.amountDigits = state.amountDigits.slice(0, -1);
-            updateAmountDisplay();
-        });
+        document.getElementById("btn-delete")?.addEventListener("click", deleteDigit);
 
         document.getElementById("btn-to-confirm")?.addEventListener("click", () => {
             if (!state.amountDigits || Number(state.amountDigits) === 0) return;
@@ -119,6 +162,13 @@ export function createNumpadFlow({ subtitles, formId }) {
             } else {
                 window.location.href = "/home";
             }
+        });
+
+        wireNumpadKeyboard({
+            onDigit: appendDigit,
+            onDelete: deleteDigit,
+            onEnter: advanceStep,
+            onEscape: () => document.getElementById("btn-cancelar")?.click(),
         });
     }
 

@@ -17,29 +17,24 @@
     Transferencia realizada com sucesso!
 </div>
 {% endif %}
-<div id="seletor-conta" style="display: none; margin-bottom: 1rem;">
-    <button id="btn-toggle-conta" class="account-toggle-btn">
-        <span id="toggle-label">Conta Corrente</span>
-    </button>
-    <select id="account-selector" hidden>
-        <option value="corrente">Conta Corrente</option>
-        <option value="poupanca">Conta Poupança</option>
-    </select>
+<div class="balance-cards-row">
+    <section class="balance-card ui-card">
+        <div>
+            <p class="balance-label">Conta Corrente</p>
+            <p class="balance-value">{{ checking_account.balance | brl if checking_account else 'R$ 0,00' }}</p>
+        </div>
+        <a href="/extrato?account=corrente" class="balance-arrow" aria-label="Abrir extrato">></a>
+    </section>
+    {% if savings_account %}
+    <section class="balance-card balance-card--savings ui-card">
+        <div>
+            <p class="balance-label">Conta Poupança</p>
+            <p class="balance-value">{{ savings_account.balance | brl }}</p>
+        </div>
+        <a href="/extrato?account=poupanca" class="balance-arrow" aria-label="Abrir extrato">></a>
+    </section>
+    {% endif %}
 </div>
-<section class="balance-card ui-card">
-    <div id="balance-container">
-        <div id="balance-corrente">
-            <p class="balance-label">Saldo disponível</p>
-            <p class="balance-value">{{ checking_account.balance | brl if checking_account  else 'R$ 0,00' }}</p>
-        </div>
-
-        <div id="balance-poupanca" style="display: none;">
-            <p class="balance-label">Saldo guardado</p>
-            <p class="balance-value">{{ savings_account.balance | brl if savings_account else 'R$ 0,00' }}</p>
-        </div>
-    </div>
-    <a href="/extrato" class="balance-arrow" aria-label="Abrir extrato">></a>
-</section>
 
 <section class="cards-grid">
     <bb-insight-card
@@ -58,14 +53,15 @@
         button-label="Ver termos"
         button-variant="ui-btn-secondary"
     ></bb-insight-card>
-    <bb-insight-card
-    id="card-poupanca"
-    title="Conta Poupança"
-    text="Crie e acesse sua conta poupança."
-    button-label="Abrir"
-    button-variant="ui-btn-accent"
-    style="cursor: pointer;"
-></bb-insight-card>
+    {% if not savings_account %}
+    <div class="ui-card dashboard-card">
+        <h3>Conta Poupança</h3>
+        <p>Guarde dinheiro e faca seu saldo render.</p>
+        <form method="post" action="/home/abrir-poupanca">
+            <button type="submit" class="ui-btn ui-btn-accent">Abrir conta</button>
+        </form>
+    </div>
+    {% endif %}
 </section>
 {% endblock %}
 

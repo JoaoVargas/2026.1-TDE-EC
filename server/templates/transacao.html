@@ -29,7 +29,14 @@
 
     <section class="transfer-step step-amount is-active" data-step-panel="amount">
         <div class="info-card ui-card">
+            {% if savings_account %}
+            <nav class="transfer-account-tabs">
+                <button type="button" class="transfer-account-tab is-active" data-account="corrente">Conta Corrente</button>
+                <button type="button" class="transfer-account-tab" data-account="poupanca">Conta Poupança</button>
+            </nav>
+            {% else %}
             <p class="info-title">Saldo disponível na conta</p>
+            {% endif %}
             <p class="info-value" id="balance-display">R$ 0,00</p>
         </div>
 
@@ -68,6 +75,7 @@
         </div>
 
         <!-- Transferência interna entre contas próprias -->
+        {% if savings_account %}
         <div style="margin-bottom: 1rem;">
             <p class="info-title" style="margin-bottom: 0.5rem;">Transferir entre minhas contas</p>
             <button
@@ -82,6 +90,7 @@
                 <span class="recipient-bank">BetaBank · sua conta</span>
             </button>
         </div>
+        {% endif %}
 
         <label class="ui-label" for="recipient-search">Buscar contato</label>
         <input class="ui-input" type="text" id="recipient-search" placeholder="Nome ou número de conta" />
