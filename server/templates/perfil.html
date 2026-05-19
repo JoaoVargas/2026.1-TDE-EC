@@ -1,0 +1,91 @@
+{% extends "dashboard_base.html" %}
+
+{% block title %}Meu perfil | Banco Digital{% endblock %}
+
+{% block dashboard_styles %}
+<link rel="stylesheet" href="/static/css/perfil.css" />
+{% endblock %}
+
+{% block dashboard_content %}
+<header class="greeting-block">
+    <h1>Meu perfil</h1>
+    <p>Personalize sua conta no BetaBank.</p>
+</header>
+
+{% if flash %}
+<div class="feedback-message feedback-success" style="display: block;">{{ flash }}</div>
+{% endif %}
+{% if error %}
+<div class="feedback-message feedback-error" style="display: block;">{{ error }}</div>
+{% endif %}
+
+<section class="perfil-grid">
+    <article class="ui-card perfil-card">
+        <header class="perfil-card-header">
+            <h2>Foto de perfil</h2>
+            <p>Use uma imagem quadrada para um melhor enquadramento.</p>
+        </header>
+
+        <div class="perfil-avatar-preview">
+            {% if has_avatar %}
+            <img src="/perfil/avatar/{{ user.id }}" alt="Foto de perfil" class="perfil-avatar-img" />
+            {% else %}
+            <div class="perfil-avatar-fallback">{{ user_initials(user.name) }}</div>
+            {% endif %}
+        </div>
+
+        <form method="post" action="/perfil/avatar" enctype="multipart/form-data" class="perfil-avatar-form">
+            <label for="avatar-input" class="ui-label">Selecione uma nova imagem</label>
+            <input
+                type="file"
+                id="avatar-input"
+                name="avatar"
+                accept="image/jpeg,image/png,image/webp,image/gif"
+                class="ui-input perfil-file-input"
+                required
+            />
+            <p class="perfil-help">Formatos aceitos: JPEG, PNG, WEBP, GIF. Tamanho máximo: 4 MB.</p>
+
+            <div class="perfil-actions">
+                <button type="submit" class="ui-btn ui-btn-primary">Salvar foto</button>
+                {% if has_avatar %}
+                <button
+                    type="submit"
+                    class="ui-btn ui-btn-secondary"
+                    formaction="/perfil/avatar/remover"
+                    formenctype="application/x-www-form-urlencoded"
+                    formnovalidate
+                >Remover foto</button>
+                {% endif %}
+            </div>
+        </form>
+    </article>
+
+    <article class="ui-card perfil-card">
+        <header class="perfil-card-header">
+            <h2>Dados da conta</h2>
+            <p>Informações cadastradas no BetaBank.</p>
+        </header>
+        <dl class="perfil-info">
+            <div><dt>Nome</dt><dd>{{ user.name }}</dd></div>
+            <div><dt>Email</dt><dd>{{ user.email }}</dd></div>
+            <div><dt>Tipo de conta</dt><dd>{{ 'Gerente' if is_manager(user) else 'Cliente' }}</dd></div>
+        </dl>
+    </article>
+
+    {% if address %}
+    <article class="ui-card perfil-card">
+        <header class="perfil-card-header">
+            <h2>Endereço</h2>
+            <p>Endereço cadastrado na sua conta.</p>
+        </header>
+        <dl class="perfil-info">
+            <div><dt>CEP</dt><dd>{{ address.cep[:5] }}-{{ address.cep[5:] }}</dd></div>
+            <div><dt>Logradouro</dt><dd>{{ address.street }}, {{ address.number }}</dd></div>
+            <div><dt>Bairro</dt><dd>{{ address.neighborhood }}</dd></div>
+            <div><dt>Cidade / Estado</dt><dd>{{ address.city }} — {{ address.state }}</dd></div>
+        </dl>
+    </article>
+    {% endif %}
+</section>
+{% endblock %}

@@ -15,13 +15,21 @@
         {{ nav_link('/investimentos', 'Investimentos', active_page == 'investimentos', 'investimento') }}
     </nav>
 
-    <div class="sidebar-profile">
-        <div class="avatar">{{ user_initials(user.name) if user else 'U' }}</div>
-        <div>
-            <strong>{{ user.name if user else 'Usuario' }}</strong>
-            <p>{{ user.email if user else 'conta@betabank.local' }}</p>
+    <a href="/perfil" class="sidebar-profile-link{% if active_page == 'perfil' %} is-active{% endif %}" aria-label="Abrir meu perfil">
+        <div class="sidebar-profile">
+            <div class="avatar">
+                {% if user and user.has_avatar %}
+                <img src="/perfil/avatar/{{ user.id }}" alt="Foto de perfil" />
+                {% else %}
+                {{ user_initials(user.name) if user else 'U' }}
+                {% endif %}
+            </div>
+            <div>
+                <strong>{{ user.name if user else 'Usuario' }}</strong>
+                <p>{{ user.email if user else 'conta@betabank.local' }}</p>
+            </div>
         </div>
-    </div>
+    </a>
 
     {% if user and is_manager(user) %}
     <a href="/manager" class="ui-btn ui-btn-primary manager-entry-btn">Acessar gerencia</a>
