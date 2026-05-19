@@ -53,6 +53,36 @@
                 <span><strong>Contas: </strong>{{ u.accounts | length }}</span>
             </div>
 
+            <div class="management-user-actions">
+                <button
+                    type="button"
+                    class="management-name-edit-trigger management-cpf-edit-trigger"
+                    data-user-id="{{ u.id }}"
+                    data-user-cpf="{{ u.cpf }}"
+                >
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M3 17.25V21h3.75l11-11-3.75-3.75-11 11zM20.71 7.04a1.003 1.003 0 000-1.42l-2.34-2.34a1.003 1.003 0 00-1.42 0l-1.83 1.83 3.75 3.75 1.84-1.82z"/>
+                    </svg>
+                    <span>Editar CPF</span>
+                </button>
+                <button
+                    type="button"
+                    class="management-name-edit-trigger management-addr-edit-trigger"
+                    data-user-id="{{ u.id }}"
+                    data-cep="{{ u.address.cep }}"
+                    data-street="{{ u.address.street }}"
+                    data-number="{{ u.address.number }}"
+                    data-neighborhood="{{ u.address.neighborhood }}"
+                    data-city="{{ u.address.city }}"
+                    data-state="{{ u.address.state }}"
+                >
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M3 17.25V21h3.75l11-11-3.75-3.75-11 11zM20.71 7.04a1.003 1.003 0 000-1.42l-2.34-2.34a1.003 1.003 0 00-1.42 0l-1.83 1.83 3.75 3.75 1.84-1.82z"/>
+                    </svg>
+                    <span>Editar endereço</span>
+                </button>
+            </div>
+
             {% if u.accounts %}
             <ul class="management-account-list">
                 {% for acc in u.accounts %}
@@ -109,6 +139,77 @@
                 <div class="management-modal-actions">
                     <button type="button" class="ui-btn ui-btn-secondary" id="rename-modal-cancel">Cancelar</button>
                     <button type="submit" class="ui-btn ui-btn-primary" id="rename-modal-save">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="management-modal-backdrop" id="cpf-modal-backdrop" hidden>
+        <div
+            class="management-modal ui-card"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="cpf-modal-title"
+        >
+            <header class="management-modal-header">
+                <h2 id="cpf-modal-title">Alterar CPF do usuario</h2>
+                <button type="button" class="ui-btn ui-btn-secondary" id="cpf-modal-close">Fechar</button>
+            </header>
+
+            <form id="cpf-form" method="post" action="">
+                <label class="ui-label" for="cpf-modal-input">Novo CPF (somente numeros)</label>
+                <input
+                    class="ui-input"
+                    id="cpf-modal-input"
+                    name="cpf"
+                    type="text"
+                    maxlength="14"
+                    autocomplete="off"
+                    placeholder="000.000.000-00"
+                />
+
+                <div class="management-modal-actions">
+                    <button type="button" class="ui-btn ui-btn-secondary" id="cpf-modal-cancel">Cancelar</button>
+                    <button type="submit" class="ui-btn ui-btn-primary">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="management-modal-backdrop" id="addr-modal-backdrop" hidden>
+        <div
+            class="management-modal ui-card"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="addr-modal-title"
+        >
+            <header class="management-modal-header">
+                <h2 id="addr-modal-title">Alterar endereco do usuario</h2>
+                <button type="button" class="ui-btn ui-btn-secondary" id="addr-modal-close">Fechar</button>
+            </header>
+
+            <form id="addr-form" method="post" action="">
+                <label class="ui-label" for="addr-modal-cep">CEP (somente numeros)</label>
+                <input class="ui-input" id="addr-modal-cep"          name="cep"          type="text" maxlength="8"  placeholder="00000000" />
+
+                <label class="ui-label" for="addr-modal-street">Rua</label>
+                <input class="ui-input" id="addr-modal-street"       name="street"       type="text" maxlength="200" placeholder="Nome da rua" />
+
+                <label class="ui-label" for="addr-modal-number">Numero</label>
+                <input class="ui-input" id="addr-modal-number"       name="number"       type="text" maxlength="20"  placeholder="123" />
+
+                <label class="ui-label" for="addr-modal-neighborhood">Bairro</label>
+                <input class="ui-input" id="addr-modal-neighborhood" name="neighborhood" type="text" maxlength="100" placeholder="Bairro" />
+
+                <label class="ui-label" for="addr-modal-city">Cidade</label>
+                <input class="ui-input" id="addr-modal-city"         name="city"         type="text" maxlength="100" placeholder="Cidade" />
+
+                <label class="ui-label" for="addr-modal-state">UF</label>
+                <input class="ui-input" id="addr-modal-state"        name="state"        type="text" maxlength="2"   placeholder="PR" />
+
+                <div class="management-modal-actions">
+                    <button type="button" class="ui-btn ui-btn-secondary" id="addr-modal-cancel">Cancelar</button>
+                    <button type="submit" class="ui-btn ui-btn-primary">Salvar</button>
                 </div>
             </form>
         </div>

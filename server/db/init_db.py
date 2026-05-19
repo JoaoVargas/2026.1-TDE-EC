@@ -120,6 +120,17 @@ def _create_tables(conn) -> None:
             FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
         )
     """)
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS user_avatars (
+            id          INT          AUTO_INCREMENT PRIMARY KEY,
+            user_id     INT          NOT NULL UNIQUE,
+            image_data  MEDIUMBLOB   NOT NULL,
+            mime_type   VARCHAR(50)  NOT NULL,
+            created_at  DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            updated_at  DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+        )
+    """)
     cursor.close()
     conn.commit()
 

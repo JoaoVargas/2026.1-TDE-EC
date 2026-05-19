@@ -20,3 +20,4 @@ class User:
     address_id: int
     created_at: datetime
     updated_at: datetime
+    has_avatar: bool = False
