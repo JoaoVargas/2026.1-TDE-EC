@@ -35,6 +35,7 @@ templates.env.globals["is_manager"] = _is_manager
 
 def require_user(request: Request, db) -> User | RedirectResponse:
     from server.repositories.session_repository import SessionRepository
+    from server.repositories.user_avatar_repository import UserAvatarRepository
     from server.repositories.user_repository import UserRepository
 
     token = get_session_token(request)
@@ -54,6 +55,7 @@ def require_user(request: Request, db) -> User | RedirectResponse:
         response.delete_cookie(SESSION_COOKIE_NAME)
         return response
 
+    user.has_avatar = UserAvatarRepository.exists_by_user_id(db, user.id)
     return user
 
 

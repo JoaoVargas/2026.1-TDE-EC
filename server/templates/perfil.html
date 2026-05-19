@@ -1,0 +1,135 @@
+{% extends "dashboard_base.html" %}
+
+{% block title %}Meu perfil | Banco Digital{% endblock %}
+
+{% block dashboard_styles %}
+<link rel="stylesheet" href="/static/css/perfil.css" />
+{% endblock %}
+
+{% block dashboard_scripts %}
+<script>
+document.querySelectorAll('.perfil-edit-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        const form = document.getElementById(btn.dataset.target);
+        if (!form) return;
+        if (form.hasAttribute('hidden')) form.removeAttribute('hidden'); else form.setAttribute('hidden', '');
+    });
+});
+</script>
+{% endblock %}
+
+{% block dashboard_content %}
+<header class="greeting-block">
+    <h1>Meu perfil</h1>
+    <p>Personalize sua conta no BetaBank.</p>
+</header>
+
+{% if flash %}
+<div class="feedback-message feedback-success" style="display: block;">{{ flash }}</div>
+{% endif %}
+{% if error %}
+<div class="feedback-message feedback-error" style="display: block;">{{ error }}</div>
+{% endif %}
+
+<section class="perfil-grid">
+    <article class="ui-card perfil-card">
+        <header class="perfil-card-header">
+            <h2>Foto de perfil</h2>
+            <p>Use uma imagem quadrada para um melhor enquadramento.</p>
+        </header>
+
+        <div class="perfil-avatar-preview">
+            {% if has_avatar %}
+            <img src="/perfil/avatar/{{ user.id }}" alt="Foto de perfil" class="perfil-avatar-img" />
+            {% else %}
+            <div class="perfil-avatar-fallback">{{ user_initials(user.name) }}</div>
+            {% endif %}
+        </div>
+
+        <form method="post" action="/perfil/avatar" enctype="multipart/form-data" class="perfil-avatar-form">
+            <label for="avatar-input" class="ui-label">Selecione uma nova imagem</label>
+            <input
+                type="file"
+                id="avatar-input"
+                name="avatar"
+                accept="image/jpeg,image/png,image/webp,image/gif"
+                class="ui-input perfil-file-input"
+                required
+            />
+            <p class="perfil-help">Formatos aceitos: JPEG, PNG, WEBP, GIF. Tamanho máximo: 4 MB.</p>
+
+            <div class="perfil-actions">
+                <button type="submit" class="ui-btn ui-btn-primary">Salvar foto</button>
+                {% if has_avatar %}
+                <button
+                    type="submit"
+                    class="ui-btn ui-btn-secondary"
+                    formaction="/perfil/avatar/remover"
+                    formenctype="application/x-www-form-urlencoded"
+                    formnovalidate
+                >Remover foto</button>
+                {% endif %}
+            </div>
+        </form>
+    </article>
+
+    <article class="ui-card perfil-card">
+        <header class="perfil-card-header">
+            <h2>Dados da conta</h2>
+            <p>Informações cadastradas no BetaBank.</p>
+            <button type="button" class="perfil-edit-btn" data-target="form-nome">✏ Editar</button>
+        </header>
+        <dl class="perfil-info">
+            <div><dt>Nome</dt><dd>{{ user.name }}</dd></div>
+            <div><dt>Email</dt><dd>{{ user.email }}</dd></div>
+            <div><dt>Tipo de conta</dt><dd>{{ 'Gerente' if is_manager(user) else 'Cliente' }}</dd></div>
+        </dl>
+        <form id="form-nome" action="/perfil/nome" method="post" class="perfil-form" hidden>
+            <label class="ui-label" for="input-nome">Novo nome</label>
+            <input class="ui-input" id="input-nome" name="name" type="text" value="{{ user.name }}" maxlength="200" required />
+            <div class="perfil-actions">
+                <button type="submit" class="ui-btn ui-btn-primary">Salvar</button>
+            </div>
+        </form>
+    </article>
+
+    {% if address %}
+    <article class="ui-card perfil-card">
+        <header class="perfil-card-header">
+            <h2>Endereço</h2>
+            <p>Endereço cadastrado na sua conta.</p>
+            <button type="button" class="perfil-edit-btn" data-target="form-endereco">✏ Editar</button>
+        </header>
+        <dl class="perfil-info">
+            <div><dt>CEP</dt><dd>{{ address.cep[:5] }}-{{ address.cep[5:] }}</dd></div>
+            <div><dt>Logradouro</dt><dd>{{ address.street }}, {{ address.number }}</dd></div>
+            <div><dt>Bairro</dt><dd>{{ address.neighborhood }}</dd></div>
+            <div><dt>Cidade / Estado</dt><dd>{{ address.city }} — {{ address.state }}</dd></div>
+        </dl>
+        <form id="form-endereco" action="/perfil/endereco" method="post" class="perfil-form" hidden>
+            <label class="ui-label" for="perfil-cep-input">CEP (somente numeros)</label>
+            <input class="ui-input" id="perfil-cep-input" name="cep" type="text" maxlength="8" value="{{ address.cep }}" />
+
+            <label class="ui-label" for="perfil-street-input">Rua</label>
+            <input class="ui-input" id="perfil-street-input" name="street" type="text" maxlength="200" value="{{ address.street }}" />
+
+            <label class="ui-label" for="perfil-number-input">Numero</label>
+            <input class="ui-input" id="perfil-number-input" name="number" type="text" maxlength="20" value="{{ address.number }}" />
+
+            <label class="ui-label" for="perfil-neighborhood-input">Bairro</label>
+            <input class="ui-input" id="perfil-neighborhood-input" name="neighborhood" type="text" maxlength="100" value="{{ address.neighborhood }}" />
+
+            <label class="ui-label" for="perfil-city-input">Cidade</label>
+            <input class="ui-input" id="perfil-city-input" name="city" type="text" maxlength="100" value="{{ address.city }}" />
+
+            <label class="ui-label" for="perfil-state-input">UF</label>
+            <input class="ui-input" id="perfil-state-input" name="state" type="text" maxlength="2" value="{{ address.state }}" />
+
+            <div class="perfil-actions">
+                <button type="submit" class="ui-btn ui-btn-primary">Salvar endereço</button>
+            </div>
+        </form>
+    </article>
+    {% endif %}
+</section>
+{% endblock %}

@@ -173,6 +173,12 @@
     background: rgba(115, 219, 211, 0.12);
 }
 
+.management-user-actions {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
 .management-name-edit-trigger svg {
     width: 0.85rem;
     height: 0.85rem;

@@ -129,6 +129,16 @@ class UserRepository:
         return cls.get_by_id(db, user_id)
 
     @classmethod
+    def update_cpf(cls, db, *, user_id: int, cpf: str) -> User | None:
+        cursor = db.cursor()
+        cursor.execute(
+            "UPDATE users SET cpf = %s WHERE id = %s",
+            (cls._normalize_cpf(cpf), user_id),
+        )
+        cursor.close()
+        return cls.get_by_id(db, user_id)
+
+    @classmethod
     def create(
         cls,
         db,

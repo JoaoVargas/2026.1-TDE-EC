@@ -47,3 +47,13 @@ class AddressRepository:
         new_id = cursor.lastrowid
         cursor.close()
         return cls.get_by_id(db, new_id)
+
+    @classmethod
+    def update(cls, db, *, address_id: int, cep: str, street: str, state: str, city: str, neighborhood: str, number: str) -> Address | None:
+        cursor = db.cursor()
+        cursor.execute(
+            "UPDATE addresses SET cep = %s, street = %s, state = %s, city = %s, neighborhood = %s, number = %s WHERE id = %s",
+            (cep, street, state, city, neighborhood, number, address_id)
+        )
+        cursor.close()
+        return cls.get_by_id(db, address_id)
