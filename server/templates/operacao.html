@@ -1,0 +1,194 @@
+{% extends "dashboard_base.html" %}
+
+{% block title %}
+{% if modo == 'depositar' %}Depositar{% elif modo == 'sacar' %}Sacar{% else %}Transferir{% endif %} | Banco Digital
+{% endblock %}
+
+{% block dashboard_styles %}
+<link rel="stylesheet" href="/static/css/transacao.css" />
+{% endblock %}
+
+{% block dashboard_topbar_actions %}
+<button class="ui-btn ui-btn-secondary" type="button" id="btn-cancelar">Cancelar</button>
+{% endblock %}
+
+{% block dashboard_content %}
+{% if error %}
+<div class="feedback-message feedback-error" style="display: block; margin-bottom: 1rem; width: min(560px, 100%); margin-left: auto; margin-right: auto;">{{ error }}</div>
+{% endif %}
+
+<form id="operacao-form" method="post" action="/operacao" hidden>
+    <input type="hidden" name="modo" value="{{ modo }}" />
+    <input type="hidden" name="amount_cents" id="hidden-amount" value="0" />
+    <input type="hidden" name="to_account_id" id="hidden-to-account" value="" />
+    <input type="hidden" name="from_account_type" id="hidden-from-account-type" value="corrente" />
+</form>
+
+<nav class="operacao-mode-tabs">
+    <a href="/operacao?modo=depositar" class="ui-btn {% if modo == 'depositar' %}ui-btn-primary{% else %}ui-btn-secondary{% endif %}">Depositar</a>
+    <a href="/operacao?modo=sacar" class="ui-btn {% if modo == 'sacar' %}ui-btn-primary{% else %}ui-btn-secondary{% endif %}">Sacar</a>
+    <a href="/operacao?modo=transferir" class="ui-btn {% if modo == 'transferir' %}ui-btn-primary{% else %}ui-btn-secondary{% endif %}">Transferir</a>
+</nav>
+
+<section class="transfer-flow ui-card" data-step="amount" data-mode="{{ modo }}">
+    <header class="transfer-header">
+        <h1>
+            {% if modo == 'depositar' %}Depositar
+            {% elif modo == 'sacar' %}Sacar
+            {% else %}Transferir{% endif %}
+        </h1>
+        <p id="transfer-subtitle">
+            {% if modo == 'depositar' %}Qual é o valor do depósito?
+            {% elif modo == 'sacar' %}Qual é o valor do saque?
+            {% else %}Qual é o valor da transferência?{% endif %}
+        </p>
+    </header>
+
+    {# ── Step: amount (shared) ── #}
+    <section class="transfer-step step-amount is-active" data-step-panel="amount">
+        <div class="info-card ui-card">
+            {% if modo == 'transferir' and savings_account %}
+            <nav class="transfer-account-tabs">
+                <button type="button" class="transfer-account-tab is-active" data-account="corrente">Conta Corrente</button>
+                <button type="button" class="transfer-account-tab" data-account="poupanca">Conta Poupança</button>
+            </nav>
+            {% else %}
+            <p class="info-title">Conta Corrente · Saldo disponível</p>
+            {% endif %}
+            <p class="info-value" id="balance-display">
+                {{ checking_account.balance | brl if checking_account else 'R$ 0,00' }}
+            </p>
+        </div>
+
+        {% if modo == 'transferir' and savings_account %}
+        <div id="balance-data"
+            data-corrente="{{ checking_account.balance | brl if checking_account else 'R$ 0,00' }}"
+            data-poupanca="{{ savings_account.balance | brl if savings_account else 'R$ 0,00' }}"
+            data-corrente-id="{{ checking_account.id if checking_account else '' }}"
+            data-poupanca-id="{{ savings_account.id if savings_account else '' }}"
+            hidden>
+        </div>
+        {% endif %}
+
+        <div class="amount-display" id="amount-display">R$ 0,00</div>
+
+        <div class="numpad" id="numpad">
+            <button type="button" class="numpad-key" data-number="1">1</button>
+            <button type="button" class="numpad-key" data-number="2">2</button>
+            <button type="button" class="numpad-key" data-number="3">3</button>
+            <button type="button" class="numpad-key" data-number="4">4</button>
+            <button type="button" class="numpad-key" data-number="5">5</button>
+            <button type="button" class="numpad-key" data-number="6">6</button>
+            <button type="button" class="numpad-key" data-number="7">7</button>
+            <button type="button" class="numpad-key" data-number="8">8</button>
+            <button type="button" class="numpad-key" data-number="9">9</button>
+            <button type="button" class="numpad-key empty" disabled></button>
+            <button type="button" class="numpad-key" data-number="0">0</button>
+            <button type="button" class="numpad-key delete" id="btn-delete">Apagar</button>
+        </div>
+
+        <button type="button" class="ui-btn ui-btn-primary step-action" id="btn-amount-next">Continuar</button>
+    </section>
+
+    {# ── Step: recipient (transferir only) ── #}
+    {% if modo == 'transferir' %}
+    <section class="transfer-step step-recipient" data-step-panel="recipient">
+        <div class="recipient-top">
+            <button type="button" class="ui-btn ui-btn-secondary" id="btn-back-amount">Voltar</button>
+            <p>Valor selecionado: <strong id="selected-amount">R$ 0,00</strong></p>
+        </div>
+
+        {% if savings_account %}
+        <div style="margin-bottom: 1rem;">
+            <p class="info-title" style="margin-bottom: 0.5rem;">Transferir entre minhas contas</p>
+            <button type="button" class="recipient-card" id="btn-own-account" data-account-id="" data-name="">
+                <span class="recipient-initial" id="own-account-initial">P</span>
+                <span class="recipient-name" id="own-account-name">Conta Poupança</span>
+                <span class="recipient-bank">BetaBank · sua conta</span>
+            </button>
+        </div>
+        {% endif %}
+
+        <label class="ui-label" for="recipient-search">Buscar contato</label>
+        <input class="ui-input" type="text" id="recipient-search" placeholder="Nome ou número de conta" />
+
+        <div class="recipient-grid" id="recipient-grid">
+            {% for acc in other_accounts %}
+            <button type="button" class="recipient-card" data-account-id="{{ acc.id }}" data-name="{{ acc.owner_name }}">
+                <span class="recipient-initial">{{ acc.owner_name[:2].upper() }}</span>
+                <span class="recipient-name">{{ acc.owner_name }}</span>
+                <span class="recipient-bank">BetaBank · {{ acc.account_number }}</span>
+            </button>
+            {% else %}
+            <p class="no-recipients">Nenhum destinatário disponível.</p>
+            {% endfor %}
+        </div>
+
+        <button type="button" class="ui-btn ui-btn-primary step-action" id="btn-to-success" disabled>Transferir</button>
+    </section>
+    {% endif %}
+
+    {# ── Step: confirm (depositar / sacar only) ── #}
+    {% if modo != 'transferir' %}
+    <section class="transfer-step step-confirm" data-step-panel="confirm">
+        <div class="recipient-top">
+            <button type="button" class="ui-btn ui-btn-secondary" id="btn-back-amount">Voltar</button>
+            <p>Valor selecionado: <strong id="selected-amount">R$ 0,00</strong></p>
+        </div>
+
+        <div class="info-card ui-card" style="text-align: center;">
+            <p class="info-title">
+                {% if modo == 'depositar' %}Confirmar depósito{% else %}Confirmar saque{% endif %}
+            </p>
+            <p class="info-value" id="confirm-amount">R$ 0,00</p>
+            <p class="confirm-note">
+                {% if modo == 'depositar' %}O valor será creditado na sua Conta Corrente.
+                {% else %}O valor será debitado da sua Conta Corrente.{% endif %}
+            </p>
+        </div>
+
+        <button type="button" class="ui-btn ui-btn-primary step-action" id="btn-confirmar">
+            {% if modo == 'depositar' %}Depositar{% else %}Sacar{% endif %}
+        </button>
+    </section>
+    {% endif %}
+
+    {# ── Step: success (shared) ── #}
+    <section class="transfer-step step-success" data-step-panel="success">
+        <div class="success-mark">OK</div>
+        <h2>
+            {% if modo == 'depositar' %}Depósito concluído!
+            {% elif modo == 'sacar' %}Saque concluído!
+            {% else %}Transferência concluída!{% endif %}
+        </h2>
+        <p>
+            {% if modo == 'depositar' %}O valor foi creditado com sucesso.
+            {% elif modo == 'sacar' %}O valor foi debitado com sucesso.
+            {% else %}Seu dinheiro foi enviado com sucesso.{% endif %}
+        </p>
+
+        <div class="receipt ui-card">
+            <div><span>Valor</span><strong id="receipt-amount">R$ 0,00</strong></div>
+            <div><span>Conta</span><strong>
+                {% if modo == 'transferir' %}<span id="receipt-account">-</span>{% else %}Conta Corrente{% endif %}
+            </strong></div>
+            {% if modo == 'transferir' %}
+            <div><span>Para</span><strong id="receipt-name">-</strong></div>
+            <div><span>Banco</span><strong>BetaBank</strong></div>
+            {% endif %}
+            <div><span>Tipo</span><strong>
+                {% if modo == 'depositar' %}Depósito
+                {% elif modo == 'sacar' %}Saque
+                {% else %}Transferência{% endif %}
+            </strong></div>
+            <div><span>Data</span><strong id="receipt-date">-</strong></div>
+        </div>
+
+        <button type="button" class="ui-btn ui-btn-primary step-action" id="btn-finish">Voltar ao menu</button>
+    </section>
+</section>
+{% endblock %}
+
+{% block dashboard_scripts %}
+<script type="module" src="/static/js/pages/operacao.js"></script>
+{% endblock %}

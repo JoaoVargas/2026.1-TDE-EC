@@ -178,19 +178,35 @@ def _seed_default_users_if_empty(conn) -> None:
     conn.commit()
 
 
-def _apply_migrations(conn) -> None:
-    cursor = conn.cursor()
+def _column_exists(cursor, table: str, column: str) -> bool:
+    cursor.execute(
+        "SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS "
+        "WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = %s AND COLUMN_NAME = %s",
+        (table, column),
+    )
+    return cursor.fetchone()[0] > 0
+
+
+def _enum_has_value(cursor, table: str, column: str, value: str) -> bool:
     cursor.execute(
         "SELECT COLUMN_TYPE FROM INFORMATION_SCHEMA.COLUMNS "
-        "WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'transactions' AND COLUMN_NAME = 'type'"
+        "WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = %s AND COLUMN_NAME = %s",
+        (table, column),
     )
     row = cursor.fetchone()
-    if row and "deposit" not in row[0]:
+    return row is not None and value in row[0]
+
+
+def _apply_migrations(conn) -> None:
+    cursor = conn.cursor()
+
+    if not _enum_has_value(cursor, "transactions", "type", "deposit"):
         cursor.execute(
             "ALTER TABLE transactions MODIFY COLUMN type "
             "ENUM('internal','transaction','expense','other','deposit','withdrawal') NOT NULL"
         )
         conn.commit()
+
     cursor.close()
 
 

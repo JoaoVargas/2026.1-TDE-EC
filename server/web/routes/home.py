@@ -34,3 +34,18 @@ def home_page(request: Request, db=Depends(get_db)):
             "flash": flash,
         },
     )
+
+
+@router.post("/home/abrir-poupanca")
+def open_savings_account(request: Request, db=Depends(get_db)):
+    result = require_user(request, db)
+    if isinstance(result, RedirectResponse):
+        return result
+    user = result
+
+    existing = AccountRepository.get_by_user_and_type(db, user.id, AccountType.SAVINGS)
+    if not existing:
+        AccountRepository.create(db, user_id=user.id, type=AccountType.SAVINGS)
+        db.commit()
+
+    return RedirectResponse("/home", status_code=303)

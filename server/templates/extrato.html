@@ -8,9 +8,28 @@
 
 {% block dashboard_content %}
 <section class="statement-page">
+    {% if savings_account %}
+    <nav class="account-tabs">
+        <a href="/extrato?account=corrente"
+           class="account-tab {% if selected_account_type == 'corrente' %}is-active{% endif %}">
+            Conta Corrente
+        </a>
+        <a href="/extrato?account=poupanca"
+           class="account-tab {% if selected_account_type == 'poupanca' %}is-active{% endif %}">
+            Conta Poupança
+        </a>
+    </nav>
+    {% endif %}
+
     <section class="statement-balance ui-card">
         <div>
-            <p class="statement-label">Saldo atual</p>
+            <p class="statement-label">
+                {% if savings_account %}
+                    {{ 'Conta Poupança' if selected_account_type == 'poupanca' else 'Conta Corrente' }} · Saldo atual
+                {% else %}
+                    Saldo atual
+                {% endif %}
+            </p>
             <p class="statement-value">{{ balance_str }}</p>
         </div>
         <div class="statement-badges">
