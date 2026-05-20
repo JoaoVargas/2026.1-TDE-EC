@@ -97,6 +97,7 @@ class BBStatementItem extends HTMLElement {
         const article = createTextElement("article", "statement-item ui-card", "");
         article.dataset.type = type;
         article.dataset.month = month;
+        article.dataset.date = this.getAttribute("date") || "";
 
         const icon = createTextElement("div", `statement-icon ${type}`, type === "in" ? "+" : "-");
 

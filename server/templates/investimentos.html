@@ -6,100 +6,146 @@
 <link rel="stylesheet" href="/static/css/investimentos.css" />
 {% endblock %}
 
-{% block dashboard_topbar_actions %}
-<button class="ui-btn ui-btn-secondary" type="button">Extrato</button>
-<button class="ui-btn ui-btn-primary" type="button">Investir</button>
-{% endblock %}
-
 {% block dashboard_content %}
 <section class="investment-page" data-view="carteira">
     <div class="investment-hero">
         <article class="investment-stat ui-card main-stat">
             <p class="investment-stat-label">Total em investimentos</p>
-            <p class="investment-stat-value"><span class="currency">R$</span><span id="total-val">0,00</span></p>
-            <p class="investment-stat-sub" id="total-change">- Sem variacao</p>
+            <p class="investment-stat-value"><span class="currency">R$</span>{{ total_str }}</p>
         </article>
-        <bb-investment-stat label="Renda fixa" value="0,00" subtitle="- 0 ativos"></bb-investment-stat>
-        <bb-investment-stat label="Renda variavel" value="0,00" subtitle="- 0 ativos"></bb-investment-stat>
+        <bb-investment-stat label="Renda fixa" value="{{ fixo_str }}" subtitle="na carteira"></bb-investment-stat>
+        <bb-investment-stat label="Renda variavel" value="{{ variavel_str }}" subtitle="na carteira"></bb-investment-stat>
     </div>
+
+    {% if flash %}
+    <p class="inv-feedback is-success" role="status">{{ flash }}</p>
+    {% endif %}
+    {% if error %}
+    <p class="inv-feedback is-error" role="status">{{ error }}</p>
+    {% endif %}
 
     <nav class="investment-tabs">
         <a class="investment-tab is-active" href="/investimentos">Minha carteira</a>
         <a class="investment-tab" href="/investimentos/distribuicao">Analise de distribuicao</a>
     </nav>
 
+    {% if holdings %}
     <section class="investment-section">
         <header class="investment-section-header">
-            <h2>Renda fixa</h2>
-            <a href="#">Ver todos</a>
+            <h2>Meus ativos</h2>
         </header>
-        <div class="investment-card-grid">
-            <bb-asset-card
-                kind="Titulo publico"
-                title="Tesouro Prefixado"
-                subtitle="Vencimento 2027"
-                tag="100% CDI"
-            ></bb-asset-card>
-            <bb-asset-card
-                kind="Meta pessoal"
-                title="Carro Novo"
-                subtitle="Caixinha de objetivo"
-                tag="100% CDI"
-            ></bb-asset-card>
-            <bb-asset-card
-                kind="Novo"
-                title="Nova caixinha disponivel"
-                subtitle="Descubra objetivos automatizados"
-                tag="Conhecer"
-                tone="accent"
-            ></bb-asset-card>
+        <div class="inv-asset-grid">
+            {% for h in holdings %}
+            <article class="inv-asset-card ui-card">
+                <div class="inv-asset-header">
+                    <div>
+                        <h3 class="inv-asset-name">{{ h.name }}</h3>
+                        <p class="inv-asset-sub">{{ h.stock_code }} · {{ h.class }}</p>
+                    </div>
+                    <span class="inv-asset-value">R$ {{ h.value_str }}</span>
+                </div>
+                <p class="inv-asset-detail">{{ h.amount }} cotas · R$ {{ "%.2f"|format(h.price)|replace('.', ',') }} cada</p>
+                <button
+                    type="button"
+                    class="ui-btn ui-btn-secondary inv-retirar-btn"
+                    data-portfolio-id="{{ h.id }}"
+                    data-name="{{ h.name }}"
+                    data-amount="{{ h.amount }}"
+                    data-price="{{ h.price }}"
+                >
+                    Retirar
+                </button>
+            </article>
+            {% endfor %}
         </div>
     </section>
+    {% else %}
+    <section class="investment-section">
+        <header class="investment-section-header">
+            <h2>Meus ativos</h2>
+        </header>
+        <p class="no-investments">Nenhum investimento encontrado em sua carteira.</p>
+    </section>
+    {% endif %}
 
+    {% if available %}
     <section class="investment-section">
         <header class="investment-section-header">
-            <h2>Renda variavel</h2>
-            <a href="#">Ver todos</a>
+            <h2>Carteiras disponíveis</h2>
+            <p class="inv-balance-info">Saldo disponível: <strong>R$ {{ balance_str }}</strong></p>
         </header>
-        <div class="investment-card-grid">
-            <bb-asset-card
-                kind="FII"
-                title="XMLT"
-                subtitle="Fundo imobiliario"
-                tag="1% proventos"
-            ></bb-asset-card>
-            <bb-asset-card
-                kind="FII"
-                title="XCORTI"
-                subtitle="Fundo imobiliario"
-                tag="15% proventos"
-            ></bb-asset-card>
+        <div class="inv-asset-grid">
+            {% for p in available %}
+            <article class="inv-asset-card ui-card">
+                <div class="inv-asset-header">
+                    <div>
+                        <h3 class="inv-asset-name">{{ p.stock_name }}</h3>
+                        <p class="inv-asset-sub">{{ p.stock_code }} · {{ p.name }}</p>
+                    </div>
+                    <span class="inv-asset-value">R$ {{ p.price_str }}<span class="inv-per-cota">/cota</span></span>
+                </div>
+                {% if p.has_position %}
+                <p class="inv-asset-detail inv-has-position">Você possui {{ p.amount }} cotas nesta carteira</p>
+                {% endif %}
+                <button
+                    type="button"
+                    class="ui-btn ui-btn-primary inv-depositar-btn"
+                    data-portfolio-id="{{ p.id }}"
+                    data-name="{{ p.stock_name }}"
+                    data-price-cents="{{ p.price_cents }}"
+                    data-balance-cents="{{ balance_cents }}"
+                >
+                    Investir
+                </button>
+            </article>
+            {% endfor %}
         </div>
     </section>
-
-    <section class="investment-section">
-        <header class="investment-section-header">
-            <h2>Criptomoedas</h2>
-            <a href="#">Ver todos</a>
-        </header>
-        <div class="investment-card-grid">
-            <bb-asset-card
-                kind="Criptoativo"
-                title="Bitcoin"
-                subtitle="BTC · Proof of Work"
-                tag="+16% crescimento"
-                tone="gold"
-            ></bb-asset-card>
-            <bb-asset-card
-                kind="Criptoativo"
-                title="Memecoin"
-                subtitle="MEME · Token"
-                tag="+16% crescimento"
-                tone="gold"
-            ></bb-asset-card>
-        </div>
-    </section>
+    {% endif %}
 </section>
+
+<!-- Modal: Depositar -->
+<div class="inv-modal-backdrop" id="inv-depositar-backdrop" hidden>
+    <div class="inv-modal ui-card" role="dialog" aria-modal="true" aria-labelledby="inv-dep-title">
+        <header class="inv-modal-header">
+            <h2 id="inv-dep-title">Investir em <span id="inv-dep-name"></span></h2>
+            <button type="button" class="ui-btn ui-btn-secondary" data-modal-close>Fechar</button>
+        </header>
+        <p class="inv-modal-info">Preço por cota: <strong id="inv-dep-price"></strong></p>
+        <p class="inv-modal-info">Saldo disponível: <strong id="inv-dep-balance"></strong></p>
+        <form id="inv-dep-form" method="post" action="">
+            <input type="hidden" name="amount_cents" id="inv-dep-amount-cents" value="0" />
+            <label class="ui-label" for="inv-dep-value">Valor a investir (R$)</label>
+            <input class="ui-input" id="inv-dep-value" type="number" min="0.01" step="0.01" placeholder="0,00" />
+            <p class="inv-modal-calc">Você receberá aprox. <strong id="inv-dep-shares">0</strong> cotas</p>
+            <div class="inv-modal-actions">
+                <button type="button" class="ui-btn ui-btn-secondary" data-modal-close>Cancelar</button>
+                <button type="submit" class="ui-btn ui-btn-primary">Confirmar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal: Retirar -->
+<div class="inv-modal-backdrop" id="inv-retirar-backdrop" hidden>
+    <div class="inv-modal ui-card" role="dialog" aria-modal="true" aria-labelledby="inv-ret-title">
+        <header class="inv-modal-header">
+            <h2 id="inv-ret-title">Retirar de <span id="inv-ret-name"></span></h2>
+            <button type="button" class="ui-btn ui-btn-secondary" data-modal-close>Fechar</button>
+        </header>
+        <p class="inv-modal-info">Você possui <strong id="inv-ret-amount"></strong> cotas</p>
+        <p class="inv-modal-info">Preço atual por cota: <strong id="inv-ret-price"></strong></p>
+        <form id="inv-ret-form" method="post" action="">
+            <label class="ui-label" for="inv-ret-shares">Quantidade de cotas a resgatar</label>
+            <input class="ui-input" id="inv-ret-shares" name="shares_str" type="number" min="0.0001" step="0.0001" placeholder="0" />
+            <p class="inv-modal-calc">Você receberá aprox. <strong id="inv-ret-value">R$ 0,00</strong></p>
+            <div class="inv-modal-actions">
+                <button type="button" class="ui-btn ui-btn-secondary" data-modal-close>Cancelar</button>
+                <button type="submit" class="ui-btn ui-btn-primary">Confirmar</button>
+            </div>
+        </form>
+    </div>
+</div>
 {% endblock %}
 
 {% block dashboard_scripts %}

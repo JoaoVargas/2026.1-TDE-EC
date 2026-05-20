@@ -1,21 +1,21 @@
 services:
-  betabank-workbench:
-    image: lscr.io/linuxserver/mysql-workbench:latest
-    container_name: betabank-workbench
-    cap_add:
-      - IPC_LOCK
-    environment:
-      PUID: "1000"
-      PGID: "1000"
-      TZ: Etc/UTC
-    ports:
-      - "${MYSQL_WORKBENCH_PORT:-3003}:3000"
-      - "${MYSQL_WORKBENCH_HTTPS_PORT:-3004}:3001"
-    volumes:
-      - betabank_workbench_data:/config
-    shm_size: "1gb"
-    networks:
-      - betabank_network
+  # betabank-workbench:
+  #   image: lscr.io/linuxserver/mysql-workbench:latest
+  #   container_name: betabank-workbench
+  #   cap_add:
+  #     - IPC_LOCK
+  #   environment:
+  #     PUID: "1000"
+  #     PGID: "1000"
+  #     TZ: Etc/UTC
+  #   ports:
+  #     - "${MYSQL_WORKBENCH_PORT:-3003}:3000"
+  #     - "${MYSQL_WORKBENCH_HTTPS_PORT:-3004}:3001"
+  #   volumes:
+  #     - betabank_workbench_data:/config
+  #   shm_size: "1gb"
+  #   networks:
+  #     - betabank_network
   betabank-portainer:
     image: portainer/portainer-ce
     container_name: betabank-portainer
@@ -55,6 +55,7 @@ services:
       - "${API_PORT:-3001}:8000"
     volumes:
       - ../server:/app/server
+      - betabank_server_venv:/app/server/.venv
     working_dir: /app
     environment:
       DB_HOST: ${DB_HOST:-betabank-db}
@@ -63,13 +64,19 @@ services:
       DB_PASSWORD: ${MYSQL_PASSWORD}
       DB_NAME: ${MYSQL_DATABASE}
       PYTHONUNBUFFERED: 1
-    command: sh -c "pip install -r /app/server/requirements.txt && uvicorn server.main:app --host 0.0.0.0 --port 8000 --reload"
+    command: >
+      bash -c "
+        python -m venv /app/server/.venv &&
+        /app/server/.venv/bin/pip install -r /app/server/requirements.txt &&
+        /app/server/.venv/bin/uvicorn server.main:app --host 0.0.0.0 --port 8000 --reload
+      "
     depends_on:
       - betabank-db
     networks:
       - betabank_network
 
 volumes:
+  betabank_server_venv:
   betabank_db_data:
     driver: local
     driver_opts:

@@ -15,18 +15,21 @@
 
     <section class="manager-overview-grid">
         <article class="manager-kpi ui-card">
-            <p class="manager-kpi-label">Modulo principal</p>
-            <strong class="manager-kpi-value">Contas e usuarios</strong>
+            <p class="manager-kpi-label">Total de usuarios</p>
+            <strong class="manager-kpi-value">{{ total_users }}</strong>
+        </article>
+        <article class="manager-kpi ui-card">
+            <p class="manager-kpi-label">Gerentes</p>
+            <strong class="manager-kpi-value">{{ total_managers }}</strong>
+        </article>
+        <article class="manager-kpi ui-card">
+            <p class="manager-kpi-label">Contas abertas</p>
+            <strong class="manager-kpi-value">{{ total_accounts }}</strong>
         </article>
         <article class="manager-kpi ui-card">
             <p class="manager-kpi-label">Perfil</p>
             <strong class="manager-kpi-value">Gerente</strong>
         </article>
     </section>
-
 </section>
-{% endblock %}
-
-{% block dashboard_scripts %}
-<script type="module" src="/static/js/pages/manager.js"></script>
 {% endblock %}

@@ -1,3 +1,18 @@
+.operacao-mode-tabs {
+    display: flex;
+    gap: 0.4rem;
+    width: min(560px, 100%);
+    margin: 0 auto 0.5rem;
+}
+
+.operacao-mode-tabs .ui-btn {
+    flex: 1;
+    text-align: center;
+    font-size: 0.78rem;
+    padding: 0.6rem 0.4rem;
+    text-decoration: none;
+}
+
 .transfer-flow {
     background: linear-gradient(160deg, #142946 0%, #1d3558 100%);
     width: min(560px, 100%);
@@ -30,6 +45,39 @@
     background: linear-gradient(140deg, #173550 0%, #1e4666 100%);
     padding: var(--space-4);
     border: 1px solid rgba(130, 180, 222, 0.28);
+    overflow: hidden;
+}
+
+.transfer-account-tabs {
+    display: flex;
+    gap: 0.3rem;
+    margin: calc(var(--space-4) * -1) calc(var(--space-4) * -1) 0.75rem;
+    padding: 0.5rem var(--space-4) 0;
+    border-bottom: 1px solid rgba(130, 180, 222, 0.2);
+}
+
+.transfer-account-tab {
+    padding: 0.32rem 0.8rem;
+    border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+    border: 1px solid transparent;
+    border-bottom: none;
+    background: transparent;
+    color: var(--color-muted);
+    font-size: 0.78rem;
+    font-weight: 600;
+    cursor: pointer;
+    letter-spacing: 0.03em;
+    transition: color 0.15s;
+}
+
+.transfer-account-tab:hover {
+    color: var(--color-text);
+}
+
+.transfer-account-tab.is-active {
+    color: var(--color-primary);
+    background: rgba(78, 207, 181, 0.08);
+    border-color: rgba(130, 180, 222, 0.3);
 }
 
 .info-title {
@@ -206,6 +254,18 @@
 .receipt strong {
     font-family: var(--font-mono);
     font-size: 0.84rem;
+}
+
+#confirm-account-label {
+    color: var(--color-muted);
+    font-size: 0.85rem;
+    margin: 0.25rem 0 0;
+}
+
+.confirm-note {
+    color: var(--color-muted);
+    font-size: 0.82rem;
+    margin: 0.5rem 0 0;
 }
 
 @media (max-width: 720px) {

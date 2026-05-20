@@ -1,0 +1,209 @@
+{% extends "dashboard_base.html" %}
+
+{% block title %}Meu perfil | Banco Digital{% endblock %}
+
+{% block dashboard_styles %}
+<link rel="stylesheet" href="/static/css/perfil.css" />
+{% endblock %}
+
+{% block dashboard_scripts %}
+<script type="module" src="/static/js/pages/perfil.js"></script>
+{% endblock %}
+
+{% block dashboard_content %}
+<header class="greeting-block">
+    <h1>Meu perfil</h1>
+    <p>Personalize sua conta no BetaBank.</p>
+</header>
+
+{% if flash %}
+<div class="feedback-message feedback-success">{{ flash }}</div>
+{% endif %}
+{% if error %}
+<div class="feedback-message feedback-error">{{ error }}</div>
+{% endif %}
+
+<section class="perfil-grid">
+    <article class="ui-card perfil-card">
+        <header class="perfil-card-header">
+            <h2>Foto de perfil</h2>
+            <p>Use uma imagem quadrada para um melhor enquadramento.</p>
+        </header>
+
+        <div class="perfil-avatar-preview">
+            {% if has_avatar %}
+            <img src="/perfil/avatar/{{ user.id }}" alt="Foto de perfil" class="perfil-avatar-img" />
+            {% else %}
+            <div class="perfil-avatar-fallback">{{ user_initials(user.name) }}</div>
+            {% endif %}
+        </div>
+
+        <form method="post" action="/perfil/avatar" enctype="multipart/form-data" class="perfil-avatar-form">
+            <label for="avatar-input" class="ui-label">Selecione uma nova imagem</label>
+            <input
+                type="file"
+                id="avatar-input"
+                name="avatar"
+                accept="image/jpeg,image/png,image/webp,image/gif"
+                class="ui-input perfil-file-input"
+                required
+            />
+            <p class="perfil-help">Formatos aceitos: JPEG, PNG, WEBP, GIF. Tamanho máximo: 4 MB.</p>
+
+            <div class="perfil-actions">
+                <button type="submit" class="ui-btn ui-btn-primary">Salvar foto</button>
+                {% if has_avatar %}
+                <button
+                    type="submit"
+                    class="ui-btn ui-btn-secondary"
+                    formaction="/perfil/avatar/remover"
+                    formenctype="application/x-www-form-urlencoded"
+                    formnovalidate
+                >Remover foto</button>
+                {% endif %}
+            </div>
+        </form>
+    </article>
+
+    <article class="ui-card perfil-card">
+        <header class="perfil-card-header">
+            <div class="perfil-card-title-row">
+                <h2>Dados da conta</h2>
+                <button
+                    type="button"
+                    class="perfil-edit-btn perfil-profile-trigger"
+                    data-name="{{ user.name }}"
+                    data-email="{{ user.email }}"
+                >
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M3 17.25V21h3.75l11-11-3.75-3.75-11 11zM20.71 7.04a1.003 1.003 0 000-1.42l-2.34-2.34a1.003 1.003 0 00-1.42 0l-1.83 1.83 3.75 3.75 1.84-1.82z"/>
+                    </svg>
+                    <span>Editar</span>
+                </button>
+            </div>
+            <p>Informações cadastradas no BetaBank.</p>
+        </header>
+
+        <dl class="perfil-info">
+            <div><dt>Nome</dt><dd>{{ user.name }}</dd></div>
+            <div><dt>Email</dt><dd>{{ user.email }}</dd></div>
+            <div><dt>Tipo de conta</dt><dd>{{ 'Gerente' if is_manager(user) else 'Cliente' }}</dd></div>
+        </dl>
+    </article>
+
+    {% if address %}
+    <article class="ui-card perfil-card">
+        <header class="perfil-card-header">
+            <div class="perfil-card-title-row">
+                <h2>Endereço</h2>
+                <button
+                    type="button"
+                    class="perfil-edit-btn perfil-addr-trigger"
+                    data-cep="{{ address.cep }}"
+                    data-street="{{ address.street }}"
+                    data-number="{{ address.number }}"
+                    data-neighborhood="{{ address.neighborhood }}"
+                    data-city="{{ address.city }}"
+                    data-state="{{ address.state }}"
+                >
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M3 17.25V21h3.75l11-11-3.75-3.75-11 11zM20.71 7.04a1.003 1.003 0 000-1.42l-2.34-2.34a1.003 1.003 0 00-1.42 0l-1.83 1.83 3.75 3.75 1.84-1.82z"/>
+                    </svg>
+                    <span>Editar</span>
+                </button>
+            </div>
+            <p>Endereço cadastrado na sua conta.</p>
+        </header>
+
+        <dl class="perfil-info">
+            <div><dt>CEP</dt><dd>{{ address.cep[:5] }}-{{ address.cep[5:] }}</dd></div>
+            <div><dt>Logradouro</dt><dd>{{ address.street }}, {{ address.number }}</dd></div>
+            <div><dt>Bairro</dt><dd>{{ address.neighborhood }}</dd></div>
+            <div><dt>Cidade / Estado</dt><dd>{{ address.city }} — {{ address.state }}</dd></div>
+        </dl>
+    </article>
+    {% endif %}
+</section>
+
+<div class="management-modal-backdrop" id="perfil-profile-modal-backdrop" hidden>
+    <div
+        class="management-modal ui-card"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="perfil-profile-modal-title"
+    >
+        <header class="management-modal-header">
+            <h2 id="perfil-profile-modal-title">Alterar dados da conta</h2>
+            <button type="button" class="ui-btn ui-btn-secondary management-modal-close" data-modal-close>Fechar</button>
+        </header>
+
+        <form method="post" action="/perfil/nome">
+            <label class="ui-label" for="perfil-profile-name">Nome</label>
+            <input
+                class="ui-input"
+                id="perfil-profile-name"
+                name="name"
+                type="text"
+                maxlength="200"
+                autocomplete="off"
+                placeholder="Nome completo"
+            />
+
+            <label class="ui-label" for="perfil-profile-email">Email</label>
+            <input
+                class="ui-input"
+                id="perfil-profile-email"
+                name="email"
+                type="email"
+                maxlength="200"
+                autocomplete="off"
+                placeholder="email@exemplo.com"
+            />
+
+            <div class="management-modal-actions">
+                <button type="button" class="ui-btn ui-btn-secondary" data-modal-close>Cancelar</button>
+                <button type="submit" class="ui-btn ui-btn-primary">Salvar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="management-modal-backdrop" id="perfil-addr-modal-backdrop" hidden>
+    <div
+        class="management-modal ui-card"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="perfil-addr-modal-title"
+    >
+        <header class="management-modal-header">
+            <h2 id="perfil-addr-modal-title">Alterar endereço</h2>
+            <button type="button" class="ui-btn ui-btn-secondary management-modal-close" data-modal-close>Fechar</button>
+        </header>
+
+        <form method="post" action="/perfil/endereco">
+            <label class="ui-label" for="perfil-addr-cep">CEP (somente numeros)</label>
+            <input class="ui-input" id="perfil-addr-cep"          name="cep"          type="text" maxlength="8"   placeholder="00000000" />
+
+            <label class="ui-label" for="perfil-addr-street">Rua</label>
+            <input class="ui-input" id="perfil-addr-street"       name="street"       type="text" maxlength="200" placeholder="Nome da rua" />
+
+            <label class="ui-label" for="perfil-addr-number">Numero</label>
+            <input class="ui-input" id="perfil-addr-number"       name="number"       type="text" maxlength="20"  placeholder="123" />
+
+            <label class="ui-label" for="perfil-addr-neighborhood">Bairro</label>
+            <input class="ui-input" id="perfil-addr-neighborhood" name="neighborhood" type="text" maxlength="100" placeholder="Bairro" />
+
+            <label class="ui-label" for="perfil-addr-city">Cidade</label>
+            <input class="ui-input" id="perfil-addr-city"         name="city"         type="text" maxlength="100" placeholder="Cidade" />
+
+            <label class="ui-label" for="perfil-addr-state">UF</label>
+            <input class="ui-input" id="perfil-addr-state"        name="state"        type="text" maxlength="2"   placeholder="PR" />
+
+            <div class="management-modal-actions">
+                <button type="button" class="ui-btn ui-btn-secondary" data-modal-close>Cancelar</button>
+                <button type="submit" class="ui-btn ui-btn-primary">Salvar</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

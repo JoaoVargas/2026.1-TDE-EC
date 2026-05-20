@@ -8,17 +8,33 @@
 
 {% block dashboard_content %}
 <header class="greeting-block">
-    <h1 id="welcome-title">Ola, Usuario</h1>
+    <h1>Ola, {{ user.name if user else 'Usuario' }}</h1>
     <p>Resumo rapido da sua conta e atalhos do BetaBank.</p>
 </header>
 
-<section class="balance-card ui-card">
-    <div>
-        <p class="balance-label">Saldo total</p>
-        <p class="balance-value" id="saldo-valor">R$ 1.250,00</p>
-    </div>
-    <a href="/extrato" class="balance-arrow" aria-label="Abrir extrato">></a>
-</section>
+{% if flash == 'transferencia_realizada' %}
+<div class="feedback-message mensagem sucesso feedback-success" style="display: block;">
+    Transferencia realizada com sucesso!
+</div>
+{% endif %}
+<div class="balance-cards-row">
+    <section class="balance-card ui-card">
+        <div>
+            <p class="balance-label">Conta Corrente</p>
+            <p class="balance-value">{{ checking_account.balance | brl if checking_account else 'R$ 0,00' }}</p>
+        </div>
+        <a href="/extrato?account=corrente" class="balance-arrow" aria-label="Abrir extrato">></a>
+    </section>
+    {% if savings_account %}
+    <section class="balance-card balance-card--savings ui-card">
+        <div>
+            <p class="balance-label">Conta Poupança</p>
+            <p class="balance-value">{{ savings_account.balance | brl }}</p>
+        </div>
+        <a href="/extrato?account=poupanca" class="balance-arrow" aria-label="Abrir extrato">></a>
+    </section>
+    {% endif %}
+</div>
 
 <section class="cards-grid">
     <bb-insight-card
@@ -37,6 +53,15 @@
         button-label="Ver termos"
         button-variant="ui-btn-secondary"
     ></bb-insight-card>
+    {% if not savings_account %}
+    <div class="ui-card dashboard-card">
+        <h3>Conta Poupança</h3>
+        <p>Guarde dinheiro e faca seu saldo render.</p>
+        <form method="post" action="/home/abrir-poupanca">
+            <button type="submit" class="ui-btn ui-btn-accent">Abrir conta</button>
+        </form>
+    </div>
+    {% endif %}
 </section>
 {% endblock %}
 
