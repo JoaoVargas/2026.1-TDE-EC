@@ -74,9 +74,28 @@ class UserPortfolioRepository:
         return _row_to_user_portfolio(row) if row else None
 
     @classmethod
+    def get_by_portfolio_id(cls, db, portfolio_id: int) -> list["UserPortfolio"]:
+        cursor = db.cursor(dictionary=True)
+        cursor.execute(
+            "SELECT * FROM user_portfolios WHERE portfolio_id = %s",
+            (portfolio_id,),
+        )
+        rows = cursor.fetchall()
+        cursor.close()
+        return [_row_to_user_portfolio(row) for row in rows]
+
+    @classmethod
     def delete(cls, db, *, user_portfolio_id: int) -> bool:
         cursor = db.cursor()
         cursor.execute("DELETE FROM user_portfolios WHERE id = %s", (user_portfolio_id,))
         affected = cursor.rowcount
         cursor.close()
         return affected > 0
+
+    @classmethod
+    def delete_by_portfolio_id(cls, db, *, portfolio_id: int) -> int:
+        cursor = db.cursor()
+        cursor.execute("DELETE FROM user_portfolios WHERE portfolio_id = %s", (portfolio_id,))
+        affected = cursor.rowcount
+        cursor.close()
+        return affected

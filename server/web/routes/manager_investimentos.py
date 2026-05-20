@@ -7,8 +7,13 @@ from fastapi import APIRouter, Depends, Form, Request
 from fastapi.responses import RedirectResponse
 
 from server.db.connection import get_db
+from server.models.account import AccountType
+from server.models.transaction import TransactionType
+from server.repositories.account_repository import AccountRepository
 from server.repositories.manager_portfolio_repository import ManagerPortfolioRepository
 from server.repositories.portfolio_repository import PortfolioRepository
+from server.repositories.transaction_repository import TransactionRepository
+from server.repositories.user_portfolio_repository import UserPortfolioRepository
 from server.web.routes._shared import require_manager, templates
 
 router = APIRouter(tags=["pages"])
@@ -17,6 +22,8 @@ _PORTFOLIO_CLASSES = ["Renda fixa", "Renda variavel", "Criptomoedas"]
 
 _FEEDBACK_MAP = {
     "carteira_criada": "Carteira criada com sucesso.",
+    "carteira_deletada": "Carteira encerrada. Todos os investidores foram reembolsados.",
+    "carteira_nao_encontrada": "Carteira não encontrada.",
     "cotacao_atualizada": "Cotação atualizada com sucesso.",
     "cotacao_erro": "Não foi possível obter a cotação para esse ativo. Verifique o código.",
     "campos_invalidos": "Preencha todos os campos corretamente.",
@@ -163,3 +170,43 @@ def manager_buscar_cotacao_api(portfolio_id: int, request: Request, db=Depends(g
         return {"error": "cotação não disponível"}
 
     return {"price": str(price)}
+
+
+@router.post("/manager/investimentos/{portfolio_id}/deletar")
+async def manager_deletar_carteira(
+    portfolio_id: int,
+    request: Request,
+    db=Depends(get_db),
+):
+    result = require_manager(request, db)
+    if isinstance(result, RedirectResponse):
+        return result
+
+    portfolio = PortfolioRepository.get_by_id(db, portfolio_id)
+    if not portfolio:
+        return RedirectResponse("/manager/investimentos?feedback=carteira_nao_encontrada", status_code=302)
+
+    user_positions = UserPortfolioRepository.get_by_portfolio_id(db, portfolio_id)
+    for up in user_positions:
+        account = AccountRepository.get_by_user_and_type(db, up.user_id, AccountType.CHECKING)
+        if not account:
+            continue
+        refund = up.stock_amount * portfolio.stock_price
+        cursor = db.cursor()
+        cursor.execute("UPDATE accounts SET balance = balance + %s WHERE id = %s", (refund, account.id))
+        cursor.close()
+        TransactionRepository.create(
+            db,
+            type=TransactionType.DEPOSIT,
+            from_account_id=None,
+            to_account_id=account.id,
+            amount=refund,
+            description=f"Reembolso pelo encerramento da carteira {portfolio.stock_name} ({portfolio.stock_code})",
+        )
+
+    UserPortfolioRepository.delete_by_portfolio_id(db, portfolio_id=portfolio_id)
+    ManagerPortfolioRepository.delete_by_portfolio_id(db, portfolio_id=portfolio_id)
+    PortfolioRepository.delete(db, portfolio_id=portfolio_id)
+    db.commit()
+
+    return RedirectResponse("/manager/investimentos?feedback=carteira_deletada", status_code=302)

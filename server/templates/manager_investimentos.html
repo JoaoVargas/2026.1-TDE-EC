@@ -73,16 +73,27 @@
                 R$ {{ "%.2f"|format(p.stock_price)|replace('.', ',') }}
                 <span class="minv-price-label">por cota</span>
             </p>
-            <button
-                type="button"
-                class="ui-btn ui-btn-secondary minv-cotacao-btn"
-                data-portfolio-id="{{ p.id }}"
-                data-stock-code="{{ p.stock_code }}"
-                data-stock-name="{{ p.stock_name }}"
-                data-current-price="{{ p.stock_price }}"
-            >
-                ↻ Atualizar cotação
-            </button>
+            <div class="minv-card-actions">
+                <button
+                    type="button"
+                    class="ui-btn ui-btn-secondary minv-cotacao-btn"
+                    data-portfolio-id="{{ p.id }}"
+                    data-stock-code="{{ p.stock_code }}"
+                    data-stock-name="{{ p.stock_name }}"
+                    data-current-price="{{ p.stock_price }}"
+                >
+                    ↻ Atualizar cotação
+                </button>
+                <button
+                    type="button"
+                    class="ui-btn ui-btn-danger minv-deletar-btn"
+                    data-portfolio-id="{{ p.id }}"
+                    data-stock-name="{{ p.stock_name }}"
+                    data-stock-code="{{ p.stock_code }}"
+                >
+                    Excluir carteira
+                </button>
+            </div>
         </article>
         {% endfor %}
     </div>
@@ -94,12 +105,34 @@
     {% endif %}
 </section>
 
+<!-- Modal: Confirmar exclusão de carteira -->
+<div class="management-modal-backdrop" id="deletar-modal-backdrop" hidden>
+    <div class="management-modal ui-card" role="dialog" aria-modal="true" aria-labelledby="deletar-modal-title">
+        <header class="management-modal-header">
+            <h2 id="deletar-modal-title">Excluir carteira</h2>
+            <button type="button" class="ui-btn ui-btn-secondary management-modal-close" data-modal-close>Fechar</button>
+        </header>
+
+        <p class="management-modal-body" id="deletar-modal-desc"></p>
+        <p class="management-modal-warning">
+            Todos os investidores serão reembolsados pelo valor atual das suas cotas. Esta ação é irreversível.
+        </p>
+
+        <form id="deletar-form" method="post" action="">
+            <div class="management-modal-actions">
+                <button type="button" class="ui-btn ui-btn-secondary" data-modal-close>Cancelar</button>
+                <button type="submit" class="ui-btn ui-btn-danger">Confirmar exclusão</button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <!-- Modal: Atualizar cotação -->
 <div class="management-modal-backdrop" id="cotacao-modal-backdrop" hidden>
     <div class="management-modal ui-card" role="dialog" aria-modal="true" aria-labelledby="cotacao-modal-title">
         <header class="management-modal-header">
             <h2 id="cotacao-modal-title">Atualizar cotação — <span id="cotacao-modal-code"></span></h2>
-            <button type="button" class="ui-btn ui-btn-secondary" id="cotacao-modal-close">Fechar</button>
+            <button type="button" class="ui-btn ui-btn-secondary management-modal-close" data-modal-close>Fechar</button>
         </header>
 
         <p class="management-modal-feedback" id="cotacao-api-status"></p>
@@ -121,7 +154,7 @@
             </div>
 
             <div class="management-modal-actions">
-                <button type="button" class="ui-btn ui-btn-secondary" id="cotacao-modal-cancel">Cancelar</button>
+                <button type="button" class="ui-btn ui-btn-secondary" data-modal-close>Cancelar</button>
                 <button type="submit" class="ui-btn ui-btn-primary">Salvar</button>
             </div>
         </form>
@@ -130,70 +163,5 @@
 {% endblock %}
 
 {% block dashboard_scripts %}
-<script>
-document.addEventListener("DOMContentLoaded", () => {
-    const backdrop = document.getElementById("cotacao-modal-backdrop");
-    const form = document.getElementById("cotacao-form");
-    const priceInput = document.getElementById("cotacao-price-input");
-    const codeSpan = document.getElementById("cotacao-modal-code");
-    const statusEl = document.getElementById("cotacao-api-status");
-    const buscarBtn = document.getElementById("cotacao-buscar-btn");
-
-    let currentPortfolioId = null;
-
-    function openModal(btn) {
-        currentPortfolioId = btn.dataset.portfolioId;
-        form.action = `/manager/investimentos/${currentPortfolioId}/cotacao`;
-        codeSpan.textContent = btn.dataset.stockName + " (" + btn.dataset.stockCode + ")";
-        priceInput.value = parseFloat(btn.dataset.currentPrice).toFixed(2).replace(".", ",");
-        statusEl.textContent = "";
-        statusEl.className = "management-modal-feedback";
-        backdrop.hidden = false;
-        setTimeout(() => { priceInput.focus(); priceInput.select(); }, 0);
-    }
-
-    function closeModal() {
-        backdrop.hidden = true;
-        currentPortfolioId = null;
-    }
-
-    // Modal: Cotação
-    document.querySelectorAll(".minv-cotacao-btn").forEach(btn => {
-        btn.addEventListener("click", () => openModal(btn));
-    });
-
-    document.getElementById("cotacao-modal-close").addEventListener("click", closeModal);
-    document.getElementById("cotacao-modal-cancel").addEventListener("click", closeModal);
-    backdrop.addEventListener("click", e => { if (e.target === backdrop) closeModal(); });
-    document.addEventListener("keydown", e => {
-        if (e.key !== "Escape") return;
-        closeModal();
-    });
-
-    buscarBtn.addEventListener("click", () => {
-        if (!currentPortfolioId) return;
-        statusEl.textContent = "Buscando cotação...";
-        statusEl.className = "management-modal-feedback";
-        buscarBtn.disabled = true;
-
-        fetch(`/manager/investimentos/${currentPortfolioId}/cotacao-api`)
-            .then(r => r.json())
-            .then(data => {
-                if (data.error) {
-                    statusEl.textContent = "Não foi possível buscar online: " + data.error;
-                    statusEl.className = "management-modal-feedback is-error";
-                } else {
-                    priceInput.value = parseFloat(data.price).toFixed(2).replace(".", ",");
-                    statusEl.textContent = "Cotação obtida com sucesso!";
-                    statusEl.className = "management-modal-feedback is-success";
-                }
-            })
-            .catch(() => {
-                statusEl.textContent = "Erro ao buscar cotação online.";
-                statusEl.className = "management-modal-feedback is-error";
-            })
-            .finally(() => { buscarBtn.disabled = false; });
-    });
-});
-</script>
+<script type="module" src="/static/js/pages/manager_investimentos.js"></script>
 {% endblock %}

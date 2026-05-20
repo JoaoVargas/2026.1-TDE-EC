@@ -95,6 +95,15 @@ a:hover {
     color: #231504;
 }
 
+.ui-btn-danger {
+    background: #c0392b;
+    color: #fff;
+}
+
+.ui-btn-danger:hover {
+    filter: brightness(1.12);
+}
+
 .feedback-message {
     margin-top: var(--space-2);
     padding: 0.62rem 0.8rem;
@@ -174,4 +183,17 @@ bb-date-range-picker {
     justify-content: flex-end;
     gap: 0.55rem;
     padding-top: var(--space-3);
+}
+
+.management-modal-body {
+    margin: 0 0 var(--space-2);
+    color: var(--color-text);
+}
+
+.management-modal-warning {
+    margin: 0 0 var(--space-3);
+    font-size: 0.85rem;
+    color: #e67e22;
+    border-left: 3px solid #e67e22;
+    padding-left: 0.6rem;
 }
