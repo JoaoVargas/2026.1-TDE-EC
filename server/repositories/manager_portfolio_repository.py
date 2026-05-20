@@ -24,6 +24,14 @@ class ManagerPortfolioRepository:
         return [_row_to_manager_portfolio(row) for row in rows]
 
     @classmethod
+    def delete_by_portfolio_id(cls, db, *, portfolio_id: int) -> int:
+        cursor = db.cursor()
+        cursor.execute("DELETE FROM manager_portfolios WHERE portfolio_id = %s", (portfolio_id,))
+        affected = cursor.rowcount
+        cursor.close()
+        return affected
+
+    @classmethod
     def create(cls, db, *, portfolio_id: int, manager_id: int) -> ManagerPortfolio:
         cursor = db.cursor()
         cursor.execute(

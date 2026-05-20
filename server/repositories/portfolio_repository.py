@@ -53,3 +53,21 @@ class PortfolioRepository:
         new_id = cursor.lastrowid
         cursor.close()
         return cls.get_by_id(db, new_id)
+
+    @classmethod
+    def update_price(cls, db, *, portfolio_id: int, stock_price: Decimal) -> Portfolio | None:
+        cursor = db.cursor()
+        cursor.execute(
+            "UPDATE portfolios SET stock_price = %s WHERE id = %s",
+            (stock_price, portfolio_id),
+        )
+        cursor.close()
+        return cls.get_by_id(db, portfolio_id)
+
+    @classmethod
+    def delete(cls, db, *, portfolio_id: int) -> bool:
+        cursor = db.cursor()
+        cursor.execute("DELETE FROM portfolios WHERE id = %s", (portfolio_id,))
+        affected = cursor.rowcount
+        cursor.close()
+        return affected > 0
