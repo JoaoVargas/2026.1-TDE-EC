@@ -182,7 +182,10 @@ bb-date-range-picker {
     display: flex;
     justify-content: flex-end;
     gap: 0.55rem;
-    padding-top: var(--space-3);
+}
+
+.management-modal-feedback:empty {
+    display: none;
 }
 
 .management-modal-body {

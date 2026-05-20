@@ -5,6 +5,11 @@
     gap: var(--space-3);
 }
 
+.minv-create-form {
+    display: grid;
+    gap: var(--space-3);
+}
+
 .minv-section-title {
     margin: 0;
     font-size: 1rem;
@@ -89,7 +94,6 @@
     display: flex;
     gap: 0.5rem;
     align-items: stretch;
-    margin-bottom: var(--space-3);
 }
 
 .minv-price-input-row .ui-input {

@@ -398,6 +398,11 @@
     color: #79ebe1;
 }
 
+.inv-modal form {
+    display: grid;
+    gap: var(--space-2);
+}
+
 .inv-modal-actions {
     display: flex;
     justify-content: flex-end;

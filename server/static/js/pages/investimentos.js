@@ -1,3 +1,5 @@
+import { createModal } from "../components/modal.js";
+
 function toBRL(value) {
     return Number(value).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
@@ -77,122 +79,71 @@ function renderDistributionView(data) {
     });
 }
 
-// ── Modal: Depositar ─────────────────────────────────
-function openDepositarModal(portfolioId, name, priceCents, balanceCents) {
-    const backdrop = document.getElementById("inv-depositar-backdrop");
-    const form = document.getElementById("inv-dep-form");
-    if (!backdrop || !form) return;
-
-    form.action = `/investimentos/${portfolioId}/depositar`;
-    document.getElementById("inv-dep-name").textContent = name;
-    document.getElementById("inv-dep-price").textContent = `R$ ${toBRL(priceCents / 100)}`;
-    document.getElementById("inv-dep-balance").textContent = `R$ ${toBRL(balanceCents / 100)}`;
-    document.getElementById("inv-dep-value").value = "";
-    document.getElementById("inv-dep-amount-cents").value = "0";
-    document.getElementById("inv-dep-shares").textContent = "0";
-    backdrop.hidden = false;
-
-    const priceVal = priceCents / 100;
-    const input = document.getElementById("inv-dep-value");
-    input.addEventListener("input", () => {
-        const val = parseFloat(input.value) || 0;
-        const cents = Math.round(val * 100);
-        document.getElementById("inv-dep-amount-cents").value = cents;
-        const shares = priceVal > 0 ? val / priceVal : 0;
-        document.getElementById("inv-dep-shares").textContent = shares.toFixed(4);
-    });
-    setTimeout(() => input.focus(), 0);
-}
-
-function closeDepositarModal() {
-    const backdrop = document.getElementById("inv-depositar-backdrop");
-    if (backdrop) backdrop.hidden = true;
-}
-
-// ── Modal: Retirar ───────────────────────────────────
-function openRetirarModal(portfolioId, name, amount, price) {
-    const backdrop = document.getElementById("inv-retirar-backdrop");
-    const form = document.getElementById("inv-ret-form");
-    if (!backdrop || !form) return;
-
-    form.action = `/investimentos/${portfolioId}/retirar`;
-    document.getElementById("inv-ret-name").textContent = name;
-    document.getElementById("inv-ret-amount").textContent = `${amount}`;
-    document.getElementById("inv-ret-price").textContent = `R$ ${toBRL(price)}`;
-    document.getElementById("inv-ret-shares").value = "";
-    document.getElementById("inv-ret-value").textContent = "R$ 0,00";
-    backdrop.hidden = false;
-
-    const priceVal = parseFloat(price);
-    const sharesInput = document.getElementById("inv-ret-shares");
-    sharesInput.addEventListener("input", () => {
-        const shares = parseFloat(sharesInput.value) || 0;
-        document.getElementById("inv-ret-value").textContent = `R$ ${toBRL(shares * priceVal)}`;
-    });
-    setTimeout(() => sharesInput.focus(), 0);
-}
-
-function closeRetirarModal() {
-    const backdrop = document.getElementById("inv-retirar-backdrop");
-    if (backdrop) backdrop.hidden = true;
-}
-
 document.addEventListener("DOMContentLoaded", () => {
     const page = document.querySelector(".investment-page");
     if (!page) return;
 
-    const view = page.dataset.view;
-    if (view === "distribuicao") {
+    if (page.dataset.view === "distribuicao") {
         const rawJson = page.dataset.portfolio;
         if (!rawJson) return;
-        let data;
-        try { data = JSON.parse(rawJson); } catch { return; }
-        renderDistributionView(data);
+        try { renderDistributionView(JSON.parse(rawJson)); } catch { /* ignore */ }
         return;
     }
 
-    // Botões depositar
+    // ── Modal: Depositar ──────────────────────────────────────────
+    const depositarModal = createModal("inv-depositar-backdrop");
+    const depForm        = document.getElementById("inv-dep-form");
+    const depInput       = document.getElementById("inv-dep-value");
+    const depAmountCents = document.getElementById("inv-dep-amount-cents");
+    const depShares      = document.getElementById("inv-dep-shares");
+
+    let currentDepositPrice = 0;
+
+    depInput?.addEventListener("input", () => {
+        const val = parseFloat(depInput.value) || 0;
+        depAmountCents.value = Math.round(val * 100);
+        depShares.textContent = currentDepositPrice > 0
+            ? (val / currentDepositPrice).toFixed(4)
+            : "0";
+    });
+
     document.querySelectorAll(".inv-depositar-btn").forEach((btn) => {
         btn.addEventListener("click", () => {
-            openDepositarModal(
-                btn.dataset.portfolioId,
-                btn.dataset.name,
-                parseInt(btn.dataset.priceCents),
-                parseInt(btn.dataset.balanceCents),
-            );
+            currentDepositPrice = parseInt(btn.dataset.priceCents) / 100;
+            depForm.action = `/investimentos/${btn.dataset.portfolioId}/depositar`;
+            document.getElementById("inv-dep-name").textContent    = btn.dataset.name;
+            document.getElementById("inv-dep-price").textContent   = `R$ ${toBRL(currentDepositPrice)}`;
+            document.getElementById("inv-dep-balance").textContent = `R$ ${toBRL(parseInt(btn.dataset.balanceCents) / 100)}`;
+            depInput.value       = "";
+            depAmountCents.value = "0";
+            depShares.textContent = "0";
+            depositarModal.open({ trigger: btn, onOpen() { setTimeout(() => depInput.focus(), 0); } });
         });
     });
 
-    // Botões retirar
+    // ── Modal: Retirar ────────────────────────────────────────────
+    const retirarModal   = createModal("inv-retirar-backdrop");
+    const retForm        = document.getElementById("inv-ret-form");
+    const retInput       = document.getElementById("inv-ret-shares");
+    const retValue       = document.getElementById("inv-ret-value");
+
+    let currentRetirePrice = 0;
+
+    retInput?.addEventListener("input", () => {
+        const shares = parseFloat(retInput.value) || 0;
+        retValue.textContent = `R$ ${toBRL(shares * currentRetirePrice)}`;
+    });
+
     document.querySelectorAll(".inv-retirar-btn").forEach((btn) => {
         btn.addEventListener("click", () => {
-            openRetirarModal(
-                btn.dataset.portfolioId,
-                btn.dataset.name,
-                btn.dataset.amount,
-                btn.dataset.price,
-            );
+            currentRetirePrice = parseFloat(btn.dataset.price);
+            retForm.action = `/investimentos/${btn.dataset.portfolioId}/retirar`;
+            document.getElementById("inv-ret-name").textContent   = btn.dataset.name;
+            document.getElementById("inv-ret-amount").textContent = btn.dataset.amount;
+            document.getElementById("inv-ret-price").textContent  = `R$ ${toBRL(currentRetirePrice)}`;
+            retInput.value        = "";
+            retValue.textContent  = "R$ 0,00";
+            retirarModal.open({ trigger: btn, onOpen() { setTimeout(() => retInput.focus(), 0); } });
         });
-    });
-
-    // Fechar modais
-    ["inv-dep-close", "inv-dep-cancel"].forEach((id) => {
-        document.getElementById(id)?.addEventListener("click", closeDepositarModal);
-    });
-    ["inv-ret-close", "inv-ret-cancel"].forEach((id) => {
-        document.getElementById(id)?.addEventListener("click", closeRetirarModal);
-    });
-
-    document.getElementById("inv-depositar-backdrop")?.addEventListener("click", (e) => {
-        if (e.target === e.currentTarget) closeDepositarModal();
-    });
-    document.getElementById("inv-retirar-backdrop")?.addEventListener("click", (e) => {
-        if (e.target === e.currentTarget) closeRetirarModal();
-    });
-
-    document.addEventListener("keydown", (e) => {
-        if (e.key !== "Escape") return;
-        closeDepositarModal();
-        closeRetirarModal();
     });
 });
