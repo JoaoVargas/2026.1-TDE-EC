@@ -43,7 +43,8 @@ def _build_other_accounts(db, exclude_user_id: int) -> list[dict]:
     for u in UserRepository.list_all(db):
         if u.id == exclude_user_id:
             continue
-        for acc in AccountRepository.get_by_user_id(db, u.id):
+        acc = AccountRepository.get_by_user_and_type(db, u.id, AccountType.CHECKING)
+        if acc:
             result.append({"id": acc.id, "account_number": acc.account_number, "owner_name": u.name})
     return result
 
@@ -136,7 +137,7 @@ async def operacao_submit(
         return RedirectResponse("/operacao?modo=transferir&error=sem_conta", status_code=302)
 
     to_account = AccountRepository.get_by_id(db, to_account_id) if to_account_id else None
-    if not to_account:
+    if not to_account or to_account.user_id == user.id or to_account.type != AccountType.CHECKING:
         return RedirectResponse("/operacao?modo=transferir&error=destinatario_invalido", status_code=302)
 
     if from_account.balance < amount:

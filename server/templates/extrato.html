@@ -43,9 +43,13 @@
         <button type="button" class="statement-filter" data-filter="in">Entradas</button>
         <button type="button" class="statement-filter" data-filter="out">Saidas</button>
         <button type="button" class="statement-filter" data-filter="month">Este mes</button>
+        <bb-date-range-picker label="Período"></bb-date-range-picker>
     </nav>
 
-    <p class="statement-list-title">Transacoes recentes</p>
+    <div class="statement-list-header">
+        <p class="statement-list-title">Transacoes recentes</p>
+        <span class="statement-count-pill" id="statement-count"></span>
+    </div>
 
     <section class="statement-list" id="statement-list">
         {% for tx in transactions %}
@@ -64,5 +68,6 @@
 {% endblock %}
 
 {% block dashboard_scripts %}
+<script type="module" src="/static/js/components/date-range-picker.js"></script>
 <script type="module" src="/static/js/pages/extrato.js"></script>
 {% endblock %}

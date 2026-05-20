@@ -7,15 +7,7 @@
 {% endblock %}
 
 {% block dashboard_scripts %}
-<script>
-document.querySelectorAll('.perfil-edit-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-        const form = document.getElementById(btn.dataset.target);
-        if (!form) return;
-        if (form.hasAttribute('hidden')) form.removeAttribute('hidden'); else form.setAttribute('hidden', '');
-    });
-});
-</script>
+<script type="module" src="/static/js/pages/perfil.js"></script>
 {% endblock %}
 
 {% block dashboard_content %}
@@ -25,10 +17,10 @@ document.querySelectorAll('.perfil-edit-btn').forEach(btn => {
 </header>
 
 {% if flash %}
-<div class="feedback-message feedback-success" style="display: block;">{{ flash }}</div>
+<div class="feedback-message feedback-success">{{ flash }}</div>
 {% endif %}
 {% if error %}
-<div class="feedback-message feedback-error" style="display: block;">{{ error }}</div>
+<div class="feedback-message feedback-error">{{ error }}</div>
 {% endif %}
 
 <section class="perfil-grid">
@@ -75,61 +67,143 @@ document.querySelectorAll('.perfil-edit-btn').forEach(btn => {
 
     <article class="ui-card perfil-card">
         <header class="perfil-card-header">
-            <h2>Dados da conta</h2>
+            <div class="perfil-card-title-row">
+                <h2>Dados da conta</h2>
+                <button
+                    type="button"
+                    class="perfil-edit-btn perfil-profile-trigger"
+                    data-name="{{ user.name }}"
+                    data-email="{{ user.email }}"
+                >
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M3 17.25V21h3.75l11-11-3.75-3.75-11 11zM20.71 7.04a1.003 1.003 0 000-1.42l-2.34-2.34a1.003 1.003 0 00-1.42 0l-1.83 1.83 3.75 3.75 1.84-1.82z"/>
+                    </svg>
+                    <span>Editar</span>
+                </button>
+            </div>
             <p>Informações cadastradas no BetaBank.</p>
-            <button type="button" class="perfil-edit-btn" data-target="form-nome">✏ Editar</button>
         </header>
+
         <dl class="perfil-info">
             <div><dt>Nome</dt><dd>{{ user.name }}</dd></div>
             <div><dt>Email</dt><dd>{{ user.email }}</dd></div>
             <div><dt>Tipo de conta</dt><dd>{{ 'Gerente' if is_manager(user) else 'Cliente' }}</dd></div>
         </dl>
-        <form id="form-nome" action="/perfil/nome" method="post" class="perfil-form" hidden>
-            <label class="ui-label" for="input-nome">Novo nome</label>
-            <input class="ui-input" id="input-nome" name="name" type="text" value="{{ user.name }}" maxlength="200" required />
-            <div class="perfil-actions">
-                <button type="submit" class="ui-btn ui-btn-primary">Salvar</button>
-            </div>
-        </form>
     </article>
 
     {% if address %}
     <article class="ui-card perfil-card">
         <header class="perfil-card-header">
-            <h2>Endereço</h2>
+            <div class="perfil-card-title-row">
+                <h2>Endereço</h2>
+                <button
+                    type="button"
+                    class="perfil-edit-btn perfil-addr-trigger"
+                    data-cep="{{ address.cep }}"
+                    data-street="{{ address.street }}"
+                    data-number="{{ address.number }}"
+                    data-neighborhood="{{ address.neighborhood }}"
+                    data-city="{{ address.city }}"
+                    data-state="{{ address.state }}"
+                >
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M3 17.25V21h3.75l11-11-3.75-3.75-11 11zM20.71 7.04a1.003 1.003 0 000-1.42l-2.34-2.34a1.003 1.003 0 00-1.42 0l-1.83 1.83 3.75 3.75 1.84-1.82z"/>
+                    </svg>
+                    <span>Editar</span>
+                </button>
+            </div>
             <p>Endereço cadastrado na sua conta.</p>
-            <button type="button" class="perfil-edit-btn" data-target="form-endereco">✏ Editar</button>
         </header>
+
         <dl class="perfil-info">
             <div><dt>CEP</dt><dd>{{ address.cep[:5] }}-{{ address.cep[5:] }}</dd></div>
             <div><dt>Logradouro</dt><dd>{{ address.street }}, {{ address.number }}</dd></div>
             <div><dt>Bairro</dt><dd>{{ address.neighborhood }}</dd></div>
             <div><dt>Cidade / Estado</dt><dd>{{ address.city }} — {{ address.state }}</dd></div>
         </dl>
-        <form id="form-endereco" action="/perfil/endereco" method="post" class="perfil-form" hidden>
-            <label class="ui-label" for="perfil-cep-input">CEP (somente numeros)</label>
-            <input class="ui-input" id="perfil-cep-input" name="cep" type="text" maxlength="8" value="{{ address.cep }}" />
-
-            <label class="ui-label" for="perfil-street-input">Rua</label>
-            <input class="ui-input" id="perfil-street-input" name="street" type="text" maxlength="200" value="{{ address.street }}" />
-
-            <label class="ui-label" for="perfil-number-input">Numero</label>
-            <input class="ui-input" id="perfil-number-input" name="number" type="text" maxlength="20" value="{{ address.number }}" />
-
-            <label class="ui-label" for="perfil-neighborhood-input">Bairro</label>
-            <input class="ui-input" id="perfil-neighborhood-input" name="neighborhood" type="text" maxlength="100" value="{{ address.neighborhood }}" />
-
-            <label class="ui-label" for="perfil-city-input">Cidade</label>
-            <input class="ui-input" id="perfil-city-input" name="city" type="text" maxlength="100" value="{{ address.city }}" />
-
-            <label class="ui-label" for="perfil-state-input">UF</label>
-            <input class="ui-input" id="perfil-state-input" name="state" type="text" maxlength="2" value="{{ address.state }}" />
-
-            <div class="perfil-actions">
-                <button type="submit" class="ui-btn ui-btn-primary">Salvar endereço</button>
-            </div>
-        </form>
     </article>
     {% endif %}
 </section>
+
+<div class="management-modal-backdrop" id="perfil-profile-modal-backdrop" hidden>
+    <div
+        class="management-modal ui-card"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="perfil-profile-modal-title"
+    >
+        <header class="management-modal-header">
+            <h2 id="perfil-profile-modal-title">Alterar dados da conta</h2>
+            <button type="button" class="ui-btn ui-btn-secondary management-modal-close" data-modal-close>Fechar</button>
+        </header>
+
+        <form method="post" action="/perfil/nome">
+            <label class="ui-label" for="perfil-profile-name">Nome</label>
+            <input
+                class="ui-input"
+                id="perfil-profile-name"
+                name="name"
+                type="text"
+                maxlength="200"
+                autocomplete="off"
+                placeholder="Nome completo"
+            />
+
+            <label class="ui-label" for="perfil-profile-email">Email</label>
+            <input
+                class="ui-input"
+                id="perfil-profile-email"
+                name="email"
+                type="email"
+                maxlength="200"
+                autocomplete="off"
+                placeholder="email@exemplo.com"
+            />
+
+            <div class="management-modal-actions">
+                <button type="button" class="ui-btn ui-btn-secondary" data-modal-close>Cancelar</button>
+                <button type="submit" class="ui-btn ui-btn-primary">Salvar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="management-modal-backdrop" id="perfil-addr-modal-backdrop" hidden>
+    <div
+        class="management-modal ui-card"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="perfil-addr-modal-title"
+    >
+        <header class="management-modal-header">
+            <h2 id="perfil-addr-modal-title">Alterar endereço</h2>
+            <button type="button" class="ui-btn ui-btn-secondary management-modal-close" data-modal-close>Fechar</button>
+        </header>
+
+        <form method="post" action="/perfil/endereco">
+            <label class="ui-label" for="perfil-addr-cep">CEP (somente numeros)</label>
+            <input class="ui-input" id="perfil-addr-cep"          name="cep"          type="text" maxlength="8"   placeholder="00000000" />
+
+            <label class="ui-label" for="perfil-addr-street">Rua</label>
+            <input class="ui-input" id="perfil-addr-street"       name="street"       type="text" maxlength="200" placeholder="Nome da rua" />
+
+            <label class="ui-label" for="perfil-addr-number">Numero</label>
+            <input class="ui-input" id="perfil-addr-number"       name="number"       type="text" maxlength="20"  placeholder="123" />
+
+            <label class="ui-label" for="perfil-addr-neighborhood">Bairro</label>
+            <input class="ui-input" id="perfil-addr-neighborhood" name="neighborhood" type="text" maxlength="100" placeholder="Bairro" />
+
+            <label class="ui-label" for="perfil-addr-city">Cidade</label>
+            <input class="ui-input" id="perfil-addr-city"         name="city"         type="text" maxlength="100" placeholder="Cidade" />
+
+            <label class="ui-label" for="perfil-addr-state">UF</label>
+            <input class="ui-input" id="perfil-addr-state"        name="state"        type="text" maxlength="2"   placeholder="PR" />
+
+            <div class="management-modal-actions">
+                <button type="button" class="ui-btn ui-btn-secondary" data-modal-close>Cancelar</button>
+                <button type="submit" class="ui-btn ui-btn-primary">Salvar</button>
+            </div>
+        </form>
+    </div>
+</div>
 {% endblock %}

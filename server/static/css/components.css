@@ -63,6 +63,7 @@ a:hover {
 
 .ui-btn:hover {
     transform: translateY(-1px);
+    text-decoration: none;
 }
 
 .ui-btn:active {
@@ -116,6 +117,61 @@ a:hover {
 bb-insight-card,
 bb-investment-stat,
 bb-asset-card,
-bb-statement-item {
+bb-statement-item,
+bb-date-range-picker {
     display: block;
+}
+
+/* ── Modal ──────────────────────────────────────────────── */
+.management-modal-backdrop[hidden] {
+    display: none !important;
+}
+
+.management-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(6, 10, 18, 0.68);
+    z-index: 40;
+    display: grid;
+    place-items: center;
+    padding: var(--space-4);
+}
+
+.management-modal {
+    width: min(100%, 460px);
+    background: linear-gradient(165deg, #172b49 0%, #1b3354 100%);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: var(--radius-lg);
+    padding: var(--space-4);
+    display: grid;
+    gap: var(--space-3);
+}
+
+.management-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+.management-modal-header h2 {
+    margin: 0;
+    font-size: 1rem;
+}
+
+.management-modal-close {
+    padding: 0.45rem 0.65rem;
+    font-size: 0.72rem;
+}
+
+.management-modal form {
+    display: grid;
+    gap: var(--space-2);
+}
+
+.management-modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.55rem;
+    padding-top: var(--space-3);
 }

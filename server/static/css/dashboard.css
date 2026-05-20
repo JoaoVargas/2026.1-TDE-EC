@@ -412,7 +412,7 @@
     cursor: pointer;
     padding: 0;
 }
-.perfil-edit-btn:hover { text-decoration: underline; }
+.perfil-edit-btn:hover { text-decoration: none; }
 
 .perfil-form {
     display: flex;

@@ -1,5 +1,6 @@
 import { showFieldError } from "/static/js/components/form-feedback.js";
 import { formatCep, formatCpf, onlyDigits } from "/static/js/components/formatters.js";
+import { wireCepLookup } from "/static/js/components/cep-lookup.js";
 
 const rules = {
     nome: (v) => {
@@ -94,32 +95,16 @@ function wireRealtimeValidation() {
     });
 }
 
-async function lookupCep() {
-    const cep = onlyDigits(document.getElementById("cep")?.value || "");
-    if (cep.length !== 8) return;
-    try {
-        const response = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
-        const result = await response.json();
-        if (result.erro) return;
-        const map = {
-            logradouro: result.logradouro || "",
-            bairro: result.bairro || "",
-            cidade: result.localidade || "",
-            estado: result.uf || "",
-        };
-        Object.entries(map).forEach(([id, value]) => {
-            const input = document.getElementById(id);
-            if (!input) return;
-            input.value = value;
-            validateField(id);
-        });
-    } catch {
-        // noop
-    }
-}
-
 document.addEventListener("DOMContentLoaded", () => {
     wireRealtimeValidation();
+
+    wireCepLookup({
+        cepInput:          document.getElementById("cep"),
+        streetInput:       document.getElementById("logradouro"),
+        neighborhoodInput: document.getElementById("bairro"),
+        cityInput:         document.getElementById("cidade"),
+        stateInput:        document.getElementById("estado"),
+    });
 
     document.getElementById("cpf")?.addEventListener("input", (event) => {
         event.target.value = formatCpf(event.target.value);
@@ -132,8 +117,6 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("estado")?.addEventListener("input", (event) => {
         event.target.value = event.target.value.toUpperCase().slice(0, 2);
     });
-
-    document.getElementById("cep")?.addEventListener("blur", lookupCep);
 
     const form = document.getElementById("form-cadastro");
     if (form) {

@@ -165,7 +165,7 @@ function setupTransferFlow() {
 
     function filterRecipients(text) {
         const q = text.trim().toLowerCase();
-        document.querySelectorAll(".recipient-card").forEach((card) => {
+        document.querySelectorAll("#recipient-grid .recipient-card").forEach((card) => {
             const name   = (card.dataset.name || "").toLowerCase();
             const number = card.querySelector(".recipient-bank")?.textContent.toLowerCase() || "";
             card.style.display = (!q || name.includes(q) || number.includes(q)) ? "" : "none";
