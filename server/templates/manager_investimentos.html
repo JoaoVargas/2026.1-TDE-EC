@@ -1,0 +1,199 @@
+{% extends "dashboard_base.html" %}
+
+{% block title %}Gestao de Investimentos | Banco Digital{% endblock %}
+
+{% block dashboard_styles %}
+<link rel="stylesheet" href="/static/css/manager.css" />
+<link rel="stylesheet" href="/static/css/manager_investimentos.css" />
+{% endblock %}
+
+{% block dashboard_topbar_actions %}
+<a class="ui-btn ui-btn-secondary" href="/manager">Voltar para o painel</a>
+{% endblock %}
+
+{% block dashboard_content %}
+<section class="page-panel ui-card manager-management-panel">
+    <header class="panel-header">
+        <h1>Carteiras de investimento</h1>
+        <p>Gerencie as carteiras disponíveis e mantenha as cotações atualizadas.</p>
+    </header>
+
+    {% if feedback %}
+    <p class="manager-feedback {% if 'erro' in feedback or 'nvalido' in feedback %}is-error{% else %}is-success{% endif %}" role="status">
+        {{ feedback }}
+    </p>
+    {% endif %}
+
+    <!-- Criar nova carteira -->
+    <div class="minv-create-panel ui-card">
+        <h2 class="minv-section-title">Nova carteira</h2>
+        <form method="post" action="/manager/investimentos/criar" class="minv-create-form">
+            <div class="minv-form-row">
+                <div class="minv-field">
+                    <label class="ui-label" for="f-name">Classe</label>
+                    <select class="ui-input" id="f-name" name="name" required>
+                        {% for c in classes %}
+                        <option value="{{ c }}">{{ c }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="minv-field">
+                    <label class="ui-label" for="f-code">Código do ativo</label>
+                    <input class="ui-input" id="f-code" name="stock_code" type="text" placeholder="Ex: PETR4" maxlength="10" required />
+                </div>
+                <div class="minv-field">
+                    <label class="ui-label" for="f-stock-name">Nome do ativo</label>
+                    <input class="ui-input" id="f-stock-name" name="stock_name" type="text" placeholder="Ex: Petrobras PN" maxlength="100" required />
+                </div>
+                <div class="minv-field">
+                    <label class="ui-label" for="f-price">Preço inicial (R$)</label>
+                    <input class="ui-input" id="f-price" name="stock_price" type="text" placeholder="Ex: 28.50" required />
+                </div>
+            </div>
+            <button type="submit" class="ui-btn ui-btn-primary">Criar carteira</button>
+        </form>
+    </div>
+
+    <!-- Lista de carteiras -->
+    {% if portfolios %}
+    <div class="minv-section-title-row">
+        <h2 class="minv-section-title">Carteiras cadastradas</h2>
+    </div>
+    <div class="minv-portfolios-grid">
+        {% for p in portfolios %}
+        <article class="minv-portfolio-card ui-card">
+            <div class="minv-portfolio-header">
+                <div>
+                    <h3 class="minv-portfolio-name">{{ p.stock_name }}</h3>
+                    <span class="minv-portfolio-code">{{ p.stock_code }}</span>
+                </div>
+                <span class="management-badge">{{ p.name }}</span>
+            </div>
+            <p class="minv-portfolio-price">
+                R$ {{ "%.2f"|format(p.stock_price)|replace('.', ',') }}
+                <span class="minv-price-label">por cota</span>
+            </p>
+            <button
+                type="button"
+                class="ui-btn ui-btn-secondary minv-cotacao-btn"
+                data-portfolio-id="{{ p.id }}"
+                data-stock-code="{{ p.stock_code }}"
+                data-stock-name="{{ p.stock_name }}"
+                data-current-price="{{ p.stock_price }}"
+            >
+                ↻ Atualizar cotação
+            </button>
+        </article>
+        {% endfor %}
+    </div>
+    {% else %}
+    <article class="management-empty-card ui-card">
+        <h2>Nenhuma carteira cadastrada</h2>
+        <p>Crie a primeira carteira usando o formulário acima.</p>
+    </article>
+    {% endif %}
+</section>
+
+<!-- Modal: Atualizar cotação -->
+<div class="management-modal-backdrop" id="cotacao-modal-backdrop" hidden>
+    <div class="management-modal ui-card" role="dialog" aria-modal="true" aria-labelledby="cotacao-modal-title">
+        <header class="management-modal-header">
+            <h2 id="cotacao-modal-title">Atualizar cotação — <span id="cotacao-modal-code"></span></h2>
+            <button type="button" class="ui-btn ui-btn-secondary" id="cotacao-modal-close">Fechar</button>
+        </header>
+
+        <p class="management-modal-feedback" id="cotacao-api-status"></p>
+
+        <form id="cotacao-form" method="post" action="">
+            <label class="ui-label" for="cotacao-price-input">Novo preço por cota (R$)</label>
+            <div class="minv-price-input-row">
+                <input
+                    class="ui-input"
+                    id="cotacao-price-input"
+                    name="stock_price"
+                    type="text"
+                    placeholder="Ex: 28.50"
+                    required
+                />
+                <button type="button" class="ui-btn ui-btn-secondary" id="cotacao-buscar-btn">
+                    Buscar online
+                </button>
+            </div>
+
+            <div class="management-modal-actions">
+                <button type="button" class="ui-btn ui-btn-secondary" id="cotacao-modal-cancel">Cancelar</button>
+                <button type="submit" class="ui-btn ui-btn-primary">Salvar</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block dashboard_scripts %}
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    const backdrop = document.getElementById("cotacao-modal-backdrop");
+    const form = document.getElementById("cotacao-form");
+    const priceInput = document.getElementById("cotacao-price-input");
+    const codeSpan = document.getElementById("cotacao-modal-code");
+    const statusEl = document.getElementById("cotacao-api-status");
+    const buscarBtn = document.getElementById("cotacao-buscar-btn");
+
+    let currentPortfolioId = null;
+
+    function openModal(btn) {
+        currentPortfolioId = btn.dataset.portfolioId;
+        form.action = `/manager/investimentos/${currentPortfolioId}/cotacao`;
+        codeSpan.textContent = btn.dataset.stockName + " (" + btn.dataset.stockCode + ")";
+        priceInput.value = parseFloat(btn.dataset.currentPrice).toFixed(2).replace(".", ",");
+        statusEl.textContent = "";
+        statusEl.className = "management-modal-feedback";
+        backdrop.hidden = false;
+        setTimeout(() => { priceInput.focus(); priceInput.select(); }, 0);
+    }
+
+    function closeModal() {
+        backdrop.hidden = true;
+        currentPortfolioId = null;
+    }
+
+    // Modal: Cotação
+    document.querySelectorAll(".minv-cotacao-btn").forEach(btn => {
+        btn.addEventListener("click", () => openModal(btn));
+    });
+
+    document.getElementById("cotacao-modal-close").addEventListener("click", closeModal);
+    document.getElementById("cotacao-modal-cancel").addEventListener("click", closeModal);
+    backdrop.addEventListener("click", e => { if (e.target === backdrop) closeModal(); });
+    document.addEventListener("keydown", e => {
+        if (e.key !== "Escape") return;
+        closeModal();
+    });
+
+    buscarBtn.addEventListener("click", () => {
+        if (!currentPortfolioId) return;
+        statusEl.textContent = "Buscando cotação...";
+        statusEl.className = "management-modal-feedback";
+        buscarBtn.disabled = true;
+
+        fetch(`/manager/investimentos/${currentPortfolioId}/cotacao-api`)
+            .then(r => r.json())
+            .then(data => {
+                if (data.error) {
+                    statusEl.textContent = "Não foi possível buscar online: " + data.error;
+                    statusEl.className = "management-modal-feedback is-error";
+                } else {
+                    priceInput.value = parseFloat(data.price).toFixed(2).replace(".", ",");
+                    statusEl.textContent = "Cotação obtida com sucesso!";
+                    statusEl.className = "management-modal-feedback is-success";
+                }
+            })
+            .catch(() => {
+                statusEl.textContent = "Erro ao buscar cotação online.";
+                statusEl.className = "management-modal-feedback is-error";
+            })
+            .finally(() => { buscarBtn.disabled = false; });
+    });
+});
+</script>
+{% endblock %}

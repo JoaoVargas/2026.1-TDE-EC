@@ -9,6 +9,7 @@
     <nav class="sidebar-nav">
         {{ nav_link('/manager', 'Painel', active_page == 'manager_dashboard') }}
         {{ nav_link('/manager/accounts', 'Contas e usuarios', active_page == 'manager_accounts') }}
+        {{ nav_link('/manager/investimentos', 'Investimentos', active_page == 'manager_investimentos') }}
     </nav>
 
     <a href="/perfil" class="sidebar-profile-link{% if active_page == 'perfil' %} is-active{% endif %}" aria-label="Abrir meu perfil">

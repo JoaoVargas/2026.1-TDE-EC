@@ -283,6 +283,127 @@
     border-radius: 999px;
 }
 
+/* ── Investimentos: cards cliente ───────────────────── */
+.inv-feedback {
+    margin: 0;
+    padding: 0.65rem 1rem;
+    border-radius: var(--radius-sm);
+    font-size: 0.88rem;
+}
+.inv-feedback.is-success { background: rgba(141, 232, 196, 0.12); color: #8de8c4; }
+.inv-feedback.is-error   { background: rgba(255, 145, 139, 0.12); color: #ff918b; }
+
+.inv-asset-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-3);
+}
+
+.inv-asset-card {
+    background: linear-gradient(160deg, #172b49 0%, #1b3354 100%);
+    padding: var(--space-4);
+    display: grid;
+    gap: var(--space-2);
+}
+
+.inv-asset-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: var(--space-2);
+}
+
+.inv-asset-name {
+    margin: 0;
+    font-size: 0.96rem;
+}
+
+.inv-asset-sub {
+    margin: 0.2rem 0 0;
+    font-size: 0.78rem;
+    color: var(--color-muted);
+}
+
+.inv-asset-value {
+    font-weight: 700;
+    font-size: 1rem;
+    color: #79ebe1;
+    white-space: nowrap;
+}
+
+.inv-per-cota {
+    font-size: 0.72rem;
+    color: var(--color-muted);
+    font-weight: 400;
+}
+
+.inv-asset-detail {
+    margin: 0;
+    font-size: 0.8rem;
+    color: var(--color-muted);
+}
+
+.inv-has-position {
+    color: #8de8c4;
+}
+
+.inv-balance-info {
+    margin: 0;
+    font-size: 0.84rem;
+    color: var(--color-muted);
+}
+
+/* ── Modais investimentos ───────────────────────────── */
+.inv-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(6, 10, 18, 0.7);
+    z-index: 100;
+    display: grid;
+    place-items: center;
+    padding: var(--space-4);
+}
+.inv-modal-backdrop[hidden] { display: none !important; }
+
+.inv-modal {
+    width: min(100%, 420px);
+    background: linear-gradient(165deg, #172b49 0%, #1b3354 100%);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    padding: var(--space-4);
+    display: grid;
+    gap: var(--space-3);
+}
+
+.inv-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+.inv-modal-header h2 {
+    margin: 0;
+    font-size: 1rem;
+}
+
+.inv-modal-info {
+    margin: 0;
+    font-size: 0.85rem;
+    color: var(--color-muted);
+}
+
+.inv-modal-calc {
+    margin: 0;
+    font-size: 0.82rem;
+    color: #79ebe1;
+}
+
+.inv-modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.55rem;
+}
+
 @media (max-width: 1100px) {
     .investment-hero {
         grid-template-columns: 1fr;

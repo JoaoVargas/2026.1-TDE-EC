@@ -47,3 +47,36 @@ class UserPortfolioRepository:
         row = cursor.fetchone()
         cursor.close()
         return _row_to_user_portfolio(row)
+
+    @classmethod
+    def get_by_user_and_portfolio(cls, db, user_id: int, portfolio_id: int) -> UserPortfolio | None:
+        cursor = db.cursor(dictionary=True)
+        cursor.execute(
+            "SELECT * FROM user_portfolios WHERE user_id = %s AND portfolio_id = %s",
+            (user_id, portfolio_id),
+        )
+        row = cursor.fetchone()
+        cursor.close()
+        return _row_to_user_portfolio(row) if row else None
+
+    @classmethod
+    def update_amount(cls, db, *, user_portfolio_id: int, stock_amount: Decimal) -> UserPortfolio | None:
+        cursor = db.cursor()
+        cursor.execute(
+            "UPDATE user_portfolios SET stock_amount = %s WHERE id = %s",
+            (stock_amount, user_portfolio_id),
+        )
+        cursor.close()
+        cursor = db.cursor(dictionary=True)
+        cursor.execute("SELECT * FROM user_portfolios WHERE id = %s", (user_portfolio_id,))
+        row = cursor.fetchone()
+        cursor.close()
+        return _row_to_user_portfolio(row) if row else None
+
+    @classmethod
+    def delete(cls, db, *, user_portfolio_id: int) -> bool:
+        cursor = db.cursor()
+        cursor.execute("DELETE FROM user_portfolios WHERE id = %s", (user_portfolio_id,))
+        affected = cursor.rowcount
+        cursor.close()
+        return affected > 0
