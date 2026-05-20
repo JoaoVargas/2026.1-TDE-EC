@@ -137,7 +137,12 @@ async def operacao_submit(
         return RedirectResponse("/operacao?modo=transferir&error=sem_conta", status_code=302)
 
     to_account = AccountRepository.get_by_id(db, to_account_id) if to_account_id else None
-    if not to_account or to_account.user_id == user.id or to_account.type != AccountType.CHECKING:
+    if not to_account:
+        return RedirectResponse("/operacao?modo=transferir&error=destinatario_invalido", status_code=302)
+
+    own_transfer = to_account.user_id == user.id and to_account.id != from_account.id
+    external_transfer = to_account.user_id != user.id and to_account.type == AccountType.CHECKING
+    if not own_transfer and not external_transfer:
         return RedirectResponse("/operacao?modo=transferir&error=destinatario_invalido", status_code=302)
 
     if from_account.balance < amount:
