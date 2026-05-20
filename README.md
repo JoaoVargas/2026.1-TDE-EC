@@ -1,78 +1,169 @@
-Setup do ambiente
+# BetaBank — Banco Digital
 
-1. Crie e ative um ambiente virtual:
+Aplicação web de banco digital desenvolvida como TDE da disciplina Experiência Criativa (PUCPR 2026.1).
 
-  python -m venv .venv
+## Tecnologias
 
-  source .venv/bin/activate
-  source .venv/bin/activate.fish
-  source .venv/Scripts/activate
+- **Python 3.14** + **FastAPI** — servidor ASGI com renderização server-side (SSR)
+- **Jinja2** — templates HTML
+- **MySQL 8.4** — banco de dados relacional
+- **mysql-connector-python** — driver de conexão com pool nativo
+- **bcrypt** — hash de senhas
+- **Docker Compose** — infraestrutura local (MySQL + servidor + Portainer)
+- **Vanilla JS / CSS** — frontend sem frameworks, organizado em componentes
 
-2. Instale as dependencias do servidor:
+## Arquitetura
 
-  cd server
-  pip install -r requirements.txt
+O projeto segue uma arquitetura **SSR pura**: não há rotas de API; todos os dados são buscados diretamente nas rotas web e injetados nos templates Jinja2. O JavaScript do cliente é restrito a interações de UI.
 
-3. Suba a infraestrutura com Docker (opcional, recomendado):
+```
+server/
+├── main.py                  # entrypoint ASGI
+├── core/
+│   ├── app.py               # factory da aplicação, middlewares, montagem de routers
+│   ├── settings.py          # configurações lidas de variáveis de ambiente
+│   ├── session.py           # helpers de sessão (cookie session_id)
+│   └── security.py          # hash/verificação de senha
+├── db/
+│   ├── connection.py        # pool de conexões MySQL e health check
+│   └── init_db.py           # criação das tabelas no startup
+├── models/                  # dataclasses das entidades de domínio
+│   ├── user.py              # User, UserType (client | manager)
+│   ├── address.py
+│   ├── account.py
+│   ├── transaction.py
+│   ├── portfolio.py
+│   ├── manager_portfolio.py
+│   ├── user_portfolio.py
+│   └── user_avatar.py
+├── repositories/            # acesso a dados (SQL puro via connection pool)
+│   ├── user_repository.py
+│   ├── address_repository.py
+│   ├── account_repository.py
+│   ├── transaction_repository.py
+│   ├── portfolio_repository.py
+│   ├── manager_portfolio_repository.py
+│   ├── user_portfolio_repository.py
+│   ├── user_avatar_repository.py
+│   └── session_repository.py
+├── web/
+│   ├── router.py            # agrega todos os sub-routers
+│   └── routes/              # uma rota por página
+│       ├── login.py / logout.py / cadastro.py
+│       ├── home.py
+│       ├── operacao.py
+│       ├── extrato.py
+│       ├── investimentos.py
+│       ├── perfil.py
+│       ├── manager.py
+│       ├── manager_accounts.py
+│       └── manager_select.py
+├── templates/               # templates Jinja2
+│   ├── base.html / auth_base.html / dashboard_base.html
+│   ├── components/          # macros e partials reutilizáveis
+│   └── *.html               # uma template por página
+└── static/
+    ├── css/                 # folhas de estilo por página + tokens de design
+    └── js/
+        ├── components/      # módulos JS reutilizáveis
+        │   ├── cep-lookup.js
+        │   ├── date-range-picker.js
+        │   ├── modal.js
+        │   ├── sidebar.js
+        │   ├── transaction-flow.js
+        │   ├── form-feedback.js
+        │   ├── formatters.js
+        │   └── ui-cards.js
+        └── pages/           # JS específico por página
+```
 
-  cd ../docker
-  docker compose up
+### Autenticação e sessões
 
-Configuracao
+As sessões são armazenadas na tabela `sessions` do banco de dados. No login, um token opaco é gerado e salvo no cookie `session_id` (HttpOnly, SameSite=Lax). O `SessionRefreshMiddleware` renova automaticamente a expiração a cada requisição autenticada.
 
-A conexao com banco usa DB_URL ou os campos abaixo:
+Variáveis relevantes: `SESSION_SECRET`, `SESSION_TIMEOUT_SECONDS` (padrão: 300 s).
 
-- DB_HOST
-- DB_PORT
-- DB_USER
-- DB_PASSWORD
-- DB_NAME
+### Tipos de usuário
 
-Opcoes de tuning do SQLAlchemy (opcionais):
+| Tipo | Acesso |
+|------|--------|
+| `client` | Dashboard, extrato, operações, investimentos, perfil |
+| `manager` | Painel de gestão, visualização de contas de clientes |
 
-- DB_ECHO (true/false)
-- DB_POOL_SIZE
-- DB_MAX_OVERFLOW
-- DB_POOL_TIMEOUT
-- DB_POOL_RECYCLE
+## Configuração
 
-Configuracoes adicionais da API:
+Copie o arquivo de exemplo e ajuste as variáveis:
 
-- APP_NAME
-- DEBUG
-- CORS_ALLOW_ORIGINS (lista separada por virgula)
+```bash
+cp docker/.env.example docker/.env   # se existir; caso contrário crie docker/.env
+```
 
-Arquitetura do servidor
+| Variável | Padrão | Descrição |
+|----------|--------|-----------|
+| `DB_HOST` | `localhost` | Host do MySQL |
+| `DB_PORT` | `3306` | Porta do MySQL |
+| `DB_USER` | `user` | Usuário do banco |
+| `DB_PASSWORD` | `password` | Senha do banco |
+| `DB_NAME` | `bancodigital` | Nome do banco |
+| `DB_URL` | — | URL completa (substitui os campos acima) |
+| `SESSION_SECRET` | `change-me-in-production` | Segredo das sessões |
+| `SESSION_TIMEOUT_SECONDS` | `300` | Duração da sessão em segundos |
+| `APP_NAME` | `Banco Digital` | Nome exibido na aplicação |
+| `DEBUG` | `false` | Modo debug do FastAPI |
+| `DB_ECHO` | `false` | Log das queries SQL |
+| `DB_POOL_SIZE` | `5` | Tamanho do pool de conexões |
+| `DB_MAX_OVERFLOW` | `10` | Conexões extras além do pool |
+| `DB_POOL_TIMEOUT` | `30` | Timeout de aquisição de conexão (s) |
+| `DB_POOL_RECYCLE` | `3600` | Reciclagem de conexões (s) |
 
-- server/main.py: entrypoint ASGI (apenas cria a aplicacao)
-- server/core/settings.py: leitura e cache de configuracoes
-- server/core/app.py: factory da aplicacao FastAPI, middlewares e routers
-- server/web/router.py: roteador para paginas HTML
-- server/web/routes/pages.py: rotas web renderizadas com Jinja2
-- server/templates/: templates Jinja2
-- server/static/: arquivos estaticos (CSS, imagens, etc.)
-- server/db/base.py: Base declarativa do SQLAlchemy
-- server/db/session.py: engine, SessionLocal e check de conectividade
-- server/db/init_db.py: inicializacao das tabelas
-- server/models/orm_models.py: entidades ORM
-- server/repositories/table_repository.py: acesso a dados
-- server/api/routes/: endpoints HTTP
+## Subindo com Docker (recomendado)
 
-Compatibilidade
+```bash
+cd docker
+docker compose up
+```
 
-O modulo server/models/example.py continua funcionando como camada de compatibilidade para imports legados.
+Serviços disponíveis:
 
-Executando a API
+| Serviço | Porta padrão | Descrição |
+|---------|-------------|-----------|
+| `betabank-db` | `3000` | MySQL 8.4 |
+| `betabank-server` | `3001` | Aplicação FastAPI |
+| `betabank-portainer` | `3002` | Painel de gerenciamento Docker |
 
-Na raiz do projeto:
+## Executando localmente
 
-  uvicorn server.main:app --reload --host 0.0.0.0 --port 8000
+```bash
+# 1. Crie e ative o ambiente virtual
+cd server
+python -m venv .venv
+source .venv/bin/activate        # Linux/macOS
+source .venv/Scripts/activate    # Windows
 
-Health check:
+# 2. Instale as dependências
+pip install -r requirements.txt
 
-  GET /api/health
+# 3. Configure as variáveis de ambiente (ou crie um .env na raiz)
+export DB_HOST=localhost DB_USER=user DB_PASSWORD=password DB_NAME=bancodigital
 
-Paginas HTML:
+# 4. Execute o servidor
+cd ..
+uvicorn server.main:app --reload --host 0.0.0.0 --port 8000
+```
 
-  GET /
-  GET /healthcheck
+A aplicação inicializa o banco automaticamente no startup (`init_db`).
+
+## Páginas
+
+| Rota | Descrição |
+|------|-----------|
+| `/login` | Login |
+| `/cadastro` | Cadastro de novo cliente (com busca automática de endereço por CEP) |
+| `/home` | Dashboard do cliente |
+| `/operacao` | Depósito, saque e transferência |
+| `/extrato` | Histórico de transações com filtro por período |
+| `/investimentos` | Carteira de investimentos e distribuição |
+| `/perfil` | Dados pessoais e avatar |
+| `/manager` | Painel do gestor |
+| `/manager/select` | Seleção de cliente para gestão |
+| `/manager/accounts` | Contas do cliente selecionado |
