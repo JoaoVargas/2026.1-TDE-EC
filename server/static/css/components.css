@@ -117,7 +117,8 @@ a:hover {
 bb-insight-card,
 bb-investment-stat,
 bb-asset-card,
-bb-statement-item {
+bb-statement-item,
+bb-date-range-picker {
     display: block;
 }
 
