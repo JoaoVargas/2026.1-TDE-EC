@@ -1,13 +1,13 @@
 {% extends "dashboard_base.html" %}
 
-{% block title %}Investimentos | Distribuicao{% endblock %}
+{% block title %}Investimentos | Resumo{% endblock %}
 
 {% block dashboard_styles %}
 <link rel="stylesheet" href="/static/css/investimentos.css" />
 {% endblock %}
 
 {% block dashboard_content %}
-<section class="investment-page" data-view="distribuicao" data-portfolio="{{ chart_json | e }}">
+<section class="investment-page" data-view="resumo" data-resumo="{{ chart_json | e }}">
     <div class="investment-hero">
         <article class="investment-stat ui-card main-stat">
             <p class="investment-stat-label">Total em investimentos</p>
@@ -25,32 +25,16 @@
 
     <nav class="investment-tabs">
         <a class="investment-tab" href="/investimentos">Minha carteira</a>
-        <a class="investment-tab" href="/investimentos/resumo">Resumo dos investimentos</a>
-        <a class="investment-tab is-active" href="/investimentos/distribuicao">Analise de distribuicao</a>
+        <a class="investment-tab is-active" href="/investimentos/resumo">Resumo dos investimentos</a>
+        <a class="investment-tab" href="/investimentos/distribuicao">Analise de distribuicao</a>
     </nav>
 
     <section class="dist-section ui-card">
         <header class="investment-section-header compact">
-            <h2>Distribuicao por classe de ativo</h2>
+            <h2>Evolucao da carteira</h2>
         </header>
-
-        <div class="dist-grid">
-            <div class="donut-shell">
-                <div class="donut" id="dist-donut"></div>
-                <div class="donut-center">
-                    <p id="donut-total">R$ 0,00</p>
-                    <span>total</span>
-                </div>
-            </div>
-            <div class="legend-list" id="legend-list"></div>
-        </div>
-    </section>
-
-    <section class="dist-section ui-card">
-        <header class="investment-section-header compact">
-            <h2>Participacao por ativo</h2>
-        </header>
-        <div class="bar-list" id="asset-bars"></div>
+        <div class="resumo-chart-wrap" id="resumo-chart"></div>
+        <div class="resumo-legend" id="resumo-legend"></div>
     </section>
 </section>
 {% endblock %}

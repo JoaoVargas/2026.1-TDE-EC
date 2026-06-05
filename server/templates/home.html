@@ -34,6 +34,20 @@
         <a href="/extrato?account=poupanca" class="balance-arrow" aria-label="Abrir extrato">></a>
     </section>
     {% endif %}
+    {% if investment_summary %}
+    <section class="balance-card balance-card--investments ui-card">
+        <div>
+            <p class="balance-label">Carteira de Investimentos</p>
+            <p class="balance-value">R$ {{ investment_summary.total_str }}</p>
+            <p class="inv-change {% if investment_summary.is_up %}inv-change--up{% else %}inv-change--down{% endif %}">
+                {% if investment_summary.is_up %}▲{% else %}▼{% endif %}
+                {% if investment_summary.is_up %}+{% else %}-{% endif %}R$ {{ investment_summary.change_str }}
+                ({% if investment_summary.is_up %}+{% else %}-{% endif %}{{ investment_summary.change_pct_str }}%)
+            </p>
+        </div>
+        <a href="/investimentos" class="balance-arrow" aria-label="Abrir carteira">></a>
+    </section>
+    {% endif %}
 </div>
 
 <section class="cards-grid">

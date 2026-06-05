@@ -27,6 +27,25 @@
     background: linear-gradient(128deg, #1e3d6e 0%, #163c50 100%);
 }
 
+.balance-card--investments {
+    background: linear-gradient(128deg, #1a3d2a 0%, #1e4832 100%);
+}
+
+.inv-change {
+    margin: 0.45rem 0 0;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+}
+
+.inv-change--up {
+    color: var(--color-success);
+}
+
+.inv-change--down {
+    color: var(--color-danger);
+}
+
 .balance-label {
     margin: 0;
     text-transform: uppercase;

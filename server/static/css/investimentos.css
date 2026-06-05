@@ -337,6 +337,12 @@
     font-weight: 400;
 }
 
+.inv-sparkline {
+    margin: 0.1rem calc(var(--space-4) * -1);
+    overflow: hidden;
+    line-height: 0;
+}
+
 .inv-asset-detail {
     margin: 0;
     font-size: 0.8rem;
@@ -407,6 +413,88 @@
     display: flex;
     justify-content: flex-end;
     gap: 0.55rem;
+}
+
+/* ── Resumo dos investimentos: chart ──────────────────── */
+.resumo-chart-wrap {
+    width: 100%;
+    min-height: 260px;
+}
+
+.resumo-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.55rem 1.2rem;
+    margin-top: 0.75rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.resumo-legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.8rem;
+    color: var(--color-muted);
+}
+
+.resumo-legend-line {
+    display: inline-block;
+    width: 18px;
+    height: 2.5px;
+    border-radius: 2px;
+    flex-shrink: 0;
+    opacity: 0.75;
+}
+
+.resumo-legend-line--total {
+    background: #7ecef4;
+    height: 3px;
+    opacity: 1;
+}
+
+.resumo-empty {
+    margin: 0;
+    color: var(--color-muted);
+    font-size: 0.88rem;
+    padding: 3rem 0;
+    text-align: center;
+}
+
+.resumo-tooltip {
+    position: absolute;
+    background: linear-gradient(135deg, #162d4a 0%, #1e3d61 100%);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 6px;
+    padding: 0.45rem 0.7rem;
+    pointer-events: none;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    gap: 0.18rem;
+    min-width: 130px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.45);
+}
+
+.resumo-tooltip[hidden] { display: none !important; }
+
+.resumo-tooltip strong {
+    font-size: 0.76rem;
+    color: rgba(220, 235, 255, 0.88);
+    white-space: nowrap;
+}
+
+.resumo-tooltip span {
+    font-size: 0.9rem;
+    font-family: var(--font-mono);
+    color: #7ecef4;
+    font-weight: 600;
+}
+
+.resumo-tooltip em {
+    font-size: 0.7rem;
+    font-style: normal;
+    color: rgba(200, 220, 240, 0.42);
 }
 
 @media (max-width: 1100px) {
