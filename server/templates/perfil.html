@@ -91,6 +91,38 @@
         </dl>
     </article>
 
+    {# ── Chaves Pix ── #}
+    <article class="ui-card perfil-card perfil-card--pix">
+        <header class="perfil-card-header">
+            <div class="perfil-card-title-row">
+                <h2>Chaves Pix</h2>
+                <button type="button" class="perfil-edit-btn" id="btn-add-pix">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+                    <span>Adicionar</span>
+                </button>
+            </div>
+            <p>Suas chaves Pix vinculadas à conta corrente.</p>
+        </header>
+
+        {% if pix_keys %}
+        <ul class="pix-key-list">
+            {% for key in pix_keys %}
+            <li class="pix-key-item">
+                <div class="pix-key-info">
+                    <span class="pix-key-type-badge">{{ key.type_label }}</span>
+                    <span class="pix-key-value">{{ key.key_value }}</span>
+                </div>
+                <form method="post" action="/perfil/pix/remover/{{ key.id }}" style="display:inline">
+                    <button type="submit" class="pix-key-remove" title="Remover chave" aria-label="Remover {{ key.key_value }}">✕</button>
+                </form>
+            </li>
+            {% endfor %}
+        </ul>
+        {% else %}
+        <p class="pix-no-keys">Nenhuma chave cadastrada. Adicione uma para receber Pix.</p>
+        {% endif %}
+    </article>
+
     {% if address %}
     <article class="ui-card perfil-card">
         <header class="perfil-card-header">
@@ -202,6 +234,50 @@
             <div class="management-modal-actions">
                 <button type="button" class="ui-btn ui-btn-secondary" data-modal-close>Cancelar</button>
                 <button type="submit" class="ui-btn ui-btn-primary">Salvar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{# ── Modal: Adicionar chave Pix ── #}
+<div class="management-modal-backdrop" id="pix-modal-backdrop" hidden>
+    <div class="management-modal ui-card" role="dialog" aria-modal="true" aria-labelledby="pix-modal-title">
+        <header class="management-modal-header">
+            <h2 id="pix-modal-title">Adicionar chave Pix</h2>
+            <button type="button" class="ui-btn ui-btn-secondary management-modal-close" data-modal-close>Fechar</button>
+        </header>
+
+        <form method="post" action="/perfil/pix/criar" id="form-pix">
+            <label class="ui-label" for="pix-type-select">Tipo de chave</label>
+            <select class="ui-input" id="pix-type-select" name="key_type" style="margin-bottom: 0.75rem;">
+                <option value="cpf">CPF</option>
+                <option value="email">E-mail</option>
+                <option value="phone">Telefone</option>
+                <option value="random">Chave aleatória</option>
+            </select>
+
+            <div id="pix-phone-field" style="display:none;">
+                <label class="ui-label" for="pix-phone-input">Número de telefone (somente dígitos)</label>
+                <input
+                    class="ui-input"
+                    id="pix-phone-input"
+                    name="key_value"
+                    type="text"
+                    maxlength="11"
+                    placeholder="11999998888"
+                    autocomplete="off"
+                    style="margin-bottom: 0.75rem;"
+                />
+            </div>
+
+            <p style="font-size:0.78rem; color:var(--color-muted); margin: 0 0 1rem;">
+                CPF e e-mail são preenchidos com seus dados cadastrados.
+                A chave aleatória é gerada automaticamente.
+            </p>
+
+            <div class="management-modal-actions">
+                <button type="button" class="ui-btn ui-btn-secondary" data-modal-close>Cancelar</button>
+                <button type="submit" class="ui-btn ui-btn-primary">Adicionar</button>
             </div>
         </form>
     </div>

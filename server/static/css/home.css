@@ -31,6 +31,22 @@
     background: linear-gradient(128deg, #1a3d2a 0%, #1e4832 100%);
 }
 
+.balance-card--credit {
+    background: linear-gradient(128deg, #2d2415 0%, #3c2e18 100%);
+}
+
+.balance-card--credit .balance-label {
+    color: #d4aa5a;
+}
+
+.card-available {
+    margin: 0.45rem 0 0;
+    font-size: 0.8rem;
+    font-weight: 600;
+    font-family: var(--font-mono);
+    color: rgba(212, 170, 90, 0.75);
+}
+
 .inv-change {
     margin: 0.45rem 0 0;
     font-size: 0.8rem;

@@ -108,6 +108,17 @@ class AccountRepository:
         return count
 
     @classmethod
+    def get_by_ids(cls, db, account_ids: list[int]) -> dict[int, "Account"]:
+        if not account_ids:
+            return {}
+        placeholders = ", ".join(["%s"] * len(account_ids))
+        cursor = db.cursor(dictionary=True)
+        cursor.execute(f"SELECT * FROM accounts WHERE id IN ({placeholders})", account_ids)
+        rows = cursor.fetchall()
+        cursor.close()
+        return {row["id"]: _row_to_account(row) for row in rows}
+
+    @classmethod
     def get_grouped_by_user_ids(
         cls,
         db,

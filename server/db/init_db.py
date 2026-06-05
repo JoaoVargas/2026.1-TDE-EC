@@ -142,6 +142,45 @@ def _create_tables(conn) -> None:
             FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
         )
     """)
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS credit_cards (
+            id            INT             AUTO_INCREMENT PRIMARY KEY,
+            user_id       INT             NOT NULL UNIQUE,
+            card_number   VARCHAR(16)     NOT NULL UNIQUE,
+            card_name     VARCHAR(100)    NOT NULL,
+            limit_amount  DECIMAL(15, 2)  NOT NULL DEFAULT 5000.00,
+            used_amount   DECIMAL(15, 2)  NOT NULL DEFAULT 0.00,
+            due_day       INT             NOT NULL DEFAULT 10,
+            status        ENUM('active', 'blocked') NOT NULL DEFAULT 'active',
+            created_at    DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            updated_at    DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+        )
+    """)
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS credit_card_transactions (
+            id              INT             AUTO_INCREMENT PRIMARY KEY,
+            credit_card_id  INT             NOT NULL,
+            type            ENUM('purchase', 'payment') NOT NULL DEFAULT 'purchase',
+            amount          DECIMAL(15, 2)  NOT NULL,
+            description     VARCHAR(255),
+            created_at      DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (credit_card_id) REFERENCES credit_cards(id) ON DELETE CASCADE
+        )
+    """)
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS pix_keys (
+            id          INT          AUTO_INCREMENT PRIMARY KEY,
+            user_id     INT          NOT NULL,
+            account_id  INT          NOT NULL,
+            key_type    ENUM('cpf', 'email', 'phone', 'random') NOT NULL,
+            key_value   VARCHAR(150) NOT NULL UNIQUE,
+            created_at  DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id)    REFERENCES users(id) ON DELETE CASCADE,
+            FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE,
+            INDEX idx_pix_user (user_id)
+        )
+    """)
     cursor.close()
     conn.commit()
 
@@ -331,6 +370,31 @@ def _apply_migrations(conn) -> None:
     )
     conn.commit()
 
+    if _table_exists(cursor, "pix_keys"):
+        cursor.execute(
+            "SELECT u.id, u.cpf, u.email FROM users u "
+            "WHERE u.type = 'client' AND u.id NOT IN (SELECT DISTINCT user_id FROM pix_keys)"
+        )
+        users_without_pix = cursor.fetchall()
+        for user_id, cpf, email in users_without_pix:
+            cursor.execute(
+                "SELECT id FROM accounts WHERE user_id = %s AND type = 'checking' LIMIT 1",
+                (user_id,),
+            )
+            acc_row = cursor.fetchone()
+            if not acc_row:
+                continue
+            account_id = acc_row[0]
+            for key_type, key_value in [("cpf", cpf), ("email", email.lower())]:
+                cursor.execute("SELECT COUNT(*) FROM pix_keys WHERE key_value = %s", (key_value,))
+                if cursor.fetchone()[0] == 0:
+                    cursor.execute(
+                        "INSERT INTO pix_keys (user_id, account_id, key_type, key_value) VALUES (%s, %s, %s, %s)",
+                        (user_id, account_id, key_type, key_value),
+                    )
+        if users_without_pix:
+            conn.commit()
+
     cursor.close()
 
 
@@ -338,8 +402,8 @@ def init_db() -> None:
     conn = _get_pool().get_connection()
     try:
         _create_tables(conn)
-        _apply_migrations(conn)
         _seed_default_users_if_empty(conn)
+        _apply_migrations(conn)
         _seed_portfolios_if_empty(conn)
     finally:
         conn.close()

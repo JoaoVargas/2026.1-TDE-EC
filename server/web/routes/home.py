@@ -6,6 +6,7 @@ from fastapi.responses import RedirectResponse
 from server.db.connection import get_db
 from server.models.account import AccountType
 from server.repositories.account_repository import AccountRepository
+from server.repositories.credit_card_repository import CreditCardRepository
 from server.repositories.portfolio_repository import PortfolioRepository
 from server.repositories.user_portfolio_repository import UserPortfolioRepository
 from server.web.routes._shared import require_user, templates
@@ -71,6 +72,7 @@ def home_page(request: Request, db=Depends(get_db)):
     checking_account = AccountRepository.get_by_user_and_type(db, user.id, AccountType.CHECKING)
     savings_account = AccountRepository.get_by_user_and_type(db, user.id, AccountType.SAVINGS)
     investment_summary = _get_investment_summary(db, user.id, checking_account)
+    credit_card = CreditCardRepository.get_by_user_id(db, user.id)
 
     flash = request.query_params.get("flash")
 
@@ -85,6 +87,7 @@ def home_page(request: Request, db=Depends(get_db)):
             "checking_account": checking_account,
             "savings_account": savings_account,
             "investment_summary": investment_summary,
+            "credit_card": credit_card,
             "flash": flash,
         },
     )

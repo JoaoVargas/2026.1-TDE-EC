@@ -16,6 +16,18 @@
 <div class="feedback-message mensagem sucesso feedback-success" style="display: block;">
     Transferencia realizada com sucesso!
 </div>
+{% elif flash == 'pix_enviado' %}
+<div class="feedback-message feedback-success" style="display: block;">
+    Pix enviado com sucesso!
+</div>
+{% elif flash == 'deposito_realizado' %}
+<div class="feedback-message feedback-success" style="display: block;">
+    Deposito realizado com sucesso!
+</div>
+{% elif flash == 'saque_realizado' %}
+<div class="feedback-message feedback-success" style="display: block;">
+    Saque realizado com sucesso!
+</div>
 {% endif %}
 <div class="balance-cards-row">
     <section class="balance-card ui-card">
@@ -48,6 +60,16 @@
         <a href="/investimentos" class="balance-arrow" aria-label="Abrir carteira">></a>
     </section>
     {% endif %}
+    {% if credit_card %}
+    <section class="balance-card balance-card--credit ui-card">
+        <div>
+            <p class="balance-label">Cartão de Crédito</p>
+            <p class="balance-value">{{ credit_card.used_amount | brl }}</p>
+            <p class="card-available">Disponível: {{ credit_card.available_amount | brl }}</p>
+        </div>
+        <a href="/cartao" class="balance-arrow" aria-label="Abrir cartão">></a>
+    </section>
+    {% endif %}
 </div>
 
 <section class="cards-grid">
@@ -57,10 +79,6 @@
         text="Protecao inteligente para voce e sua familia."
         button-label="Conhecer"
         button-variant="ui-btn-accent"
-    ></bb-insight-card>
-    <bb-insight-card
-        title="Cartao de credito"
-        text="Fatura atual: R$ 0,00"
     ></bb-insight-card>
     <bb-insight-card
         data-modal-id="modal-termos"

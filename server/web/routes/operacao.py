@@ -8,13 +8,14 @@ from server.db.connection import get_db
 from server.models.account import AccountType
 from server.models.transaction import TransactionType
 from server.repositories.account_repository import AccountRepository
+from server.repositories.pix_key_repository import PixKeyRepository
 from server.repositories.transaction_repository import TransactionRepository
 from server.repositories.user_repository import UserRepository
 from server.web.routes._shared import require_user, templates
 
 router = APIRouter(tags=["pages"])
 
-_VALID_MODES = ("depositar", "sacar", "transferir")
+_VALID_MODES = ("depositar", "sacar", "transferir", "pix")
 
 _ERROR_MAPS = {
     "depositar": {
@@ -32,10 +33,17 @@ _ERROR_MAPS = {
         "destinatario_invalido": "Destinatário não encontrado.",
         "sem_conta": "Nenhuma conta encontrada para o usuário.",
     },
+    "pix": {
+        "saldo_insuficiente": "Saldo insuficiente para este Pix.",
+        "valor_invalido": "Valor inválido.",
+        "chave_invalida": "Chave Pix não encontrada.",
+        "sem_conta": "Conta corrente não encontrada.",
+        "chave_propria": "Você não pode enviar Pix para sua própria chave.",
+    },
 }
 
-_ACTIVE_PAGE = {"depositar": "deposito", "sacar": "saque", "transferir": "transacao"}
-_DASHBOARD_LABEL = {"depositar": "Depositar", "sacar": "Sacar", "transferir": "Transferir"}
+_ACTIVE_PAGE = {"depositar": "operacao", "sacar": "operacao", "transferir": "operacao", "pix": "operacao"}
+_DASHBOARD_LABEL = {"depositar": "Depositar", "sacar": "Sacar", "transferir": "Transferir", "pix": "Pix"}
 
 
 def _build_other_accounts(db, exclude_user_id: int) -> list[dict]:
@@ -65,6 +73,7 @@ def operacao_page(request: Request, db=Depends(get_db)):
     other_accounts = _build_other_accounts(db, user.id) if modo == "transferir" else []
 
     error_key = request.query_params.get("error")
+    pix_recipient_name = request.query_params.get("pix_name", "")
 
     return templates.TemplateResponse(
         request=request,
@@ -79,6 +88,7 @@ def operacao_page(request: Request, db=Depends(get_db)):
             "savings_account": savings_account,
             "other_accounts": other_accounts,
             "error": _ERROR_MAPS[modo].get(error_key) if error_key else None,
+            "pix_recipient_name": pix_recipient_name,
         },
     )
 
@@ -90,6 +100,7 @@ async def operacao_submit(
     amount_cents: int = Form(...),
     to_account_id: Optional[int] = Form(None),
     from_account_type: str = Form("corrente"),
+    pix_key: Optional[str] = Form(None),
     db=Depends(get_db),
 ):
     result = require_user(request, db)
@@ -129,6 +140,43 @@ async def operacao_submit(
         TransactionRepository.create(db, type=TransactionType.WITHDRAWAL, from_account_id=account.id, to_account_id=None, amount=amount, description=None)
         db.commit()
         return RedirectResponse("/home?flash=saque_realizado", status_code=302)
+
+    if modo == "pix":
+        from_account = AccountRepository.get_by_user_and_type(db, user.id, AccountType.CHECKING)
+        if not from_account:
+            return RedirectResponse("/operacao?modo=pix&error=sem_conta", status_code=302)
+        if not pix_key or not pix_key.strip():
+            return RedirectResponse("/operacao?modo=pix&error=chave_invalida", status_code=302)
+
+        key_record = PixKeyRepository.get_by_key_value(db, pix_key.strip())
+        if not key_record:
+            return RedirectResponse("/operacao?modo=pix&error=chave_invalida", status_code=302)
+        if key_record.user_id == user.id:
+            return RedirectResponse("/operacao?modo=pix&error=chave_propria", status_code=302)
+
+        to_account = AccountRepository.get_by_id(db, key_record.account_id)
+        if not to_account:
+            return RedirectResponse("/operacao?modo=pix&error=chave_invalida", status_code=302)
+        if from_account.balance < amount:
+            return RedirectResponse("/operacao?modo=pix&error=saldo_insuficiente", status_code=302)
+
+        recipient = UserRepository.get_by_id(db, key_record.user_id)
+        recipient_name = recipient.name if recipient else "destinatário"
+
+        cursor = db.cursor()
+        cursor.execute("UPDATE accounts SET balance = balance - %s WHERE id = %s", (amount, from_account.id))
+        cursor.execute("UPDATE accounts SET balance = balance + %s WHERE id = %s", (amount, to_account.id))
+        cursor.close()
+        TransactionRepository.create(
+            db,
+            type=TransactionType.TRANSACTION,
+            from_account_id=from_account.id,
+            to_account_id=to_account.id,
+            amount=amount,
+            description=f"Pix para {recipient_name}",
+        )
+        db.commit()
+        return RedirectResponse("/home?flash=pix_enviado", status_code=302)
 
     # modo == "transferir"
     tipo = AccountType.SAVINGS if from_account_type == "poupanca" else AccountType.CHECKING

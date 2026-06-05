@@ -28,9 +28,17 @@ class BBInsightCard extends HTMLElement {
         const buttonLabel = this.getAttribute("button-label") || "";
         if (buttonLabel) {
             const variant = this.getAttribute("button-variant") || "ui-btn-primary";
-            const button = createTextElement("button", `ui-btn ${variant}`, buttonLabel);
-            button.type = "button";
-            article.appendChild(button);
+            const href = this.getAttribute("href") || "";
+            if (href) {
+                const link = createTextElement("a", `ui-btn ${variant}`, buttonLabel);
+                link.href = href;
+                link.style.textDecoration = "none";
+                article.appendChild(link);
+            } else {
+                const button = createTextElement("button", `ui-btn ${variant}`, buttonLabel);
+                button.type = "button";
+                article.appendChild(button);
+            }
         }
 
         this.replaceChildren(article);
@@ -91,8 +99,11 @@ class BBStatementItem extends HTMLElement {
             return;
         }
 
-        const type = (this.getAttribute("kind") || "out").toLowerCase();
-        const month = this.getAttribute("month") || "";
+        const type        = (this.getAttribute("kind") || "out").toLowerCase();
+        const month       = this.getAttribute("month") || "";
+        const typeLabel   = this.getAttribute("type-label") || "";
+        const counterpart = this.getAttribute("counterpart") || "";
+        const balanceAfter = this.getAttribute("balance-after") || "";
 
         const article = createTextElement("article", "statement-item ui-card", "");
         article.dataset.type = type;
@@ -102,17 +113,38 @@ class BBStatementItem extends HTMLElement {
         const icon = createTextElement("div", `statement-icon ${type}`, type === "in" ? "+" : "-");
 
         const meta = createTextElement("div", "statement-meta", "");
-        const name = createTextElement("p", "statement-name", this.getAttribute("title") || "-");
-        const date = createTextElement("p", "statement-date", this.getAttribute("date") || "-");
-        meta.append(name, date);
 
+        const titleRow = createTextElement("div", "statement-title-row", "");
+        const name     = createTextElement("p", "statement-name", this.getAttribute("title") || "-");
+        titleRow.append(name);
+        if (typeLabel) {
+            const badge = createTextElement("span", `statement-type-badge type-${type}`, typeLabel);
+            titleRow.append(badge);
+        }
+
+        meta.append(titleRow);
+
+        if (counterpart) {
+            const cp = createTextElement("p", "statement-counterpart", counterpart);
+            meta.append(cp);
+        }
+
+        const date = createTextElement("p", "statement-date", this.getAttribute("date") || "-");
+        meta.append(date);
+
+        const right = createTextElement("div", "statement-right", "");
         const amount = createTextElement(
             "p",
             `statement-amount ${type}`,
             this.getAttribute("amount") || "R$ 0,00"
         );
+        right.append(amount);
+        if (balanceAfter) {
+            const bal = createTextElement("p", "statement-balance-after", `Saldo: ${balanceAfter}`);
+            right.append(bal);
+        }
 
-        article.append(icon, meta, amount);
+        article.append(icon, meta, right);
         this.replaceChildren(article);
         this.dataset.rendered = "true";
     }
