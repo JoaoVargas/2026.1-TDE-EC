@@ -41,4 +41,26 @@ document.addEventListener("DOMContentLoaded", () => {
             },
         });
     });
+
+    // ── Pix key modal ──
+    const pixModal    = createModal("pix-modal-backdrop");
+    const btnAddPix   = document.getElementById("btn-add-pix");
+    const pixTypeSelect  = document.getElementById("pix-type-select");
+    const pixPhoneField  = document.getElementById("pix-phone-field");
+    const pixPhoneInput  = document.getElementById("pix-phone-input");
+
+    btnAddPix?.addEventListener("click", () => {
+        pixModal.open({ onOpen() { pixTypeSelect?.focus(); } });
+    });
+
+    pixTypeSelect?.addEventListener("change", () => {
+        const isPhone = pixTypeSelect.value === "phone";
+        if (pixPhoneField) pixPhoneField.style.display = isPhone ? "" : "none";
+        if (pixPhoneInput) pixPhoneInput.required = isPhone;
+    });
+
+    // Only allow digits in phone input
+    pixPhoneInput?.addEventListener("input", () => {
+        pixPhoneInput.value = pixPhoneInput.value.replace(/\D/g, "");
+    });
 });

@@ -48,7 +48,15 @@
 
     <div class="statement-list-header">
         <p class="statement-list-title">Transacoes recentes</p>
-        <span class="statement-count-pill" id="statement-count"></span>
+        <div style="display:flex; align-items:center; gap:0.5rem;">
+            <span class="statement-count-pill" id="statement-count"></span>
+            <a
+                href="/extrato/exportar?account={{ selected_account_type }}"
+                class="ui-btn ui-btn-secondary"
+                style="font-size:0.75rem; padding:0.4rem 0.8rem; text-decoration:none;"
+                download
+            >Exportar CSV</a>
+        </div>
     </div>
 
     <section class="statement-list" id="statement-list">
@@ -59,6 +67,9 @@
             title="{{ tx.title }}"
             date="{{ tx.date_str }}"
             amount="{{ tx.amount_str }}"
+            type-label="{{ tx.type_label }}"
+            counterpart="{{ tx.counterpart }}"
+            balance-after="{{ tx.balance_after }}"
         ></bb-statement-item>
         {% else %}
         <p class="no-transactions">Nenhuma transacao encontrada.</p>

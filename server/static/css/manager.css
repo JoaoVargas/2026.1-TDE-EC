@@ -252,6 +252,116 @@
     font-size: 0.85rem;
 }
 
+.management-credit-card-info {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 1rem;
+    padding: 0.6rem 0.72rem;
+    border-radius: var(--radius-sm);
+    border: 1px solid rgba(212, 174, 98, 0.25);
+    background: rgba(212, 174, 98, 0.06);
+    font-size: 0.84rem;
+}
+
+.management-credit-card-number {
+    font-family: var(--font-mono);
+    color: var(--color-text);
+}
+
+.management-credit-card-limit {
+    color: var(--color-muted);
+}
+
+.management-credit-card-status {
+    padding: 0.2rem 0.5rem;
+    border-radius: 999px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.management-credit-card-status--active {
+    background: rgba(78, 207, 181, 0.15);
+    color: #4ecfb5;
+    border: 1px solid rgba(78, 207, 181, 0.3);
+}
+
+.management-credit-card-status--blocked {
+    background: rgba(220, 80, 80, 0.15);
+    color: var(--color-danger);
+    border: 1px solid rgba(220, 80, 80, 0.3);
+}
+
+.management-modal-subtitle {
+    margin: 0 0 var(--space-4);
+    color: var(--color-muted);
+    font-size: 0.9rem;
+}
+
+.management-badge--active {
+    background: rgba(78, 207, 181, 0.15);
+    color: #4ecfb5;
+    border: 1px solid rgba(78, 207, 181, 0.3);
+}
+
+.management-badge--blocked {
+    background: rgba(220, 80, 80, 0.15);
+    color: var(--color-danger);
+    border: 1px solid rgba(220, 80, 80, 0.3);
+}
+
+.management-no-action {
+    font-size: 0.78rem;
+    color: var(--color-muted);
+    font-style: italic;
+    padding: 0.35rem 0;
+}
+
+.manager-section-subtitle {
+    margin: 0 0 var(--space-3);
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--color-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+}
+
+.manager-no-card-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: var(--space-2);
+}
+
+.manager-no-card-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+    padding: var(--space-3) var(--space-4);
+}
+
+.manager-no-card-item p { margin: 0.15rem 0 0; font-size: 0.8rem; color: var(--color-muted); }
+
+.manager-slider {
+    width: 100%;
+    margin: var(--space-3) 0 var(--space-1);
+    accent-color: var(--color-primary);
+    cursor: pointer;
+}
+
+.manager-slider-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.72rem;
+    color: var(--color-muted);
+    font-family: var(--font-mono);
+    margin-bottom: var(--space-4);
+}
+
 
 @media (max-width: 920px) {
     .manager-overview-grid,

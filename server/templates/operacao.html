@@ -18,12 +18,14 @@
     <input type="hidden" name="amount_cents" id="hidden-amount" value="0" />
     <input type="hidden" name="to_account_id" id="hidden-to-account" value="" />
     <input type="hidden" name="from_account_type" id="hidden-from-account-type" value="corrente" />
+    <input type="hidden" name="pix_key" id="hidden-pix-key" value="" />
 </form>
 
 <nav class="operacao-mode-tabs">
     <a href="/operacao?modo=depositar" class="ui-btn {% if modo == 'depositar' %}ui-btn-primary{% else %}ui-btn-secondary{% endif %}">Depositar</a>
     <a href="/operacao?modo=sacar" class="ui-btn {% if modo == 'sacar' %}ui-btn-primary{% else %}ui-btn-secondary{% endif %}">Sacar</a>
     <a href="/operacao?modo=transferir" class="ui-btn {% if modo == 'transferir' %}ui-btn-primary{% else %}ui-btn-secondary{% endif %}">Transferir</a>
+    <a href="/operacao?modo=pix" class="ui-btn {% if modo == 'pix' %}ui-btn-primary{% else %}ui-btn-secondary{% endif %}">Pix</a>
 </nav>
 
 <section class="transfer-flow ui-card" data-step="amount" data-mode="{{ modo }}">
@@ -31,11 +33,13 @@
         <h1>
             {% if modo == 'depositar' %}Depositar
             {% elif modo == 'sacar' %}Sacar
+            {% elif modo == 'pix' %}Pix
             {% else %}Transferir{% endif %}
         </h1>
         <p id="transfer-subtitle">
             {% if modo == 'depositar' %}Qual é o valor do depósito?
             {% elif modo == 'sacar' %}Qual é o valor do saque?
+            {% elif modo == 'pix' %}Qual é o valor do Pix?
             {% else %}Qual é o valor da transferência?{% endif %}
         </p>
     </header>
@@ -85,6 +89,43 @@
 
         <button type="button" class="ui-btn ui-btn-primary step-action" id="btn-amount-next">Continuar</button>
     </section>
+
+    {# ── Step: pix key (pix only) ── #}
+    {% if modo == 'pix' %}
+    <section class="transfer-step step-recipient" data-step-panel="pix-key">
+        <div class="recipient-top">
+            <button type="button" class="ui-btn ui-btn-secondary" id="btn-back-amount">Voltar</button>
+            <p>Valor: <strong id="selected-amount">R$ 0,00</strong></p>
+        </div>
+
+        <label class="ui-label" for="pix-key-input">Chave Pix</label>
+        <input
+            class="ui-input"
+            type="text"
+            id="pix-key-input"
+            placeholder="CPF, e-mail, telefone ou chave aleatória"
+            autocomplete="off"
+        />
+        <p class="pix-key-hint">Digite a chave Pix do destinatário e pressione Continuar.</p>
+
+        <button type="button" class="ui-btn ui-btn-primary step-action" id="btn-pix-next" disabled>Continuar</button>
+    </section>
+
+    <section class="transfer-step step-confirm" data-step-panel="pix-confirm">
+        <div class="recipient-top">
+            <button type="button" class="ui-btn ui-btn-secondary" id="btn-back-pix-key">Voltar</button>
+            <p>Valor: <strong id="pix-selected-amount">R$ 0,00</strong></p>
+        </div>
+
+        <div class="info-card ui-card" style="text-align: center;">
+            <p class="info-title">Confirmar Pix</p>
+            <p class="info-value" id="pix-confirm-amount">R$ 0,00</p>
+            <p class="confirm-note">Para: <strong id="pix-confirm-key"></strong></p>
+        </div>
+
+        <button type="button" class="ui-btn ui-btn-primary step-action" id="btn-pix-confirmar">Enviar Pix</button>
+    </section>
+    {% endif %}
 
     {# ── Step: recipient (transferir only) ── #}
     {% if modo == 'transferir' %}
@@ -155,26 +196,33 @@
         <h2>
             {% if modo == 'depositar' %}Depósito concluído!
             {% elif modo == 'sacar' %}Saque concluído!
+            {% elif modo == 'pix' %}Pix enviado!
             {% else %}Transferência concluída!{% endif %}
         </h2>
         <p>
             {% if modo == 'depositar' %}O valor foi creditado com sucesso.
             {% elif modo == 'sacar' %}O valor foi debitado com sucesso.
+            {% elif modo == 'pix' %}Seu Pix foi enviado com sucesso.
             {% else %}Seu dinheiro foi enviado com sucesso.{% endif %}
         </p>
 
         <div class="receipt ui-card">
             <div><span>Valor</span><strong id="receipt-amount">R$ 0,00</strong></div>
             <div><span>Conta</span><strong>
-                {% if modo == 'transferir' %}<span id="receipt-account">-</span>{% else %}Conta Corrente{% endif %}
+                {% if modo == 'transferir' %}<span id="receipt-account">-</span>
+                {% elif modo == 'pix' %}Conta Corrente
+                {% else %}Conta Corrente{% endif %}
             </strong></div>
             {% if modo == 'transferir' %}
             <div><span>Para</span><strong id="receipt-name">-</strong></div>
             <div><span>Banco</span><strong>BetaBank</strong></div>
+            {% elif modo == 'pix' %}
+            <div><span>Chave Pix</span><strong id="receipt-pix-key">-</strong></div>
             {% endif %}
             <div><span>Tipo</span><strong>
                 {% if modo == 'depositar' %}Depósito
                 {% elif modo == 'sacar' %}Saque
+                {% elif modo == 'pix' %}Pix
                 {% else %}Transferência{% endif %}
             </strong></div>
             <div><span>Data</span><strong id="receipt-date">-</strong></div>

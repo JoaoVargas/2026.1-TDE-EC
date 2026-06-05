@@ -7,6 +7,7 @@ from server.repositories.portfolio_repository import PortfolioRepository
 from server.repositories.session_repository import SessionRepository
 from server.repositories.transaction_repository import TransactionRepository
 from server.repositories.user_portfolio_repository import UserPortfolioRepository
+from server.repositories.portfolio_price_history_repository import PortfolioPriceHistoryRepository
 from server.repositories.user_repository import UserRepository
 
 __all__ = [
@@ -18,4 +19,5 @@ __all__ = [
     "ManagerPortfolioRepository",
     "UserPortfolioRepository",
     "SessionRepository",
+    "PortfolioPriceHistoryRepository",
 ]

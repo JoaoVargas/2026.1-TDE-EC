@@ -1,0 +1,223 @@
+{% extends "dashboard_base.html" %}
+
+{% block title %}Cartão de Crédito | Banco Digital{% endblock %}
+
+{% block dashboard_styles %}
+<link rel="stylesheet" href="/static/css/extrato.css" />
+<link rel="stylesheet" href="/static/css/cartao.css" />
+{% endblock %}
+
+{% block dashboard_content %}
+<header class="greeting-block">
+    <h1>Cartão de Crédito</h1>
+    <p>Gerencie seu cartão e acompanhe sua fatura.</p>
+</header>
+
+{% if flash %}
+<div class="feedback-message feedback-success" style="display:block; margin-bottom:1rem;">{{ flash }}</div>
+{% endif %}
+{% if error %}
+<div class="feedback-message feedback-error" style="display:block; margin-bottom:1rem;">{{ error }}</div>
+{% endif %}
+
+{% if card %}
+
+<div class="cartao-layout">
+
+    {# ── Visual card ── #}
+    <div class="credit-card-visual">
+        <div class="credit-card-chip"></div>
+        <p class="credit-card-number">{{ card.masked_number }}</p>
+        <div class="credit-card-bottom">
+            <div>
+                <p class="credit-card-label">Titular</p>
+                <p class="credit-card-value">{{ card.card_name }}</p>
+            </div>
+            <div>
+                <p class="credit-card-label">Vencimento</p>
+                <p class="credit-card-value">todo dia {{ card.due_day }}</p>
+            </div>
+        </div>
+        <div class="credit-card-brand">VISA</div>
+    </div>
+
+    {# ── Balance card (extrato-style) ── #}
+    <section class="statement-balance ui-card">
+        <div>
+            <p class="statement-label">Fatura atual</p>
+            <p class="statement-value">{{ card.used_amount | brl }}</p>
+        </div>
+        <div class="statement-badges">
+            <span class="statement-badge badge-in">{{ card.available_amount | brl }} disponível</span>
+            <span class="statement-badge cartao-badge-limit">Limite {{ card.limit_amount | brl }}</span>
+        </div>
+    </section>
+
+    {# ── Actions ── #}
+    <div class="cartao-actions">
+        {% if card.used_amount > 0 %}
+        <button type="button" class="ui-btn ui-btn-primary" id="btn-pagar-fatura">Pagar fatura</button>
+        {% endif %}
+        <button type="button" class="ui-btn ui-btn-accent" id="btn-simular-compra">Simular compra</button>
+        <button type="button" class="ui-btn ui-btn-secondary" id="btn-ajustar-limite">Ajustar limite</button>
+    </div>
+
+    {# ── Extract section ── #}
+    <section class="cartao-extract">
+        <nav class="statement-filters" id="cartao-filters">
+            <button type="button" class="statement-filter is-active" data-filter="all">Tudo</button>
+            <button type="button" class="statement-filter" data-filter="out">Compras</button>
+            <button type="button" class="statement-filter" data-filter="in">Pagamentos</button>
+            <button type="button" class="statement-filter" data-filter="month">Este mês</button>
+        </nav>
+
+        <div class="statement-list-header">
+            <p class="statement-list-title">Lançamentos</p>
+            <span class="statement-count-pill" id="cartao-count"></span>
+        </div>
+
+        <div class="statement-list" id="cartao-statement-list">
+            {% for tx in transactions %}
+            <bb-statement-item
+                kind="{{ tx.kind }}"
+                month="{{ tx.month }}"
+                title="{{ tx.title }}"
+                date="{{ tx.date_str }}"
+                amount="{{ tx.amount_str }}"
+            ></bb-statement-item>
+            {% else %}
+            <p class="no-transactions">Nenhum lançamento encontrado.</p>
+            {% endfor %}
+        </div>
+    </section>
+
+</div>
+
+{# ── Modal: Pagar fatura ── #}
+{% if card.used_amount > 0 %}
+<div class="management-modal-backdrop" id="modal-pagar" hidden>
+    <div class="management-modal ui-card" role="dialog" aria-modal="true" aria-labelledby="modal-pagar-title">
+        <header class="management-modal-header">
+            <h2 id="modal-pagar-title">Pagar fatura</h2>
+            <button type="button" class="ui-btn ui-btn-secondary management-modal-close" data-modal-close>Fechar</button>
+        </header>
+
+        <div class="cartao-modal-info">
+            <p>Fatura atual: <strong>{{ card.used_amount | brl }}</strong></p>
+            {% if checking_account %}
+            <p>Saldo conta corrente: <strong>{{ checking_account.balance | brl }}</strong></p>
+            {% endif %}
+        </div>
+
+        <form method="post" action="/cartao/pagar" id="form-pagar">
+            <input type="hidden" name="amount_cents" id="pagar-amount-cents" value="0" />
+
+            <label class="ui-label" for="pagar-amount-display">Valor a pagar</label>
+            <div class="cartao-amount-row">
+                <input class="ui-input" id="pagar-amount-display" type="text" placeholder="R$ 0,00" autocomplete="off" />
+                <button type="button" class="ui-btn ui-btn-secondary" id="btn-pagar-total"
+                    data-full="{{ (card.used_amount * 100) | int }}">Pagar tudo</button>
+            </div>
+
+            <div class="management-modal-actions">
+                <button type="button" class="ui-btn ui-btn-secondary" data-modal-close>Cancelar</button>
+                <button type="submit" class="ui-btn ui-btn-primary">Confirmar pagamento</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endif %}
+
+{# ── Modal: Simular compra ── #}
+<div class="management-modal-backdrop" id="modal-compra" hidden>
+    <div class="management-modal ui-card" role="dialog" aria-modal="true" aria-labelledby="modal-compra-title">
+        <header class="management-modal-header">
+            <h2 id="modal-compra-title">Simular compra</h2>
+            <button type="button" class="ui-btn ui-btn-secondary management-modal-close" data-modal-close>Fechar</button>
+        </header>
+
+        <div class="cartao-modal-info">
+            <p>Limite disponível: <strong>{{ card.available_amount | brl }}</strong></p>
+        </div>
+
+        <form method="post" action="/cartao/usar" id="form-compra">
+            <input type="hidden" name="amount_cents" id="compra-amount-cents" value="0" />
+
+            <label class="ui-label" for="compra-desc">Descrição</label>
+            <input class="ui-input" id="compra-desc" name="description" type="text"
+                maxlength="100" placeholder="Ex: Supermercado" value="Compra" />
+
+            <label class="ui-label" for="compra-amount-display">Valor</label>
+            <input class="ui-input" id="compra-amount-display" type="text" placeholder="R$ 0,00" autocomplete="off" />
+
+            <div class="management-modal-actions">
+                <button type="button" class="ui-btn ui-btn-secondary" data-modal-close>Cancelar</button>
+                <button type="submit" class="ui-btn ui-btn-accent">Confirmar compra</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{# ── Modal: Ajustar limite ── #}
+<div class="management-modal-backdrop" id="modal-limite" hidden>
+    <div class="management-modal ui-card" role="dialog" aria-modal="true" aria-labelledby="modal-limite-title">
+        <header class="management-modal-header">
+            <h2 id="modal-limite-title">Ajustar limite</h2>
+            <button type="button" class="ui-btn ui-btn-secondary management-modal-close" data-modal-close>Fechar</button>
+        </header>
+
+        <div class="cartao-modal-info">
+            <p>Limite atual: <strong>{{ card.limit_amount | brl }}</strong></p>
+            {% if card.used_amount > 0 %}
+            <p>Mínimo permitido: <strong>{{ card.used_amount | brl }}</strong> (fatura em aberto)</p>
+            {% endif %}
+        </div>
+
+        <form method="post" action="/cartao/limite" id="form-limite">
+            <input type="hidden" name="new_limit_cents" id="limite-hidden" value="{{ (card.limit_amount * 100) | int }}" />
+
+            <label class="ui-label" for="limite-slider">
+                Novo limite: <strong id="limite-display">{{ card.limit_amount | brl }}</strong>
+            </label>
+            <input
+                class="cartao-slider"
+                id="limite-slider"
+                type="range"
+                min="100"
+                max="5000"
+                step="100"
+                value="{{ card.limit_amount | int }}"
+                data-used="{{ card.used_amount | int }}"
+            />
+            <div class="cartao-slider-labels">
+                <span>R$ 100</span>
+                <span>R$ 5.000</span>
+            </div>
+
+            <div class="management-modal-actions">
+                <button type="button" class="ui-btn ui-btn-secondary" data-modal-close>Cancelar</button>
+                <button type="submit" class="ui-btn ui-btn-primary">Confirmar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% else %}
+
+{# ── Empty / request card state ── #}
+<div class="cartao-empty ui-card">
+    <p>Você ainda não possui um cartão de crédito.</p>
+    <p>Solicite agora para começar a usar.</p>
+    <form method="post" action="/cartao/solicitar">
+        <button type="submit" class="ui-btn ui-btn-primary">Solicitar cartão</button>
+    </form>
+</div>
+
+{% endif %}
+
+{% endblock %}
+
+{% block dashboard_scripts %}
+<script type="module" src="/static/js/components/ui-cards.js"></script>
+<script type="module" src="/static/js/pages/cartao.js"></script>
+{% endblock %}

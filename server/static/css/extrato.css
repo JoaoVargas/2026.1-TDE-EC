@@ -288,7 +288,7 @@ bb-date-range-picker {
     background: #17334b;
     padding: 0.9rem 1rem;
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     gap: 0.8rem;
 }
 
@@ -304,6 +304,7 @@ bb-date-range-picker {
     place-items: center;
     font-weight: 700;
     flex-shrink: 0;
+    margin-top: 0.15rem;
 }
 
 .statement-icon.in {
@@ -321,10 +322,49 @@ bb-date-range-picker {
     min-width: 0;
 }
 
+.statement-title-row {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    flex-wrap: wrap;
+}
+
 .statement-name {
     margin: 0;
     font-size: 0.86rem;
     font-weight: 600;
+}
+
+.statement-type-badge {
+    padding: 0.15rem 0.45rem;
+    border-radius: 999px;
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    flex-shrink: 0;
+}
+
+.statement-type-badge.type-in {
+    color: var(--color-primary);
+    background: rgba(78, 207, 181, 0.12);
+    border: 1px solid rgba(78, 207, 181, 0.28);
+}
+
+.statement-type-badge.type-out {
+    color: var(--color-danger);
+    background: rgba(240, 115, 115, 0.12);
+    border: 1px solid rgba(240, 115, 115, 0.28);
+}
+
+.statement-counterpart {
+    margin: 0.22rem 0 0;
+    font-size: 0.71rem;
+    color: var(--color-muted);
+    font-family: var(--font-mono);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .statement-date {
@@ -332,6 +372,14 @@ bb-date-range-picker {
     color: var(--color-muted);
     font-size: 0.72rem;
     font-family: var(--font-mono);
+}
+
+.statement-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.15rem;
+    flex-shrink: 0;
 }
 
 .statement-amount {
@@ -349,6 +397,14 @@ bb-date-range-picker {
     color: var(--color-danger);
 }
 
+.statement-balance-after {
+    margin: 0;
+    font-size: 0.68rem;
+    font-family: var(--font-mono);
+    color: var(--color-muted);
+    white-space: nowrap;
+}
+
 @media (max-width: 640px) {
     .statement-balance {
         flex-direction: column;
@@ -361,10 +417,6 @@ bb-date-range-picker {
 
     .statement-item {
         flex-wrap: wrap;
-    }
-
-    .statement-amount {
-        margin-left: 42px;
     }
 
     .date-range-picker {

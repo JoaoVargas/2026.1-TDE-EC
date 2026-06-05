@@ -1,0 +1,163 @@
+.cartao-layout {
+    display: grid;
+    gap: var(--space-4);
+    width: min(760px, 100%);
+    margin: 0 auto;
+}
+
+/* ── Visual card ── */
+.credit-card-visual {
+    background: linear-gradient(135deg, #1e3a5f 0%, #0f2340 50%, #1a3050 100%);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-5);
+    position: relative;
+    min-height: 180px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    box-shadow: var(--shadow-strong);
+    overflow: hidden;
+}
+
+.credit-card-visual::before {
+    content: "";
+    position: absolute;
+    top: -40px; right: -40px;
+    width: 200px; height: 200px;
+    border-radius: 50%;
+    background: rgba(78, 207, 181, 0.07);
+}
+
+.credit-card-visual::after {
+    content: "";
+    position: absolute;
+    bottom: -60px; left: -20px;
+    width: 160px; height: 160px;
+    border-radius: 50%;
+    background: rgba(212, 174, 98, 0.06);
+}
+
+.credit-card-chip {
+    width: 40px; height: 30px;
+    background: linear-gradient(135deg, var(--color-accent) 0%, #b8932a 100%);
+    border-radius: 6px;
+    position: relative; z-index: 1;
+}
+
+.credit-card-number {
+    font-family: var(--font-mono);
+    font-size: 1.15rem;
+    letter-spacing: 0.12em;
+    color: var(--color-text);
+    margin: 0;
+    position: relative; z-index: 1;
+}
+
+.credit-card-bottom {
+    display: flex;
+    gap: var(--space-6);
+    position: relative; z-index: 1;
+}
+
+.credit-card-label {
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--color-muted);
+    margin: 0 0 0.2rem;
+}
+
+.credit-card-value {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--color-text);
+    margin: 0;
+    text-transform: uppercase;
+}
+
+.credit-card-brand {
+    position: absolute;
+    bottom: var(--space-5); right: var(--space-5);
+    font-size: 1rem;
+    font-weight: 700;
+    font-style: italic;
+    color: rgba(255, 255, 255, 0.7);
+    letter-spacing: 0.05em;
+    z-index: 1;
+}
+
+/* ── Balance card badge override ── */
+.cartao-badge-limit {
+    color: var(--color-muted);
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.12);
+}
+
+/* ── Actions ── */
+.cartao-actions {
+    display: flex;
+    gap: var(--space-3);
+    flex-wrap: wrap;
+}
+
+/* ── Extract section ── */
+.cartao-extract {
+    display: grid;
+    gap: var(--space-3);
+}
+
+/* ── Slider ── */
+.cartao-slider {
+    width: 100%;
+    margin: var(--space-3) 0 var(--space-1);
+    accent-color: var(--color-primary);
+    cursor: pointer;
+}
+
+.cartao-slider-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.72rem;
+    color: var(--color-muted);
+    font-family: var(--font-mono);
+    margin-bottom: var(--space-4);
+}
+
+/* ── Modal helpers ── */
+.cartao-modal-info {
+    background: var(--color-surface-700);
+    border-radius: var(--radius-md);
+    padding: var(--space-3) var(--space-4);
+    margin-bottom: var(--space-4);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    font-size: 0.9rem;
+}
+
+.cartao-modal-info p { margin: 0; color: var(--color-muted); }
+.cartao-modal-info strong { color: var(--color-text); }
+
+.cartao-amount-row {
+    display: flex;
+    gap: var(--space-2);
+    align-items: center;
+    margin-bottom: var(--space-4);
+}
+
+.cartao-amount-row .ui-input { flex: 1; }
+
+/* ── Empty state ── */
+.cartao-empty {
+    padding: var(--space-6);
+    text-align: center;
+    color: var(--color-muted);
+    max-width: 480px;
+    margin: var(--space-8) auto;
+    display: grid;
+    gap: var(--space-3);
+    justify-items: center;
+}
+
+.cartao-empty p { margin: 0; }

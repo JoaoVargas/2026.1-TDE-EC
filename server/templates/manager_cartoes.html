@@ -1,0 +1,194 @@
+{% extends "dashboard_base.html" %}
+
+{% block title %}Gestão de Cartões | Banco Digital{% endblock %}
+
+{% block dashboard_styles %}
+<link rel="stylesheet" href="/static/css/manager.css" />
+{% endblock %}
+
+{% block dashboard_content %}
+<section class="page-panel ui-card manager-management-panel">
+    <header class="panel-header">
+        <h1>Cartões de crédito</h1>
+        <p>Emita cartões para clientes e gerencie os existentes.</p>
+    </header>
+
+    {% if feedback %}
+    <p class="manager-feedback {% if feedback_is_error %}is-error{% else %}is-success{% endif %}" role="status">
+        {{ feedback }}
+    </p>
+    {% endif %}
+
+    {# ── Cards list ── #}
+    {% if cards %}
+    <section class="management-users-grid">
+        {% for c in cards %}
+        <article class="management-user-card ui-card">
+            <header class="management-user-header">
+                <div class="management-user-identity">
+                    <h2 class="management-user-name">{{ c.user_name }}</h2>
+                    <p>{{ c.user_email }}</p>
+                </div>
+                <span class="management-badge management-badge--{{ c.status }}">
+                    {{ 'Ativo' if c.status == 'active' else 'Bloqueado' }}
+                </span>
+            </header>
+
+            <div class="management-user-meta">
+                <span><strong>Nº: </strong>{{ c.masked_number }}</span>
+                <span><strong>Limite: </strong>R$ {{ "%.2f"|format(c.limit_amount) | replace('.', ',') }}</span>
+                <span><strong>Fatura: </strong>R$ {{ "%.2f"|format(c.used_amount) | replace('.', ',') }}</span>
+                <span><strong>Disponível: </strong>R$ {{ "%.2f"|format(c.available_amount) | replace('.', ',') }}</span>
+            </div>
+
+            <div class="management-user-actions">
+                <button
+                    type="button"
+                    class="management-name-edit-trigger management-limit-card-trigger"
+                    data-card-id="{{ c.id }}"
+                    data-user-name="{{ c.user_name }}"
+                    data-limit-cents="{{ c.limit_cents }}"
+                    data-used-cents="{{ c.used_cents }}"
+                >
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M3 17.25V21h3.75l11-11-3.75-3.75-11 11zM20.71 7.04a1.003 1.003 0 000-1.42l-2.34-2.34a1.003 1.003 0 00-1.42 0l-1.83 1.83 3.75 3.75 1.84-1.82z"/>
+                    </svg>
+                    <span>Ajustar limite</span>
+                </button>
+                {% if c.can_cancel %}
+                <button
+                    type="button"
+                    class="management-name-edit-trigger management-cancel-card-trigger"
+                    data-card-id="{{ c.id }}"
+                    data-user-name="{{ c.user_name }}"
+                >
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M12 2C6.47 2 2 6.47 2 12s4.47 10 10 10 10-4.47 10-10S17.53 2 12 2zm5 13.59L15.59 17 12 13.41 8.41 17 7 15.59 10.59 12 7 8.41 8.41 7 12 10.59 15.59 7 17 8.41 13.41 12 17 15.59z"/>
+                    </svg>
+                    <span>Cancelar cartão</span>
+                </button>
+                {% else %}
+                <span class="management-no-action">Fatura em aberto — não cancelável</span>
+                {% endif %}
+            </div>
+        </article>
+        {% endfor %}
+    </section>
+    {% else %}
+    <article class="management-empty-card ui-card">
+        <h2>Nenhum cartão emitido</h2>
+        <p>Ainda não existe nenhum cartão de crédito ativo no sistema.</p>
+    </article>
+    {% endif %}
+
+    {# ── Clients without card ── #}
+    {% if clients_without_card %}
+    <section class="manager-no-card-section">
+        <h2 class="manager-section-subtitle">Clientes sem cartão</h2>
+        <ul class="manager-no-card-list">
+            {% for cl in clients_without_card %}
+            <li class="manager-no-card-item ui-card">
+                <div>
+                    <strong>{{ cl.name }}</strong>
+                    <p>{{ cl.email }}</p>
+                </div>
+                <button
+                    type="button"
+                    class="ui-btn ui-btn-primary management-create-card-trigger"
+                    data-user-id="{{ cl.id }}"
+                    data-user-name="{{ cl.name }}"
+                >Emitir cartão</button>
+            </li>
+            {% endfor %}
+        </ul>
+    </section>
+    {% endif %}
+
+    {# ── Modal: cancel confirmation ── #}
+    <div class="management-modal-backdrop" id="cancel-card-modal" hidden>
+        <div class="management-modal ui-card" role="dialog" aria-modal="true" aria-labelledby="cancel-card-title">
+            <header class="management-modal-header">
+                <h2 id="cancel-card-title">Cancelar cartão</h2>
+                <button type="button" class="ui-btn ui-btn-secondary management-modal-close" data-modal-close>Fechar</button>
+            </header>
+            <p id="cancel-card-desc" class="management-modal-subtitle"></p>
+            <p style="font-size:0.85rem; color:var(--color-muted); margin-bottom:var(--space-4);">
+                Esta ação é irreversível. O cliente poderá solicitar um novo cartão depois.
+            </p>
+            <form id="cancel-card-form" method="post" action="">
+                <div class="management-modal-actions">
+                    <button type="button" class="ui-btn ui-btn-secondary" data-modal-close>Voltar</button>
+                    <button type="submit" class="ui-btn ui-btn-danger">Confirmar cancelamento</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {# ── Modal: adjust limit ── #}
+    <div class="management-modal-backdrop" id="limit-card-modal" hidden>
+        <div class="management-modal ui-card" role="dialog" aria-modal="true" aria-labelledby="limit-card-title">
+            <header class="management-modal-header">
+                <h2 id="limit-card-title">Ajustar limite</h2>
+                <button type="button" class="ui-btn ui-btn-secondary management-modal-close" data-modal-close>Fechar</button>
+            </header>
+            <p id="limit-card-subtitle" class="management-modal-subtitle"></p>
+
+            <form id="limit-card-form" method="post" action="">
+                <input type="hidden" name="new_limit_cents" id="limit-card-cents" value="" />
+
+                <label class="ui-label" for="limit-card-slider">
+                    Novo limite: <strong id="limit-card-display">R$ 0,00</strong>
+                </label>
+                <input
+                    class="manager-slider"
+                    id="limit-card-slider"
+                    type="range"
+                    min="100000"
+                    max="10000000"
+                    step="100000"
+                    value="500000"
+                />
+                <div class="manager-slider-labels">
+                    <span>R$ 1.000</span>
+                    <span>R$ 100.000</span>
+                </div>
+
+                <div class="management-modal-actions">
+                    <button type="button" class="ui-btn ui-btn-secondary" data-modal-close>Cancelar</button>
+                    <button type="submit" class="ui-btn ui-btn-primary">Salvar limite</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {# ── Modal: create card ── #}
+    <div class="management-modal-backdrop" id="create-card-modal" hidden>
+        <div class="management-modal ui-card" role="dialog" aria-modal="true" aria-labelledby="create-card-title">
+            <header class="management-modal-header">
+                <h2 id="create-card-title">Emitir cartão</h2>
+                <button type="button" class="ui-btn ui-btn-secondary management-modal-close" data-modal-close>Fechar</button>
+            </header>
+            <p id="create-card-subtitle" class="management-modal-subtitle"></p>
+
+            <form id="create-card-form" method="post" action="/manager/cartoes/criar">
+                <input type="hidden" name="user_id" id="create-card-user-id" value="" />
+                <input type="hidden" name="limit_cents" id="create-card-limit-cents" value="500000" />
+
+                <label class="ui-label" for="create-card-limit-display">Limite de crédito</label>
+                <input class="ui-input" id="create-card-limit-display" type="text"
+                    placeholder="R$ 5.000,00" autocomplete="off" />
+
+                <div class="management-modal-actions">
+                    <button type="button" class="ui-btn ui-btn-secondary" data-modal-close>Cancelar</button>
+                    <button type="submit" class="ui-btn ui-btn-primary">Emitir cartão</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+</section>
+{% endblock %}
+
+{% block dashboard_scripts %}
+<script type="module" src="/static/js/pages/manager_cartoes.js"></script>
+{% endblock %}

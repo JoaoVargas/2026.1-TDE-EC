@@ -9,12 +9,14 @@ const state = {
     accountType: "corrente",   // only matters for transferir
     selectedAccountId: null,
     selectedName: null,
+    pixKey: "",
 };
 
 const SUBTITLES = {
-    depositar:  { amount: "Qual é o valor do depósito?",      confirm:   "Confirme o valor do depósito",    success: "Comprovante da operação" },
-    sacar:      { amount: "Qual é o valor do saque?",          confirm:   "Confirme o valor do saque",       success: "Comprovante da operação" },
-    transferir: { amount: "Qual é o valor da transferência?",  recipient: "Para quem você quer transferir?", success: "Comprovante da operação" },
+    depositar:  { amount: "Qual é o valor do depósito?",      confirm:      "Confirme o valor do depósito",    success: "Comprovante da operação" },
+    sacar:      { amount: "Qual é o valor do saque?",          confirm:      "Confirme o valor do saque",       success: "Comprovante da operação" },
+    transferir: { amount: "Qual é o valor da transferência?",  recipient:    "Para quem você quer transferir?", success: "Comprovante da operação" },
+    pix:        { amount: "Qual é o valor do Pix?",            "pix-key":    "Informe a chave Pix",             "pix-confirm": "Confirme o Pix",  success: "Comprovante da operação" },
 };
 
 function el(id) { return document.getElementById(id); }
@@ -48,10 +50,11 @@ function deleteDigit() {
 }
 
 function writeReceipt() {
-    if (el("receipt-amount")) el("receipt-amount").textContent = formatAmount(state.amountDigits);
-    if (el("receipt-date"))   el("receipt-date").textContent   = new Date().toLocaleString("pt-BR");
+    if (el("receipt-amount"))  el("receipt-amount").textContent  = formatAmount(state.amountDigits);
+    if (el("receipt-date"))    el("receipt-date").textContent    = new Date().toLocaleString("pt-BR");
     if (el("receipt-account")) el("receipt-account").textContent = getAccountLabel(state.accountType);
-    if (el("receipt-name"))  el("receipt-name").textContent    = state.selectedName || "-";
+    if (el("receipt-name"))    el("receipt-name").textContent    = state.selectedName || "-";
+    if (el("receipt-pix-key")) el("receipt-pix-key").textContent = state.pixKey || "-";
 }
 
 // ── Deposit / Withdrawal ───────────────────────────────────────────────────────
@@ -275,6 +278,97 @@ function setupTransferFlow() {
     });
 }
 
+// ── Pix ───────────────────────────────────────────────────────────────────────
+
+function setupPixFlow() {
+    function updatePixAmountDisplays() {
+        const value = formatAmount(state.amountDigits);
+        if (el("selected-amount"))    el("selected-amount").textContent    = value;
+        if (el("pix-selected-amount")) el("pix-selected-amount").textContent = value;
+        if (el("pix-confirm-amount")) el("pix-confirm-amount").textContent  = value;
+    }
+
+    const keyInput = el("pix-key-input");
+    const btnNext  = el("btn-pix-next");
+
+    keyInput?.addEventListener("input", () => {
+        if (btnNext) btnNext.disabled = !keyInput.value.trim();
+    });
+
+    el("btn-amount-next")?.addEventListener("click", () => {
+        if (!state.amountDigits || Number(state.amountDigits) === 0) return;
+        updateAmountDisplay();
+        setStep("pix-key");
+    });
+
+    el("btn-back-amount")?.addEventListener("click", () => setStep("amount"));
+
+    btnNext?.addEventListener("click", () => {
+        state.pixKey = keyInput?.value.trim() || "";
+        if (!state.pixKey) return;
+        updatePixAmountDisplays();
+        if (el("pix-confirm-key")) el("pix-confirm-key").textContent = state.pixKey;
+        setStep("pix-confirm");
+    });
+
+    el("btn-back-pix-key")?.addEventListener("click", () => setStep("pix-key"));
+
+    el("btn-pix-confirmar")?.addEventListener("click", async () => {
+        const form         = el("operacao-form");
+        const hiddenAmount = el("hidden-amount");
+        const hiddenPixKey = el("hidden-pix-key");
+        if (!form || !hiddenAmount) return;
+
+        hiddenAmount.value = state.amountDigits || "0";
+        if (hiddenPixKey) hiddenPixKey.value = state.pixKey;
+
+        const btn = el("btn-pix-confirmar");
+        if (btn) btn.disabled = true;
+
+        const errorMap = {
+            saldo_insuficiente: "Saldo insuficiente para este Pix.",
+            valor_invalido:     "Valor inválido.",
+            chave_invalida:     "Chave Pix não encontrada.",
+            sem_conta:          "Conta corrente não encontrada.",
+            chave_propria:      "Você não pode enviar Pix para sua própria chave.",
+        };
+
+        try {
+            const response = await fetch("/operacao", { method: "POST", body: new FormData(form) });
+            const finalUrl = new URL(response.url);
+            if (finalUrl.pathname === "/home") {
+                writeReceipt();
+                setStep("success");
+            } else {
+                const msg = errorMap[finalUrl.searchParams.get("error")] || "Erro ao enviar Pix.";
+                let errorDiv = el("inline-pix-error");
+                if (!errorDiv) {
+                    errorDiv = document.createElement("div");
+                    errorDiv.id = "inline-pix-error";
+                    errorDiv.className = "feedback-message feedback-error";
+                    errorDiv.style.marginBottom = "1rem";
+                    flow?.insertBefore(errorDiv, flow.querySelector(".transfer-header")?.nextSibling ?? null);
+                }
+                errorDiv.textContent = msg;
+                errorDiv.style.display = "block";
+                setTimeout(() => { errorDiv.style.display = "none"; }, 3500);
+                setStep("pix-confirm");
+            }
+        } catch {
+            alert("Erro de conexão. Tente novamente.");
+        } finally {
+            if (btn) btn.disabled = false;
+        }
+    });
+
+    el("btn-finish")?.addEventListener("click", () => { window.location.href = "/home"; });
+
+    wireNumpadKeyboard({ onDigit: appendDigit, onDelete: deleteDigit, onEnter: () => {
+        if (state.step === "amount") el("btn-amount-next")?.click();
+        else if (state.step === "success") window.location.href = "/home";
+    }});
+}
+
 // ── Bootstrap ─────────────────────────────────────────────────────────────────
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -287,6 +381,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (MODE === "transferir") {
         setupTransferFlow();
+    } else if (MODE === "pix") {
+        setupPixFlow();
     } else {
         setupSimpleFlow();
     }

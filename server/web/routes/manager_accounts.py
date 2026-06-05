@@ -194,3 +194,5 @@ async def manager_update_endereco(
     )
     db.commit()
     return RedirectResponse("/manager/accounts?feedback=endereco_atualizado", status_code=302)
+
+

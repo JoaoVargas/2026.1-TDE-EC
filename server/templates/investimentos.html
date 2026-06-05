@@ -13,8 +13,14 @@
             <p class="investment-stat-label">Total em investimentos</p>
             <p class="investment-stat-value"><span class="currency">R$</span>{{ total_str }}</p>
         </article>
-        <bb-investment-stat label="Renda fixa" value="{{ fixo_str }}" subtitle="na carteira"></bb-investment-stat>
-        <bb-investment-stat label="Renda variavel" value="{{ variavel_str }}" subtitle="na carteira"></bb-investment-stat>
+        <article class="investment-stat ui-card">
+            <p class="investment-stat-label">Renda fixa</p>
+            <p class="investment-stat-value"><span class="currency">R$</span>{{ fixo_str }}</p>
+        </article>
+        <article class="investment-stat ui-card">
+            <p class="investment-stat-label">Renda variavel</p>
+            <p class="investment-stat-value"><span class="currency">R$</span>{{ variavel_str }}</p>
+        </article>
     </div>
 
     {% if flash %}
@@ -26,6 +32,7 @@
 
     <nav class="investment-tabs">
         <a class="investment-tab is-active" href="/investimentos">Minha carteira</a>
+        <a class="investment-tab" href="/investimentos/resumo">Resumo dos investimentos</a>
         <a class="investment-tab" href="/investimentos/distribuicao">Analise de distribuicao</a>
     </nav>
 
@@ -36,7 +43,7 @@
         </header>
         <div class="inv-asset-grid">
             {% for h in holdings %}
-            <article class="inv-asset-card ui-card">
+            <article class="inv-asset-card ui-card" data-history="{{ h.price_history_json | e }}">
                 <div class="inv-asset-header">
                     <div>
                         <h3 class="inv-asset-name">{{ h.name }}</h3>
@@ -44,6 +51,7 @@
                     </div>
                     <span class="inv-asset-value">R$ {{ h.value_str }}</span>
                 </div>
+                <div class="inv-sparkline" aria-hidden="true"></div>
                 <p class="inv-asset-detail">{{ h.amount }} cotas · R$ {{ "%.2f"|format(h.price)|replace('.', ',') }} cada</p>
                 <button
                     type="button"
@@ -76,7 +84,7 @@
         </header>
         <div class="inv-asset-grid">
             {% for p in available %}
-            <article class="inv-asset-card ui-card">
+            <article class="inv-asset-card ui-card" data-history="{{ p.price_history_json | e }}">
                 <div class="inv-asset-header">
                     <div>
                         <h3 class="inv-asset-name">{{ p.stock_name }}</h3>
@@ -84,6 +92,7 @@
                     </div>
                     <span class="inv-asset-value">R$ {{ p.price_str }}<span class="inv-per-cota">/cota</span></span>
                 </div>
+                <div class="inv-sparkline" aria-hidden="true"></div>
                 {% if p.has_position %}
                 <p class="inv-asset-detail inv-has-position">Você possui {{ p.amount }} cotas nesta carteira</p>
                 {% endif %}

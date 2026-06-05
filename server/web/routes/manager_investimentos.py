@@ -11,6 +11,7 @@ from server.models.account import AccountType
 from server.models.transaction import TransactionType
 from server.repositories.account_repository import AccountRepository
 from server.repositories.manager_portfolio_repository import ManagerPortfolioRepository
+from server.repositories.portfolio_price_history_repository import PortfolioPriceHistoryRepository
 from server.repositories.portfolio_repository import PortfolioRepository
 from server.repositories.transaction_repository import TransactionRepository
 from server.repositories.user_portfolio_repository import UserPortfolioRepository
@@ -123,6 +124,7 @@ async def manager_criar_carteira(
         db, name=name, stock_code=stock_code, stock_name=stock_name, stock_price=price
     )
     ManagerPortfolioRepository.create(db, portfolio_id=portfolio.id, manager_id=manager.id)
+    PortfolioPriceHistoryRepository.record(db, portfolio_id=portfolio.id, price=price)
     db.commit()
     return RedirectResponse("/manager/investimentos?feedback=carteira_criada", status_code=302)
 
@@ -150,6 +152,7 @@ async def manager_atualizar_cotacao(
         return RedirectResponse("/manager/investimentos?feedback=campos_invalidos", status_code=302)
 
     PortfolioRepository.update_price(db, portfolio_id=portfolio_id, stock_price=new_price)
+    PortfolioPriceHistoryRepository.record(db, portfolio_id=portfolio_id, price=new_price)
     db.commit()
     return RedirectResponse("/manager/investimentos?feedback=cotacao_atualizada", status_code=302)
 

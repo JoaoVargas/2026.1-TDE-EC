@@ -8,6 +8,7 @@ from server.db.connection import get_db
 from server.models.account import AccountType
 from server.models.transaction import TransactionType
 from server.repositories.account_repository import AccountRepository
+from server.repositories.portfolio_price_history_repository import PortfolioPriceHistoryRepository
 from server.repositories.portfolio_repository import PortfolioRepository
 from server.repositories.transaction_repository import TransactionRepository
 from server.repositories.user_portfolio_repository import UserPortfolioRepository
@@ -76,6 +77,43 @@ def _build_chart_json(total: Decimal, holdings: list[dict], class_totals: dict[s
     return json.dumps({"classes": classes, "assets": assets, "total": float(total)})
 
 
+def _price_history_json(db, portfolio_id: int) -> str:
+    records = PortfolioPriceHistoryRepository.get_by_portfolio_id(db, portfolio_id)
+    return json.dumps([float(r.price) for r in records])
+
+
+def _build_resumo_json(db, holdings: list[dict]) -> str:
+    if not holdings:
+        return json.dumps({"labels": [], "portfolios": [], "total": []})
+
+    portfolio_lines = []
+    shared_labels: list[str] | None = None
+
+    for h in holdings:
+        records = PortfolioPriceHistoryRepository.get_by_portfolio_id(db, h["id"])
+        if not records:
+            continue
+        prices = [float(r.price) for r in records]
+        values = [p * float(h["amount"]) for p in prices]
+        dates = [r.recorded_at.strftime("%d/%m") for r in records]
+        if shared_labels is None:
+            shared_labels = dates
+        portfolio_lines.append({
+            "name": f"{h['name']} ({h['stock_code']})",
+            "class": h["class"],
+            "color": _CLASS_COLORS.get(h["class"], _DEFAULT_COLOR),
+            "values": values,
+        })
+
+    if not portfolio_lines:
+        return json.dumps({"labels": [], "portfolios": [], "total": []})
+
+    n = len(shared_labels)
+    total = [sum(p["values"][i] if i < len(p["values"]) else 0 for p in portfolio_lines) for i in range(n)]
+
+    return json.dumps({"labels": shared_labels, "portfolios": portfolio_lines, "total": total})
+
+
 _ERROR_MAP = {
     "saldo_insuficiente": "Saldo insuficiente para esta operação.",
     "valor_invalido": "Valor inválido.",
@@ -102,6 +140,9 @@ def investimentos_page(request: Request, db=Depends(get_db)):
     fixo = class_totals.get("Renda fixa", Decimal("0"))
     variavel = class_totals.get("Renda variavel", Decimal("0"))
 
+    for h in holdings:
+        h["price_history_json"] = _price_history_json(db, h["id"])
+
     # All available portfolios with user's current position
     user_positions = {up.portfolio_id: up for up in UserPortfolioRepository.get_by_user_id(db, user.id)}
     all_portfolios = PortfolioRepository.list_all(db)
@@ -115,6 +156,7 @@ def investimentos_page(request: Request, db=Depends(get_db)):
             "price_cents": int(p.stock_price * 100),
             "has_position": p.id in user_positions,
             "amount": user_positions[p.id].stock_amount if p.id in user_positions else Decimal("0"),
+            "price_history_json": _price_history_json(db, p.id),
         }
         for p in all_portfolios
     ]
@@ -248,6 +290,34 @@ async def investimentos_retirar(
 
     db.commit()
     return RedirectResponse("/investimentos?flash=resgate_realizado", status_code=302)
+
+
+@router.get("/investimentos/resumo")
+def investimentos_resumo_page(request: Request, db=Depends(get_db)):
+    result = require_user(request, db)
+    if isinstance(result, RedirectResponse):
+        return result
+    user = result
+
+    total, holdings, class_totals = _build_holdings(db, user.id)
+    fixo = class_totals.get("Renda fixa", Decimal("0"))
+    variavel = class_totals.get("Renda variavel", Decimal("0"))
+    chart_json = _build_resumo_json(db, holdings)
+
+    return templates.TemplateResponse(
+        request=request,
+        name="investimentos_resumo.html",
+        context={
+            "request": request,
+            "active_page": "investimentos",
+            "dashboard_label": "Resumo dos investimentos",
+            "user": user,
+            "total_str": _fmt(total),
+            "fixo_str": _fmt(fixo),
+            "variavel_str": _fmt(variavel),
+            "chart_json": chart_json,
+        },
+    )
 
 
 @router.get("/investimentos/distribuicao")

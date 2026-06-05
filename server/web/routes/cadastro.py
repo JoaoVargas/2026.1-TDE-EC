@@ -8,11 +8,13 @@ from fastapi.responses import RedirectResponse
 from server.core.security import hash_password
 from server.core.session import get_session_user_id
 from server.db.connection import get_db
+from server.models.account import AccountType
+from server.models.pix_key import PixKeyType
+from server.repositories.account_repository import AccountRepository
 from server.repositories.address_repository import AddressRepository
+from server.repositories.pix_key_repository import PixKeyRepository
 from server.repositories.user_repository import UserRepository
 from server.web.routes._shared import templates
-from server.repositories.account_repository import AccountRepository
-from server.models.account import AccountType
 
 router = APIRouter(tags=["pages"])
 
@@ -116,28 +118,13 @@ async def cadastro_submit(
             password_hash=hash_password(senha),
             birthday=date.fromisoformat(nascimento),
             address_id=address.id,
+            create_default_account=False,
         )
-        AccountRepository.create(db, user_id=user.id, type=AccountType.CHECKING)
-        AccountRepository.create(db, user_id=user.id, type=AccountType.SAVINGS)
+        checking = AccountRepository.create(db, user_id=user.id, type=AccountType.CHECKING)
+        PixKeyRepository.create(db, user_id=user.id, account_id=checking.id, key_type=PixKeyType.CPF, key_value=cpf_digits)
+        PixKeyRepository.create(db, user_id=user.id, account_id=checking.id, key_type=PixKeyType.EMAIL, key_value=email_norm)
         db.commit()
 
-    except mysql.connector.errors.IntegrityError:  # ← mais específico PRIMEIRO
-        db.rollback()
-        return templates.TemplateResponse(
-            request=request,
-            name="cadastro.html",
-            context={"request": request, "error": "CPF ou e-mail já cadastrado.", "form": form_ctx},
-            status_code=409,
-        )
-
-    except Exception as e:  # ← genérico por último
-        db.rollback()
-        return templates.TemplateResponse(
-            request=request,
-            name="cadastro.html",
-            context={"request": request, "error": "Erro interno. Tente novamente.", "form": form_ctx},
-            status_code=500,
-        )
     except mysql.connector.errors.IntegrityError:
         db.rollback()
         return templates.TemplateResponse(
@@ -145,6 +132,15 @@ async def cadastro_submit(
             name="cadastro.html",
             context={"request": request, "error": "CPF ou e-mail já cadastrado.", "form": form_ctx},
             status_code=409,
+        )
+
+    except Exception:
+        db.rollback()
+        return templates.TemplateResponse(
+            request=request,
+            name="cadastro.html",
+            context={"request": request, "error": "Erro interno. Tente novamente.", "form": form_ctx},
+            status_code=500,
         )
 
     return RedirectResponse("/login", status_code=302)
