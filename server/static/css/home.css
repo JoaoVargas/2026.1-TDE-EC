@@ -92,3 +92,89 @@
         grid-template-columns: 1fr;
     }
 }
+
+/* ── Home modals ──────────────────────────────────────── */
+.home-modal {
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.home-modal--wide {
+    width: min(100%, 600px);
+}
+
+/* Seguros */
+.seguros-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-3);
+}
+
+.seguro-item {
+    background: linear-gradient(150deg, #172c49 0%, #1f3555 100%);
+    padding: var(--space-4);
+    display: grid;
+    gap: var(--space-2);
+    align-content: start;
+}
+
+.seguro-item h3 {
+    margin: 0;
+    font-size: 0.9rem;
+}
+
+.seguro-item p {
+    margin: 0;
+    font-size: 0.82rem;
+    color: var(--color-muted);
+    line-height: 1.5;
+}
+
+.seguro-price {
+    color: var(--color-primary) !important;
+    font-weight: 600;
+    margin-top: var(--space-1) !important;
+}
+
+.seguros-contact {
+    font-size: 0.81rem;
+    color: var(--color-muted);
+    margin: 0;
+    padding: 0.7rem var(--space-4);
+    border-left: 2px solid var(--color-primary);
+    background: rgba(78, 207, 181, 0.06);
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    line-height: 1.5;
+}
+
+/* Termos */
+.termos-body {
+    max-height: 52vh;
+    overflow-y: auto;
+    display: grid;
+    gap: var(--space-4);
+    padding-right: var(--space-2);
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-border) transparent;
+}
+
+.termos-section h3 {
+    margin: 0 0 var(--space-2);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--color-primary);
+}
+
+.termos-section p {
+    margin: 0;
+    font-size: 0.84rem;
+    color: var(--color-muted);
+    line-height: 1.65;
+}
+
+@media (max-width: 580px) {
+    .seguros-grid {
+        grid-template-columns: 1fr;
+    }
+}

@@ -38,6 +38,7 @@
 
 <section class="cards-grid">
     <bb-insight-card
+        data-modal-id="modal-seguros"
         title="Seguros BetaBank"
         text="Protecao inteligente para voce e sua familia."
         button-label="Conhecer"
@@ -48,6 +49,7 @@
         text="Fatura atual: R$ 0,00"
     ></bb-insight-card>
     <bb-insight-card
+        data-modal-id="modal-termos"
         title="Termos de uso"
         text="Leia os principais pontos e regras da conta."
         button-label="Ver termos"
@@ -63,6 +65,76 @@
     </div>
     {% endif %}
 </section>
+<!-- Modal: Seguros BetaBank -->
+<div class="management-modal-backdrop" id="modal-seguros" hidden>
+    <div class="management-modal home-modal home-modal--wide" role="dialog" aria-modal="true" aria-labelledby="modal-seguros-title">
+        <header class="management-modal-header">
+            <h2 id="modal-seguros-title">Seguros BetaBank</h2>
+            <button type="button" class="ui-btn ui-btn-secondary management-modal-close" data-modal-close>Fechar</button>
+        </header>
+        <p class="management-modal-body">Protecao inteligente para voce e sua familia. Escolha o plano que melhor se adapta ao seu momento de vida.</p>
+        <div class="seguros-grid">
+            <div class="seguro-item ui-card">
+                <h3>Seguro de Vida</h3>
+                <p>Cobertura de ate R$ 500.000 para voce e seus dependentes em casos de invalidez ou falecimento.</p>
+                <p class="seguro-price">A partir de R$ 29,90/mes</p>
+            </div>
+            <div class="seguro-item ui-card">
+                <h3>Seguro Residencial</h3>
+                <p>Proteja seu imovel contra incendio, roubo, danos eletricos e desastres naturais com cobertura completa.</p>
+                <p class="seguro-price">A partir de R$ 19,90/mes</p>
+            </div>
+            <div class="seguro-item ui-card">
+                <h3>Seguro Auto</h3>
+                <p>Tranquilidade para dirigir com cobertura contra colisao, roubo, terceiros e assistencia 24 horas.</p>
+                <p class="seguro-price">A partir de R$ 89,90/mes</p>
+            </div>
+        </div>
+        <p class="seguros-contact">Para contratar ou obter mais informacoes, entre em contato com nosso atendimento pelo aplicativo ou ligue para 0800 123 4567.</p>
+        <div class="management-modal-actions">
+            <button type="button" class="ui-btn ui-btn-secondary" data-modal-close>Fechar</button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Termos de uso -->
+<div class="management-modal-backdrop" id="modal-termos" hidden>
+    <div class="management-modal home-modal home-modal--wide" role="dialog" aria-modal="true" aria-labelledby="modal-termos-title">
+        <header class="management-modal-header">
+            <h2 id="modal-termos-title">Termos de Uso</h2>
+            <button type="button" class="ui-btn ui-btn-secondary management-modal-close" data-modal-close>Fechar</button>
+        </header>
+        <div class="termos-body">
+            <div class="termos-section">
+                <h3>Sobre o BetaBank</h3>
+                <p>O BetaBank e uma instituicao financeira digital que oferece conta corrente, conta poupanca, transferencias e servicos de investimento. Ao utilizar nossa plataforma, voce aceita integralmente estes Termos de Uso.</p>
+            </div>
+            <div class="termos-section">
+                <h3>Condicoes de uso da conta</h3>
+                <p>O uso da conta e pessoal e intransferivel. E proibido compartilhar suas credenciais de acesso com terceiros. Voce e responsavel por todas as transacoes realizadas mediante seu login e senha. Em caso de acesso nao autorizado, notifique-nos imediatamente.</p>
+            </div>
+            <div class="termos-section">
+                <h3>Privacidade e dados</h3>
+                <p>Coletamos apenas os dados necessarios para a prestacao dos servicos financeiros. Suas informacoes nao serao vendidas ou compartilhadas com terceiros sem seu consentimento, exceto quando exigido por lei ou por orgaos reguladores competentes.</p>
+            </div>
+            <div class="termos-section">
+                <h3>Transacoes e responsabilidades</h3>
+                <p>O BetaBank nao se responsabiliza por transacoes realizadas por engano ou fraude quando as credenciais do usuario foram utilizadas. Conferir os dados antes de confirmar qualquer operacao e de responsabilidade exclusiva do usuario.</p>
+            </div>
+            <div class="termos-section">
+                <h3>Encerramento da conta</h3>
+                <p>Voce pode encerrar sua conta a qualquer momento mediante solicitacao pelo aplicativo. O BetaBank se reserva o direito de encerrar contas que violem estes termos ou apresentem atividade suspeita, mediante comunicacao previa.</p>
+            </div>
+            <div class="termos-section">
+                <h3>Alteracoes nos termos</h3>
+                <p>Estes termos podem ser atualizados periodicamente. Notificacoes de alteracoes relevantes serao enviadas por e-mail ou exibidas no painel da conta com antecedencia minima de 15 dias.</p>
+            </div>
+        </div>
+        <div class="management-modal-actions">
+            <button type="button" class="ui-btn ui-btn-secondary" data-modal-close>Fechar</button>
+        </div>
+    </div>
+</div>
 {% endblock %}
 
 {% block dashboard_scripts %}
