@@ -1,8 +1,6 @@
 from datetime import date
 from decimal import Decimal
 
-import mysql.connector
-
 from server.core.security import hash_password
 from server.db.connection import _get_pool
 from server.models.user import UserType
@@ -186,8 +184,6 @@ def _create_tables(conn) -> None:
 
 
 def _seed_default_users_if_empty(conn) -> None:
-    from server.models.account import AccountType
-    from server.repositories.account_repository import AccountRepository
     from server.repositories.address_repository import AddressRepository
     from server.repositories.user_repository import UserRepository
 
@@ -201,49 +197,315 @@ def _seed_default_users_if_empty(conn) -> None:
 
     manager_address = AddressRepository.create(
         conn,
-        cep="80000000",
-        street="Rua Gerente",
+        cep="80420090",
+        street="Av. Batel",
         state="PR",
         city="Curitiba",
-        neighborhood="Centro",
-        number="100",
+        neighborhood="Batel",
+        number="1320",
     )
     UserRepository.create(
         conn,
         cpf="39053344705",
         type=UserType.MANAGER,
-        name="Gerente Padrao",
+        name="Ricardo Alves Ferreira",
         email="gerente@gerente.com",
         password_hash=hash_password("ASDasd123"),
-        birthday=date(1988, 1, 10),
+        birthday=date(1982, 3, 15),
         address_id=manager_address.id,
     )
 
-    client_address = AddressRepository.create(
+    mariana_address = AddressRepository.create(
         conn,
-        cep="80010000",
-        street="Rua Cliente",
+        cep="80020310",
+        street="Rua XV de Novembro",
         state="PR",
         city="Curitiba",
-        neighborhood="Batel",
-        number="200",
+        neighborhood="Centro",
+        number="458",
     )
-    client = UserRepository.create(
+    UserRepository.create(
         conn,
         cpf="11144477735",
         type=UserType.CLIENT,
-        name="Usuario Padrao",
+        name="Mariana Costa Oliveira",
         email="usuario@usuario.com",
         password_hash=hash_password("ASDasd123"),
-        birthday=date(1995, 5, 20),
-        address_id=client_address.id,
+        birthday=date(1993, 7, 22),
+        address_id=mariana_address.id,
     )
 
-    checking = AccountRepository.get_by_user_and_type(conn, client.id, AccountType.CHECKING)
-    if checking:
-        cursor = conn.cursor()
-        cursor.execute("UPDATE accounts SET balance = %s WHERE id = %s", (Decimal("1000.00"), checking.id))
-        cursor.close()
+    pedro_address = AddressRepository.create(
+        conn,
+        cep="80060240",
+        street="Rua Padre Camargo",
+        state="PR",
+        city="Curitiba",
+        neighborhood="Alto da Glória",
+        number="280",
+    )
+    UserRepository.create(
+        conn,
+        cpf="98765432100",
+        type=UserType.CLIENT,
+        name="Pedro Henrique Santos",
+        email="pedro.h.santos@betabank.com.br",
+        password_hash=hash_password("ASDasd123"),
+        birthday=date(1989, 11, 5),
+        address_id=pedro_address.id,
+    )
+
+    conn.commit()
+
+
+def _insert_tx(cursor, *, type, from_id, to_id, amount, description, days_ago=0):
+    if days_ago == 0:
+        cursor.execute(
+            "INSERT INTO transactions (type, from_account_id, to_account_id, amount, description) "
+            "VALUES (%s, %s, %s, %s, %s)",
+            (type, from_id, to_id, str(amount), description),
+        )
+    else:
+        cursor.execute(
+            "INSERT INTO transactions "
+            "(type, from_account_id, to_account_id, amount, description, created_at) "
+            "VALUES (%s, %s, %s, %s, %s, DATE_SUB(NOW(), INTERVAL %s DAY))",
+            (type, from_id, to_id, str(amount), description, days_ago),
+        )
+
+
+def _seed_transactions_if_empty(conn) -> None:
+    cursor = conn.cursor()
+    cursor.execute("SELECT COUNT(*) FROM transactions")
+    count = cursor.fetchone()[0]
+    cursor.close()
+
+    if count > 0:
+        return
+
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute(
+        "SELECT a.id AS account_id FROM users u "
+        "JOIN accounts a ON a.user_id = u.id AND a.type = 'checking' "
+        "WHERE u.email = 'usuario@usuario.com'"
+    )
+    mariana_row = cursor.fetchone()
+    cursor.execute(
+        "SELECT a.id AS account_id FROM users u "
+        "JOIN accounts a ON a.user_id = u.id AND a.type = 'checking' "
+        "WHERE u.email = 'pedro.h.santos@betabank.com.br'"
+    )
+    pedro_row = cursor.fetchone()
+    cursor.close()
+
+    if not mariana_row or not pedro_row:
+        return
+
+    m = mariana_row["account_id"]
+    p = pedro_row["account_id"]
+
+    cursor = conn.cursor()
+
+    # --- Mariana ---
+    # May salary deposit
+    _insert_tx(cursor, type="deposit", from_id=None, to_id=m, amount=Decimal("8500.00"),
+               description="Salário - maio/2026", days_ago=42)
+    # Rent May
+    _insert_tx(cursor, type="expense", from_id=m, to_id=None, amount=Decimal("1200.00"),
+               description="Aluguel - maio/2026", days_ago=41)
+    # Electricity via PIX
+    _insert_tx(cursor, type="expense", from_id=m, to_id=None, amount=Decimal("187.50"),
+               description="PIX - Copel energia elétrica", days_ago=38)
+    # PIX transfer to Pedro
+    _insert_tx(cursor, type="transaction", from_id=m, to_id=p, amount=Decimal("300.00"),
+               description="PIX - Pedro Henrique Santos", days_ago=35)
+    # ATM cash withdrawal
+    _insert_tx(cursor, type="withdrawal", from_id=m, to_id=None, amount=Decimal("400.00"),
+               description="Saque - Caixa Eletrônico Banco24h", days_ago=30)
+    # Streaming subscriptions
+    _insert_tx(cursor, type="expense", from_id=m, to_id=None, amount=Decimal("89.90"),
+               description="Netflix e Spotify - assinaturas mensais", days_ago=28)
+    # June salary deposit
+    _insert_tx(cursor, type="deposit", from_id=None, to_id=m, amount=Decimal("8500.00"),
+               description="Salário - junho/2026", days_ago=12)
+    # Rent June
+    _insert_tx(cursor, type="expense", from_id=m, to_id=None, amount=Decimal("1200.00"),
+               description="Aluguel - junho/2026", days_ago=11)
+    # Internet via PIX
+    _insert_tx(cursor, type="expense", from_id=m, to_id=None, amount=Decimal("99.90"),
+               description="PIX - Vivo internet fibra", days_ago=8)
+    # Investment application (ITUB4 40 shares × R$34.70 + SELIC29 70 units × R$13.24 = R$2,314.80)
+    _insert_tx(cursor, type="other", from_id=m, to_id=None, amount=Decimal("2314.80"),
+               description="Aplicação em investimentos - ITUB4 e SELIC29", days_ago=7)
+    # PIX transfer to Pedro
+    _insert_tx(cursor, type="transaction", from_id=m, to_id=p, amount=Decimal("150.00"),
+               description="PIX - Pedro Henrique Santos", days_ago=5)
+    # Grocery
+    _insert_tx(cursor, type="expense", from_id=m, to_id=None, amount=Decimal("347.60"),
+               description="Supermercado Condor - compras da semana", days_ago=3)
+    # Credit card payment
+    _insert_tx(cursor, type="expense", from_id=m, to_id=None, amount=Decimal("500.00"),
+               description="Pagamento fatura cartão de crédito", days_ago=2)
+
+    # --- Pedro ---
+    # May salary deposit
+    _insert_tx(cursor, type="deposit", from_id=None, to_id=p, amount=Decimal("5000.00"),
+               description="Salário - maio/2026", days_ago=42)
+    # Rent May
+    _insert_tx(cursor, type="expense", from_id=p, to_id=None, amount=Decimal("800.00"),
+               description="Aluguel - maio/2026", days_ago=41)
+    # Grocery May (PIX from Mariana at days_ago=35 already covers the credit entry)
+    _insert_tx(cursor, type="expense", from_id=p, to_id=None, amount=Decimal("256.30"),
+               description="Supermercado Walmart - compras", days_ago=30)
+    # Gas bill via PIX
+    _insert_tx(cursor, type="expense", from_id=p, to_id=None, amount=Decimal("185.00"),
+               description="PIX - Comgás conta gás", days_ago=25)
+    # Water bill via PIX
+    _insert_tx(cursor, type="expense", from_id=p, to_id=None, amount=Decimal("73.20"),
+               description="PIX - Sanepar água e esgoto", days_ago=20)
+    # June salary deposit
+    _insert_tx(cursor, type="deposit", from_id=None, to_id=p, amount=Decimal("5000.00"),
+               description="Salário - junho/2026", days_ago=12)
+    # Rent June
+    _insert_tx(cursor, type="expense", from_id=p, to_id=None, amount=Decimal("800.00"),
+               description="Aluguel - junho/2026", days_ago=11)
+    # Investment application (PETR4 40 × R$36.85 + BTC 0.003 × R$325,000 = R$2,449.00)
+    _insert_tx(cursor, type="other", from_id=p, to_id=None, amount=Decimal("2449.00"),
+               description="Aplicação em investimentos - PETR4 e BTC", days_ago=10)
+    # Grocery June
+    _insert_tx(cursor, type="expense", from_id=p, to_id=None, amount=Decimal("195.80"),
+               description="Supermercado Condor - compras da semana", days_ago=3)
+    # Pharmacy
+    _insert_tx(cursor, type="expense", from_id=p, to_id=None, amount=Decimal("87.40"),
+               description="Farmácia Nissei - medicamentos", days_ago=1)
+
+    cursor.close()
+
+    # Final balances derived from the transactions above:
+    # Mariana: +8500 -1200 -187.50 -300 -400 -89.90 +8500 -1200 -99.90 -2314.80 -150 -347.60 -500 = R$10,210.30
+    # Pedro:   +5000 -800 +300 -256.30 -185 -73.20 +5000 -800 -2449 +150 -195.80 -87.40 = R$5,603.30
+    cursor = conn.cursor()
+    cursor.execute("UPDATE accounts SET balance = %s WHERE id = %s", (Decimal("10210.30"), m))
+    cursor.execute("UPDATE accounts SET balance = %s WHERE id = %s", (Decimal("5603.30"), p))
+    cursor.close()
+    conn.commit()
+
+
+def _seed_credit_cards_if_empty(conn) -> None:
+    cursor = conn.cursor()
+    cursor.execute("SELECT COUNT(*) FROM credit_cards")
+    count = cursor.fetchone()[0]
+    cursor.close()
+
+    if count > 0:
+        return
+
+    from server.repositories.credit_card_repository import CreditCardRepository
+
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("SELECT id FROM users WHERE email = 'usuario@usuario.com'")
+    mariana_row = cursor.fetchone()
+    cursor.close()
+
+    if not mariana_row:
+        return
+
+    card = CreditCardRepository.create(
+        conn,
+        user_id=mariana_row["id"],
+        card_name="MARIANA C OLIVEIRA",
+        limit_amount=Decimal("8000.00"),
+        due_day=15,
+    )
+
+    # Purchases with backdated timestamps
+    purchases = [
+        (Decimal("299.90"), "Amazon - acessórios notebook", 25),
+        (Decimal("89.00"),  "Uber Eats - restaurante japonês", 20),
+        (Decimal("450.00"), "Renner - roupas e calçados", 15),
+        (Decimal("120.50"), "iFood - jantar delivery", 8),
+        (Decimal("67.80"),  "Posto Ipiranga - combustível", 6),
+    ]
+
+    cursor = conn.cursor()
+    for amount, desc, days_ago in purchases:
+        cursor.execute(
+            "INSERT INTO credit_card_transactions "
+            "(credit_card_id, type, amount, description, created_at) "
+            "VALUES (%s, 'purchase', %s, %s, DATE_SUB(NOW(), INTERVAL %s DAY))",
+            (card.id, str(amount), desc, days_ago),
+        )
+        CreditCardRepository.apply_purchase(conn, card_id=card.id, amount=amount)
+
+    # Partial payment
+    payment = Decimal("500.00")
+    cursor.execute(
+        "INSERT INTO credit_card_transactions "
+        "(credit_card_id, type, amount, description, created_at) "
+        "VALUES (%s, 'payment', %s, 'Pagamento fatura', DATE_SUB(NOW(), INTERVAL 2 DAY))",
+        (card.id, str(payment)),
+    )
+    CreditCardRepository.apply_payment(conn, card_id=card.id, amount=payment)
+
+    cursor.close()
+    conn.commit()
+
+
+def _seed_investments_if_empty(conn) -> None:
+    cursor = conn.cursor()
+    cursor.execute("SELECT COUNT(*) FROM user_portfolios")
+    count = cursor.fetchone()[0]
+    cursor.close()
+
+    if count > 0:
+        return
+
+    from server.repositories.portfolio_repository import PortfolioRepository
+    from server.repositories.user_portfolio_repository import UserPortfolioRepository
+
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("SELECT id FROM users WHERE email = 'usuario@usuario.com'")
+    mariana_row = cursor.fetchone()
+    cursor.execute("SELECT id FROM users WHERE email = 'pedro.h.santos@betabank.com.br'")
+    pedro_row = cursor.fetchone()
+    cursor.close()
+
+    if not mariana_row or not pedro_row:
+        return
+
+    portfolios = {p.stock_code: p for p in PortfolioRepository.list_all(conn)}
+
+    # Mariana: ITUB4 40 shares (40 × R$34.70 = R$1,388) + SELIC29 70 units (70 × R$13.24 = R$926.80)
+    if "ITUB4" in portfolios:
+        UserPortfolioRepository.create(
+            conn,
+            portfolio_id=portfolios["ITUB4"].id,
+            user_id=mariana_row["id"],
+            stock_amount=Decimal("40.0000"),
+        )
+    if "SELIC29" in portfolios:
+        UserPortfolioRepository.create(
+            conn,
+            portfolio_id=portfolios["SELIC29"].id,
+            user_id=mariana_row["id"],
+            stock_amount=Decimal("70.0000"),
+        )
+
+    # Pedro: PETR4 40 shares (40 × R$36.85 = R$1,474) + BTC 0.003 (0.003 × R$325,000 = R$975)
+    if "PETR4" in portfolios:
+        UserPortfolioRepository.create(
+            conn,
+            portfolio_id=portfolios["PETR4"].id,
+            user_id=pedro_row["id"],
+            stock_amount=Decimal("40.0000"),
+        )
+    if "BTC" in portfolios:
+        UserPortfolioRepository.create(
+            conn,
+            portfolio_id=portfolios["BTC"].id,
+            user_id=pedro_row["id"],
+            stock_amount=Decimal("0.0030"),
+        )
 
     conn.commit()
 
@@ -405,5 +667,8 @@ def init_db() -> None:
         _seed_default_users_if_empty(conn)
         _apply_migrations(conn)
         _seed_portfolios_if_empty(conn)
+        _seed_transactions_if_empty(conn)
+        _seed_credit_cards_if_empty(conn)
+        _seed_investments_if_empty(conn)
     finally:
         conn.close()
