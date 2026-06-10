@@ -112,6 +112,33 @@
     background: rgba(78, 207, 181, 0.08);
 }
 
+.filter-search {
+    border-radius: 999px;
+    background: #173249;
+    border: 1px solid rgba(110, 162, 196, 0.33);
+    color: var(--color-text);
+    padding: 0.45rem 0.9rem;
+    font-family: var(--font-sans);
+    font-size: 0.8rem;
+    outline: none;
+    width: 170px;
+    transition: border-color 0.14s;
+    -webkit-appearance: none;
+}
+
+.filter-search::placeholder {
+    color: var(--color-muted);
+}
+
+.filter-search:focus {
+    border-color: rgba(110, 162, 196, 0.65);
+}
+
+.filter-search::-webkit-search-cancel-button {
+    filter: invert(0.5);
+    cursor: pointer;
+}
+
 .statement-chart {
     background: linear-gradient(135deg, #17344f 60%, #1f4968 100%);
     padding: 1.2rem 1.4rem;
@@ -252,6 +279,49 @@ bb-date-range-picker {
 .date-range-apply {
     font-size: 0.75rem;
     padding: 0.48rem 0.9rem;
+}
+
+bb-filter-select {
+    position: relative;
+}
+
+.filter-select-dropdown {
+    position: absolute;
+    top: calc(100% + 0.5rem);
+    left: 0;
+    z-index: 20;
+    background: linear-gradient(135deg, #17344f 60%, #1f4968 100%);
+    border: 1px solid rgba(110, 162, 196, 0.33);
+    border-radius: var(--radius-md);
+    padding: 0.35rem;
+    display: flex;
+    flex-direction: column;
+    min-width: 148px;
+    box-shadow: var(--shadow-strong);
+}
+
+.filter-select-dropdown[hidden] {
+    display: none;
+}
+
+.filter-select-option {
+    background: none;
+    border: none;
+    color: var(--color-muted);
+    font-family: var(--font-sans);
+    font-size: 0.82rem;
+    font-weight: 500;
+    padding: 0.48rem 0.75rem;
+    text-align: left;
+    cursor: pointer;
+    border-radius: calc(var(--radius-md) - 2px);
+    transition: background 0.12s, color 0.12s;
+    white-space: nowrap;
+}
+
+.filter-select-option:hover {
+    background: rgba(110, 162, 196, 0.1);
+    color: var(--color-text);
 }
 
 .statement-list-header {

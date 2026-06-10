@@ -1,3 +1,5 @@
+import { initStatementFilters } from "../components/statement-filters.js";
+
 function parseBrl(str) {
     const digits = str.replace(/\D/g, "");
     return parseInt(digits || "0", 10);
@@ -18,35 +20,6 @@ function bindCurrencyInput(inputEl, hiddenEl) {
     });
 }
 
-// ── Filter logic (mirrors extrato.js) ──────────────────────────────────────
-function updateCount() {
-    const pill = document.getElementById("cartao-count");
-    if (!pill) return;
-    const visible = Array.from(document.querySelectorAll("#cartao-statement-list bb-statement-item")).filter(
-        (el) => el.style.display !== "none"
-    ).length;
-    pill.textContent = visible;
-}
-
-function applyFilter(filter) {
-    const items = document.querySelectorAll("#cartao-statement-list .statement-item");
-    const nowMonth = String(new Date().getMonth() + 1);
-    items.forEach((item) => {
-        let visible = true;
-        if (filter === "in")    visible = item.dataset.type === "in";
-        else if (filter === "out")   visible = item.dataset.type === "out";
-        else if (filter === "month") visible = item.dataset.month === nowMonth;
-        const host = item.closest("bb-statement-item") || item;
-        host.style.display = visible ? "" : "none";
-    });
-    updateCount();
-}
-
-function setActiveFilter(btn) {
-    document.querySelectorAll("#cartao-filters .statement-filter").forEach((n) => n.classList.remove("is-active"));
-    btn?.classList.add("is-active");
-}
-
 // ── Modal helpers ───────────────────────────────────────────────────────────
 function openModal(id) {
     const el = document.getElementById(id);
@@ -59,15 +32,22 @@ function closeModal(id) {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-    updateCount();
-
-    // Filters
-    document.querySelectorAll("#cartao-filters .statement-filter").forEach((btn) => {
-        btn.addEventListener("click", () => {
-            setActiveFilter(btn);
-            applyFilter(btn.dataset.filter || "all");
-        });
+    // Filters — shared logic + description search
+    let searchText = "";
+    const { applyAll } = initStatementFilters({
+        navSelector:  "#cartao-filters",
+        listSelector: "#cartao-statement-list",
+        countPillId:  "cartao-count",
+        extraTest: (item) => !searchText || (item.dataset.title || "").includes(searchText),
     });
+
+    const searchInput = document.getElementById("cartao-search");
+    if (searchInput) {
+        searchInput.addEventListener("input", () => {
+            searchText = searchInput.value.trim().toLowerCase();
+            applyAll();
+        });
+    }
 
     // Pay bill modal
     const btnPagar    = document.getElementById("btn-pagar-fatura");

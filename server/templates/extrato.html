@@ -41,9 +41,23 @@
     <nav class="statement-filters" id="statement-filters">
         <button type="button" class="statement-filter is-active" data-filter="all">Tudo</button>
         <button type="button" class="statement-filter" data-filter="in">Entradas</button>
-        <button type="button" class="statement-filter" data-filter="out">Saidas</button>
-        <button type="button" class="statement-filter" data-filter="month">Este mes</button>
+        <button type="button" class="statement-filter" data-filter="out">Saídas</button>
+        <button type="button" class="statement-filter" data-filter="month">Este mês</button>
+        <bb-filter-select label="Tipo">
+            <option value="">Todos os tipos</option>
+            <option value="type:pix">PIX</option>
+            <option value="type:transferência">Transferência</option>
+            <option value="type:depósito">Depósito</option>
+            <option value="type:saque">Saque</option>
+        </bb-filter-select>
         <bb-date-range-picker label="Período"></bb-date-range-picker>
+        <input
+            id="extrato-search"
+            class="filter-search"
+            type="search"
+            placeholder="Buscar descrição…"
+            autocomplete="off"
+        />
     </nav>
 
     <div class="statement-list-header">
@@ -80,5 +94,6 @@
 
 {% block dashboard_scripts %}
 <script type="module" src="/static/js/components/date-range-picker.js"></script>
+<script type="module" src="/static/js/components/filter-select.js"></script>
 <script type="module" src="/static/js/pages/extrato.js"></script>
 {% endblock %}

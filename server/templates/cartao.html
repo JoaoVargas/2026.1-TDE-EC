@@ -69,6 +69,14 @@
             <button type="button" class="statement-filter" data-filter="out">Compras</button>
             <button type="button" class="statement-filter" data-filter="in">Pagamentos</button>
             <button type="button" class="statement-filter" data-filter="month">Este mês</button>
+            <bb-date-range-picker label="Período"></bb-date-range-picker>
+            <input
+                id="cartao-search"
+                class="filter-search"
+                type="search"
+                placeholder="Buscar descrição…"
+                autocomplete="off"
+            />
         </nav>
 
         <div class="statement-list-header">
@@ -219,5 +227,6 @@
 
 {% block dashboard_scripts %}
 <script type="module" src="/static/js/components/ui-cards.js"></script>
+<script type="module" src="/static/js/components/date-range-picker.js"></script>
 <script type="module" src="/static/js/pages/cartao.js"></script>
 {% endblock %}

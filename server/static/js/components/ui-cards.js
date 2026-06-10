@@ -106,9 +106,11 @@ class BBStatementItem extends HTMLElement {
         const balanceAfter = this.getAttribute("balance-after") || "";
 
         const article = createTextElement("article", "statement-item ui-card", "");
-        article.dataset.type = type;
-        article.dataset.month = month;
-        article.dataset.date = this.getAttribute("date") || "";
+        article.dataset.type      = type;
+        article.dataset.month     = month;
+        article.dataset.date      = this.getAttribute("date") || "";
+        article.dataset.title     = (this.getAttribute("title") || "").toLowerCase();
+        article.dataset.typeLabel = (this.getAttribute("type-label") || "").toLowerCase();
 
         const icon = createTextElement("div", `statement-icon ${type}`, type === "in" ? "+" : "-");
 
